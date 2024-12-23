@@ -1,0 +1,187 @@
+/* Color Variables */
+:root {
+    --primary-color: #007bff;
+    --primary-hover: #0056b3;
+    --secondary-color: #17a2b8;
+    --secondary-hover: #138496;
+    --danger-color: #f61810;
+    --light-bg: #f4f4f4;
+    --text-color: #333;
+    --table-border: #ddd;
+    --even-row-bg: #f2f2f2;
+}
+
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body Styling */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--light-bg);
+    padding: 20px;
+}
+
+/* Container Styling */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Styling */
+form {
+    margin-bottom: 20px;
+}
+
+form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+form select,
+form input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--table-border);
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+form button[type="submit"] {
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+form button[type="submit"]:hover {
+    background: var(--primary-hover);
+}
+
+/* Action Buttons Styling */
+button#pdfButton,
+button#printButton,
+button#abnormalityDetailsButton {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    margin: 5px 5px 0 0;
+}
+
+button:hover {
+    background-color: var(--secondary-hover);
+    transform: scale(1.05);
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table, th, td {
+    border: 1px solid var(--table-border);
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+tr:nth-child(even) {
+    background-color: var(--even-row-bg);
+}
+
+/* Charts Styling */
+.chart-container {
+    margin-bottom: 30px;
+}
+
+.chart-container h2 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+canvas {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    form button,
+    button#pdfButton,
+    button#printButton {
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 8px;
+    }
+}
+
+/* Print Styling */
+@media print {
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+    }
+
+    form, 
+    button#pdfButton,
+    button#printButton,
+    button#abnormalityDetailsButton {
+        display: none;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid var(--table-border);
+        padding: 8px;
+    }
+}
