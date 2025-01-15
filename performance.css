@@ -1,0 +1,194 @@
+/* General Styling */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: #f5f5f5;
+  color: #333;
+  line-height: 1.5;
+}
+
+h1 {
+  text-align: center;
+  color: #e90b0b;
+  margin-bottom: 10px;
+  font-size: 2.4em; /* Increased font size for header */
+  font-weight: bold;
+}
+
+/* Main Container for Filters and Description */
+.container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background-color: #def5fb;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Filters Section */
+.filters {
+  flex: 2;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.filters label {
+  font-weight: bold;
+  color: #2c3e50;
+  font-size: 14px; /* Increased font size for labels */
+}
+
+.filters select,
+.filters button {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px; /* Increased font size */
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.filters select {
+  background-color: #f9f9f9;
+}
+
+.filters button {
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.filters button:hover {
+  background-color: #2980b9;
+}
+
+/* Description Section */
+.description {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: #fdfdfd;
+  max-height: 250px;
+}
+
+.description table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.description th,
+.description td {
+  padding: 8px;
+  text-align: left;
+  border: 1px solid #ddd;
+  font-size: 14px; /* Increased font size */
+}
+
+.description thead td {
+  background-color: #ecf0f1;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Report Table */
+#reportTable {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  font-size: 14px; /* Increased font size for compact view */
+}
+
+#reportTable th,
+#reportTable td {
+  border: 1px solid #111010;
+  padding: 8px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+#reportTable th {
+  background-color: #34495e;
+  color: #fff;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+#reportTable tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+#reportTable tbody tr:hover {
+  background-color: #f2f2f2;
+  transition: background-color 0.3s ease;
+}
+
+#reportTable .cli-name {
+  text-align: left;
+  font-weight: bold; /* Bold for CLI NAME/CLI LOBBY */
+  color: #2c3e50;
+  padding-left: 15px; /* Slight left padding */
+  font-size: 16px; /* Increased font size for CLI NAME/CLI LOBBY */
+}
+
+/* Responsive Design */
+@media screen and (max-width: 1024px) {
+  /* Compact Layout for Smaller Laptops */
+  .filters {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .filters select,
+  .filters button {
+    font-size: 13px;
+    padding: 9px;
+  }
+
+  .description {
+    max-height: 200px;
+  }
+
+  #reportTable {
+    font-size: 13px;
+  }
+
+  #reportTable th,
+  #reportTable td {
+    padding: 7px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  /* Compact Layout for Tablets */
+  .container {
+    flex-direction: column;
+  }
+
+  .filters {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .description {
+    margin-bottom: 15px;
+  }
+
+  #reportTable {
+    font-size: 12px;
+  }
+
+  #reportTable th,
+  #reportTable td {
+    padding: 6px;
+  }
+}

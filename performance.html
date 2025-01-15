@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Report</title>
+  <link rel="stylesheet" href="performance.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<h1>DAILY REPORT ANALYSIS DAY WISE</h1>
+
+<!-- Filters and Description Section -->
+<div class="filter-description-box">
+  <div class="filters">
+    <label for="month">Month:</label>
+    <select id="month">
+      <option value="January">January</option>
+      <option value="February">February</option>
+      <option value="March">March</option>
+      <option value="April">April</option>
+      <option value="May">May</option>
+      <option value="June">June</option>
+      <option value="July">July</option>
+      <option value="August">August</option>
+      <option value="September">September</option>
+      <option value="October">October</option>
+      <option value="November">November</option>
+      <option value="December">December</option>
+    </select>
+
+    <label for="year">Year:</label>
+    <select id="year">
+      <option value="2024">2024</option>
+      <option value="2025">2025</option>
+      <option value="2026">2026</option>
+    </select>
+
+    <label for="parameter">Parameter:</label>
+    <select id="parameter">
+      <option value="ALL">ALL</option>
+      <option value="FOOTPLATE_DURING_WEE_HOURS">FOOTPLATE DURING WEE HOURS</option>
+      <option value="FOOTPLATE_EXCLUDING_WEE_HOURS">FOOTPLATE EXCLUDING WEE HOURS</option>
+      <option value="AUTO_AND_IB_AMBUSH">AUTO AND IB AMBUSH (NO OF TRAINS)</option>
+      <option value="LEVEL_CROSSING_AMBUSH">LEVEL CROSSING AMBUSH (NO OF TRAINS)</option>
+      <option value="CD_ZONES_AMBUSH">CD ZONES AMBUSH (NO OF TRAINS)</option>
+      <option value="BA_AMBUSH">BA AMBUSH (NO OF CREWS)</option>
+      <option value="SPEED_GUN_CHECKING">SPEED GUN CHECKING (NO OF TRAINS)</option>
+      <option value="CVVRS_ANALYSIS">CVVRS ANALYSIS (NO OF TRAINS)</option>
+      <option value="SPM_ANALYSIS">SPM ANALYSIS (NO OF TRAINS)</option>
+      <option value="FAMILY_SAFETY_SEMINAR">FAMILY/SAFETY SEMINAR</option>
+      <option value="RUNNING_ROOM_INSPECTION">RUNNING ROOM INSPECTION</option>
+      <option value="LOBBY_INSPECTION">LOBBY INSPECTION</option>
+    </select>
+    <button onclick="fetchData()">SHOW REPORT</button>
+    <button onclick="downloadExcel()">Download Excel</button>
+  </div>
+
+  <div class="description">
+    <table class="description-table">
+      <thead>
+        <tr>
+          <td colspan="2" style="text-align: center;">Description</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>PN</td>
+          <td>Pending</td>
+        </tr>
+        <tr>
+          <td>SB</td>
+          <td>Submitted</td>
+        </tr>
+        <tr>
+          <td>OD</td>
+          <td>Other Duty</td>
+        </tr>
+        <tr>
+          <td>TR</td>
+          <td>Training</td>
+        </tr>
+        <tr>
+          <td>LV</td>
+          <td>Leave/Rest</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Main Report Table -->
+<table id="reportTable" border="1" cellpadding="5" style="width: 100%;">
+  <thead>
+    <tr>
+      <th>CLI NAME/LOBBY</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>5</th>
+      <th>6</th>
+      <th>7</th>
+      <th>8</th>
+      <th>9</th>
+      <th>10</th>
+      <th>11</th>
+      <th>12</th>
+      <th>13</th>
+      <th>14</th>
+      <th>15</th>
+      <th>16</th>
+      <th>17</th>
+      <th>18</th>
+      <th>19</th>
+      <th>20</th>
+      <th>21</th>
+      <th>22</th>
+      <th>23</th>
+      <th>24</th>
+      <th>25</th>
+      <th>26</th>
+      <th>27</th>
+      <th>28</th>
+      <th>29</th>
+      <th>30</th>
+      <th>31</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Data rows will be added dynamically -->
+  </tbody>
+</table>
+
+<script src="performance.js"></script>
+</body>
+</html>
