@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOBILE INSPECTION FOR CREW</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            margin-top: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+    <script>
+        let crewData = {};
+
+        async function loadCrewData() {
+            const response = await fetch('CREWM.csv');
+            const data = await response.text();
+            const rows = data.split("\n").map(row => row.split(","));
+
+            for (let i = 1; i < rows.length; i++) {
+                let [id, name, desg, hq, cli] = rows[i];
+                crewData[id.trim().toUpperCase()] = { name, desg, hq, cli };
+            }
+        }
+
+        function fillCrewDetails() {
+            const crewIdInput = document.getElementById("crew_id");
+            crewIdInput.value = crewIdInput.value.toUpperCase(); // ✅ Capitalize Crew ID
+
+            const crewId = crewIdInput.value.trim();
+            if (crewData[crewId]) {
+                document.getElementById("crew_name").value = crewData[crewId].name;
+                document.getElementById("desg").value = crewData[crewId].desg;
+                document.getElementById("hq").value = crewData[crewId].hq;
+                document.getElementById("cli_name").value = crewData[crewId].cli;
+            } else {
+                alert("Crew ID not found in database!");
+            }
+        }
+
+        function toggleFields() {
+            const mobileUsage = document.getElementById("mobile_usage").value;
+            const extraFields = document.getElementById("extra_fields");
+            const remarkField = document.getElementById("remark_field");
+
+            if (mobileUsage === "YES") {
+                extraFields.classList.remove("hidden");
+                remarkField.classList.remove("hidden");
+            } else {
+                extraFields.classList.add("hidden");
+                remarkField.classList.remove("hidden");
+
+                // ✅ Auto-set NO for all fields when "NO" is selected
+                document.querySelector("[name='used_whatsapp']").value = "NO";
+                document.querySelector("[name='used_calling']").value = "NO";
+                document.querySelector("[name='used_personal']").value = "NO";
+            }
+        }
+
+        function submitForm(event) {
+            event.preventDefault();
+    
+            const submitBtn = document.getElementById("submit_btn");
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Submitting...";
+    
+            const formData = new FormData(document.getElementById("inspection_form"));
+    
+            fetch("https://script.google.com/macros/s/AKfycbxqGUxxRHBPHyVFXsrsvg9k1ztA7OMtiDFMr-CCLlzv6KbGz0wasOYQiDb78_FBDImL2g/exec", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert("Form submitted successfully!");
+    
+                // ✅ Submit button enable wapas
+                submitBtn.disabled = false;
+                submitBtn.innerText = "SUBMIT";
+    
+                // ✅ Form reset bhi ho jayega
+                document.getElementById("inspection_form").reset();
+                document.getElementById("extra_fields").classList.add("hidden");
+                document.getElementById("remark_field").classList.add("hidden");
+            })
+            .catch(error => {
+                console.error("Error submitting form:", error);
+                alert("Form submission failed!");
+    
+                // ✅ Error aane par submit button wapas enable ho jayega
+                submitBtn.disabled = false;
+                submitBtn.innerText = "SUBMIT";
+            });
+        }
+
+        window.onload = loadCrewData;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>MOBILE INSPECTION FOR CREW</h2>
+        <form id="inspection_form" onsubmit="submitForm(event)">
+            <label>Crew ID:</label>
+            <input type="text" id="crew_id" name="crew_id" required onblur="fillCrewDetails()">
+            
+            <label>Crew Name:</label>
+            <input type="text" id="crew_name" name="crew_name" readonly>
+
+            <label>DESG:</label>
+            <input type="text" id="desg" name="desg" readonly>
+
+            <label>HQ:</label>
+            <input type="text" id="hq" name="hq" readonly>
+
+            <label>CLI NAME:</label>
+            <input type="text" id="cli_name" name="cli_name" readonly>
+
+            <label>Whether Crew carrying personal mobile other than CUG:</label>
+            <select id="mobile_usage" name="mobile_usage" onchange="toggleFields()" required>
+                <option value="">Select</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+            </select>
+
+            <div id="remark_field" class="hidden">
+                <label>Remark:</label>
+                <textarea name="remark"></textarea>
+            </div>
+
+            <div id="extra_fields" class="hidden">
+                <label>Whether Crew used WhatsApp during run of train:</label>
+                <select name="used_whatsapp">
+                    <option value="YES">YES</option>
+                    <option value="NO" selected>NO</option>
+                </select>
+
+                <label>Whether Crew used calling the phone during run the train:</label>
+                <select name="used_calling">
+                    <option value="YES">YES</option>
+                    <option value="NO" selected>NO</option>
+                </select>
+
+                <label>Whether Crew used phone for personal activities:</label>
+                <select name="used_personal">
+                    <option value="YES">YES</option>
+                    <option value="NO" selected>NO</option>
+                </select>
+            </div>
+
+            <button type="submit" id="submit_btn">SUBMIT</button>
+        </form>
+    </div>
+</body>
+</html>
