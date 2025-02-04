@@ -165,8 +165,9 @@
             <input type="text" id="cli_name" name="cli_name" readonly>
 
             <!-- New Field Added here -->
-            <label>AMBUSH DONE BY (CLI NAME/HQ):</label>
-            <input type="text" name="ambush_done_by" id="ambush_done_by" required>
+            <label>AMBUSH DONE BY (Enter CLI ID):</label>
+            <input type="text" name="ambush_done_by" id="ambush_done_by" required placeholder="BSP0132 (alphabet in capital letters only)" pattern="^[A-Z0-9]+$">
+
 
             <label>Whether Crew carrying personal mobile other than CUG:</label>
             <select id="mobile_usage" name="mobile_usage" onchange="toggleFields()" required>
@@ -185,7 +186,7 @@
             <label>Number of Calls made/received after on duty?</label>
             <input type="number" name="calls_after_duty" min="0">
 
-            <label>Number of Calls made/received after on run?</label>
+            <label>Number of Calls made/received while on run?</label>
             <input type="number" name="calls_after_run" min="0">
 
             <label>Number of Calls made/received other than TLC/CLI?</label>
