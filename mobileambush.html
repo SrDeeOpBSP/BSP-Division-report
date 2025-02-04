@@ -97,54 +97,46 @@
 
         function toggleFields() {
             const mobileUsage = document.getElementById("mobile_usage").value;
-            const extraFields = document.getElementById("extra_fields");
-            const remarkField = document.getElementById("remark_field");
+            const reasonField = document.getElementById("reason_field");
 
             if (mobileUsage === "YES") {
-                extraFields.classList.remove("hidden");
-                remarkField.classList.remove("hidden");
+                reasonField.classList.remove("hidden");
             } else {
-                extraFields.classList.add("hidden");
-                remarkField.classList.remove("hidden");
-
-                // ✅ Auto-set NO for all fields when "NO" is selected
-                document.querySelector("[name='used_whatsapp']").value = "NO";
-                document.querySelector("[name='used_calling']").value = "NO";
-                document.querySelector("[name='used_personal']").value = "NO";
+                reasonField.classList.add("hidden");
+                document.getElementById("reason").value = "";
             }
         }
 
         function submitForm(event) {
             event.preventDefault();
-    
+
             const submitBtn = document.getElementById("submit_btn");
             submitBtn.disabled = true;
             submitBtn.innerText = "Submitting...";
-    
+
             const formData = new FormData(document.getElementById("inspection_form"));
-    
-            fetch("https://script.google.com/macros/s/AKfycbxqGUxxRHBPHyVFXsrsvg9k1ztA7OMtiDFMr-CCLlzv6KbGz0wasOYQiDb78_FBDImL2g/exec", {
+
+            fetch("https://script.google.com/macros/s/AKfycbxoJcAWbhRqRH53IKVYI7XppLCNs1lVA9WuyKGKQyYj61h9P14jeozyI8ugr8iLCjjoww/exec", {
                 method: "POST",
                 body: formData
             })
             .then(response => response.text())
             .then(data => {
                 alert("Form submitted successfully!");
-    
-                // ✅ Submit button enable wapas
+
+                // ✅ Enable submit button after submission
                 submitBtn.disabled = false;
                 submitBtn.innerText = "SUBMIT";
-    
-                // ✅ Form reset bhi ho jayega
+
+                // ✅ Reset form after submission
                 document.getElementById("inspection_form").reset();
-                document.getElementById("extra_fields").classList.add("hidden");
-                document.getElementById("remark_field").classList.add("hidden");
+                document.getElementById("reason_field").classList.add("hidden");
             })
             .catch(error => {
                 console.error("Error submitting form:", error);
                 alert("Form submission failed!");
-    
-                // ✅ Error aane par submit button wapas enable ho jayega
+
+                // ✅ Enable submit button if error occurs
                 submitBtn.disabled = false;
                 submitBtn.innerText = "SUBMIT";
             });
@@ -172,6 +164,10 @@
             <label>CLI NAME:</label>
             <input type="text" id="cli_name" name="cli_name" readonly>
 
+            <!-- New Field Added here -->
+            <label>AMBUSH DONE BY (CLI NAME/HQ):</label>
+            <input type="text" name="ambush_done_by" id="ambush_done_by" required>
+
             <label>Whether Crew carrying personal mobile other than CUG:</label>
             <select id="mobile_usage" name="mobile_usage" onchange="toggleFields()" required>
                 <option value="">Select</option>
@@ -179,30 +175,24 @@
                 <option value="NO">NO</option>
             </select>
 
-            <div id="remark_field" class="hidden">
-                <label>Remark:</label>
-                <textarea name="remark"></textarea>
+            <!-- Reason field appears only when "YES" is selected -->
+            <div id="reason_field" class="hidden">
+                <label>Reason:</label>
+                <textarea name="reason" id="reason"></textarea>
             </div>
 
-            <div id="extra_fields" class="hidden">
-                <label>Whether Crew used WhatsApp during run of train:</label>
-                <select name="used_whatsapp">
-                    <option value="YES">YES</option>
-                    <option value="NO" selected>NO</option>
-                </select>
+            <!-- Extra fields are always visible -->
+            <label>Number of Calls made/received after on duty?</label>
+            <input type="number" name="calls_after_duty" min="0">
 
-                <label>Whether Crew used calling the phone during run the train:</label>
-                <select name="used_calling">
-                    <option value="YES">YES</option>
-                    <option value="NO" selected>NO</option>
-                </select>
+            <label>Number of Calls made/received after on run?</label>
+            <input type="number" name="calls_after_run" min="0">
 
-                <label>Whether Crew used phone for personal activities:</label>
-                <select name="used_personal">
-                    <option value="YES">YES</option>
-                    <option value="NO" selected>NO</option>
-                </select>
-            </div>
+            <label>Number of Calls made/received other than TLC/CLI?</label>
+            <input type="number" name="calls_other_than_tlc" min="0">
+
+            <label>Remark:</label>
+            <textarea name="remark"></textarea>
 
             <button type="submit" id="submit_btn">SUBMIT</button>
         </form>
