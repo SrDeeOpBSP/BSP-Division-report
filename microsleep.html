@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MICRO SLEEP COUNSELLING</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <link rel="stylesheet" href="microsleep.css">
+    
+</head>
+<body>
+
+    <h2>MICRO SLEEP COUNSELLING</h2>
+
+    <form id="microSleepForm">
+        <label>Date:</label>
+        <input type="date" id="date" name="date" required><br><br>
+
+        <label>CLI ID:</label>
+        <input type="text" id="cli_id" name="cli_id" required placeholder="Example: BSP0068" oninput="formatCLIID()" maxlength="10">
+        <label>CLI Name:</label>
+        <input type="text" id="cli_name" name="cli_name" readonly>
+        <label>CLI HQ:</label>
+        <input type="text" id="cli_hq" name="cli_hq" readonly><br><br>
+
+        <label>Crew ID:</label>
+        <input type="text" id="crew_id" name="crew_id" required placeholder="Example: BSP0068" oninput="formatCrewID()" maxlength="10">
+        <label>Crew Name:</label>
+        <input type="text" id="crew_name" name="crew_name" readonly>
+        <label>DESG:</label>
+        <input type="text" id="desg" name="desg" readonly>
+        <label>HQ:</label>
+        <input type="text" id="hq" name="hq" readonly><br><br>
+
+        <button type="submit">SUBMIT</button>
+    </form>
+
+    <script>
+        let cliData = {};
+        let crewData = {};
+        let isSubmitting = false; // Prevent multiple submissions
+    
+        function formatCLIID() {
+            let input = document.getElementById("cli_id");
+            input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            fetchCLIData();
+        }
+    
+        function formatCrewID() {
+            let input = document.getElementById("crew_id");
+            input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            fetchCrewData();
+        }
+    
+        function loadCLIData() {
+            fetch('CLIMICRO.csv')
+                .then(response => response.text())
+                .then(data => {
+                    Papa.parse(data, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: function(results) {
+                            results.data.forEach(row => {
+                                cliData[row["LI ID"]] = { name: row["NAME"], hq: row["HQ"] };
+                            });
+                        }
+                    });
+                });
+        }
+    
+        function loadCrewData() {
+            fetch('CREWM.csv')
+                .then(response => response.text())
+                .then(data => {
+                    Papa.parse(data, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: function(results) {
+                            results.data.forEach(row => {
+                                crewData[row["CREW ID"]] = { name: row["CREW NAME"], desg: row["DESG"], hq: row["HQ"] };
+                            });
+                        }
+                    });
+                });
+        }
+    
+        function fetchCLIData() {
+            let cliID = document.getElementById("cli_id").value;
+            if (cliData[cliID]) {
+                document.getElementById("cli_name").value = cliData[cliID].name;
+                document.getElementById("cli_hq").value = cliData[cliID].hq;
+            } else {
+                document.getElementById("cli_name").value = "";
+                document.getElementById("cli_hq").value = "";
+            }
+        }
+    
+        function fetchCrewData() {
+            let crewID = document.getElementById("crew_id").value;
+            if (crewData[crewID]) {
+                document.getElementById("crew_name").value = crewData[crewID].name;
+                document.getElementById("desg").value = crewData[crewID].desg;
+                document.getElementById("hq").value = crewData[crewID].hq;
+            } else {
+                document.getElementById("crew_name").value = "";
+                document.getElementById("desg").value = "";
+                document.getElementById("hq").value = "";
+            }
+        }
+    
+        document.getElementById("microSleepForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+    
+            if (isSubmitting) {
+                alert("Form already submitted, please wait...");
+                return;
+            }
+    
+            isSubmitting = true; // Prevent duplicate submissions
+            let submitButton = document.querySelector("button[type='submit']");
+            
+            // ✅ Button changes while submitting
+            submitButton.disabled = true;
+            submitButton.innerText = "Submitting...";
+            submitButton.style.backgroundColor = "#FF8C00"; // Dark Orange
+            submitButton.style.color = "white";
+    
+            let formData = new FormData(this);
+            let jsonData = {};
+            formData.forEach((value, key) => { jsonData[key] = value; });
+    
+            fetch("https://script.google.com/macros/s/AKfycbyDIUuWHvUocN1FLg4tLAB3ofTeO5SLfJKphJKqOPPl_ssyNDBRCVpM-7KBMeDzijtM/exec", {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(jsonData)
+            }).then(() => {
+                alert("Data Successfully Submitted!");
+                document.getElementById("microSleepForm").reset();
+                
+                isSubmitting = false; // Allow next submission
+                
+                // ✅ Reset button after submission
+                submitButton.disabled = false;
+                submitButton.innerText = "Submit";
+                submitButton.style.backgroundColor = "#007BFF"; // Original Blue
+                submitButton.style.color = "white";
+            }).catch(error => {
+                console.log("Error:", error);
+                isSubmitting = false;
+    
+                // ✅ Reset button on error
+                submitButton.disabled = false;
+                submitButton.innerText = "Submit";
+                submitButton.style.backgroundColor = "#007BFF"; // Original Blue
+                submitButton.style.color = "white";
+            });
+        });
+    
+        window.onload = function() {
+            loadCLIData();
+            loadCrewData();
+        };
+    </script>
+    
+    
+
+</body>
+</html>
