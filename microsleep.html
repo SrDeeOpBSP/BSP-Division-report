@@ -6,7 +6,6 @@
     <title>MICRO SLEEP COUNSELLING</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link rel="stylesheet" href="microsleep.css">
-    
 </head>
 <body>
 
@@ -31,6 +30,14 @@
         <input type="text" id="desg" name="desg" readonly>
         <label>HQ:</label>
         <input type="text" id="hq" name="hq" readonly><br><br>
+
+        <!-- NEW FIELD: Counselling on VCD Done -->
+        <label>Counselling on VCD Done:</label>
+        <select id="vcd_counselling" name="vcd_counselling" required>
+            <option value="">Select</option>
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+        </select><br><br>
 
         <button type="submit">SUBMIT</button>
     </form>
@@ -119,17 +126,15 @@
             isSubmitting = true; // Prevent duplicate submissions
             let submitButton = document.querySelector("button[type='submit']");
             
-            // ✅ Button changes while submitting
             submitButton.disabled = true;
             submitButton.innerText = "Submitting...";
             submitButton.style.backgroundColor = "#FF8C00"; // Dark Orange
-            submitButton.style.color = "white";
     
             let formData = new FormData(this);
             let jsonData = {};
             formData.forEach((value, key) => { jsonData[key] = value; });
     
-            fetch("https://script.google.com/macros/s/AKfycbyDIUuWHvUocN1FLg4tLAB3ofTeO5SLfJKphJKqOPPl_ssyNDBRCVpM-7KBMeDzijtM/exec", {
+            fetch("https://script.google.com/macros/s/AKfycbwQsFGjSdh3-9sGg5lLcpPvqt_6nCo5sXIIL8keSlzoijxf7OuifYuU7vlVIZYBJGTU/exec", {
                 method: "POST",
                 mode: "no-cors",
                 headers: { "Content-Type": "application/json" },
@@ -140,20 +145,16 @@
                 
                 isSubmitting = false; // Allow next submission
                 
-                // ✅ Reset button after submission
                 submitButton.disabled = false;
                 submitButton.innerText = "Submit";
-                submitButton.style.backgroundColor = "#007BFF"; // Original Blue
-                submitButton.style.color = "white";
+                submitButton.style.backgroundColor = "#007BFF";
             }).catch(error => {
                 console.log("Error:", error);
                 isSubmitting = false;
     
-                // ✅ Reset button on error
                 submitButton.disabled = false;
                 submitButton.innerText = "Submit";
-                submitButton.style.backgroundColor = "#007BFF"; // Original Blue
-                submitButton.style.color = "white";
+                submitButton.style.backgroundColor = "#007BFF";
             });
         });
     
@@ -162,8 +163,6 @@
             loadCrewData();
         };
     </script>
-    
-    
 
 </body>
 </html>
