@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Seminar Report</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="microsleep.css">
+    <style>
+        #submitBtn {
+            background-color: blue;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+        }
+        #submitBtn:disabled {
+            background-color: red;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>FAMILY SEMINAR REPORT</h2>
+
+    <form id="seminarForm">
+        <label for="cliName">CLI NAME:</label>
+        <select id="cliName" required>
+            <option value="">Select CLI NAME</option>
+        </select>
+
+        <label for="crewId">CREW ID:</label>
+        <select id="crewId" required>
+            <option value="">Select CREW ID</option>
+        </select>
+
+        <label for="crewName">CREW NAME:</label>
+        <input type="text" id="crewName" readonly>
+
+        <label for="desg">DESG:</label>
+        <input type="text" id="desg" readonly>
+
+        <label for="hq">HQ:</label>
+        <input type="text" id="hq" readonly>
+
+        <label for="familySeminar">FAMILY SEMINAR:</label>
+        <select id="familySeminar" required>
+            <option value="">Select</option>
+            <option value="ATTENDED">ATTENDED</option>
+            <option value="NOT ATTENDED">NOT ATTENDED</option>
+        </select>
+
+        <label for="seminarDate" id="dateLabel" style="display: none;">DATE:</label>
+        <input type="date" id="seminarDate" style="display: none;">
+
+        <button type="submit" id="submitBtn">SUBMIT</button>
+    </form>
+
+    <script>
+        let crewData = {};  // Store CSV data
+        
+        // Load CREW.csv Data
+        $(document).ready(function() {
+            $.get("CREW.csv", function(data) {
+                let lines = data.split("\n");
+                let cliSet = new Set();
+
+                for (let i = 1; i < lines.length; i++) {
+                    let row = lines[i].split(",");
+                    if (row.length < 5) continue; // Skip incomplete rows
+
+                    let cliName = row[0].trim();
+                    let crewId = row[1].trim();
+                    let crewName = row[2].trim();
+                    let desg = row[3].trim();
+                    let hq = row[4].trim();
+
+                    cliSet.add(cliName);
+
+                    if (!crewData[cliName]) crewData[cliName] = [];
+                    crewData[cliName].push({ crewId, crewName, desg, hq });
+                }
+
+                cliSet.forEach(cli => {
+                    $("#cliName").append(new Option(cli, cli));
+                });
+            });
+        });
+
+        // Update CREW ID Dropdown on CLI NAME selection
+        $("#cliName").change(function() {
+            let cli = $(this).val();
+            $("#crewId").empty().append(new Option("Select CREW ID", ""));
+            if (crewData[cli]) {
+                crewData[cli].forEach(crew => {
+                    $("#crewId").append(new Option(crew.crewId, crew.crewId));
+                });
+            }
+        });
+
+        // Auto-fill fields on CREW ID selection
+        $("#crewId").change(function() {
+            let cli = $("#cliName").val();
+            let crewId = $(this).val();
+            let crew = crewData[cli]?.find(c => c.crewId === crewId);
+
+            if (crew) {
+                $("#crewName").val(crew.crewName);
+                $("#desg").val(crew.desg);
+                $("#hq").val(crew.hq);
+            }
+        });
+
+        // Show/hide DATE field based on FAMILY SEMINAR selection
+        $("#familySeminar").change(function() {
+            if ($(this).val() === "ATTENDED") {
+                $("#dateLabel, #seminarDate").show();
+            } else {
+                $("#dateLabel, #seminarDate").hide();
+                $("#seminarDate").val("");
+            }
+        });
+
+        // Submit Form Data to Google Sheets
+        $("#seminarForm").submit(function(event) {
+            event.preventDefault();
+            
+            // Check if DATE is required and not filled
+            let familySeminar = $("#familySeminar").val();
+            let seminarDate = $("#seminarDate").val();
+            if (familySeminar === "ATTENDED" && seminarDate === "") {
+                alert("Please select a DATE for the attended seminar.");
+                return; // Stop form submission
+            }
+
+            // Disable button and change text/color
+            $("#submitBtn").text("Submitting...").prop("disabled", true);
+
+            let timestamp = new Date().toLocaleString();
+            let cliName = $("#cliName").val();
+            let crewId = $("#crewId").val();
+            let crewName = $("#crewName").val();
+            let desg = $("#desg").val();
+            let hq = $("#hq").val();
+
+            let data = {
+                Timestamp: timestamp,
+                "CLI NAME": cliName,
+                "CREW ID": crewId,
+                "CREW NAME": crewName,
+                DESG: desg,
+                HQ: hq,
+                "FAMILY SEMINAR": familySeminar,
+                DATE: seminarDate
+            };
+
+            $.ajax({
+                url: "https://script.google.com/macros/s/AKfycbxAk6jsXn8INrTNDrbCP9dU2Nd3KJrUDFnospss2nfm0Psn7fyL1NlDRk9Om29lJSWB/exec",
+                type: "POST",
+                data: data,
+                success: function(response) {
+                    alert("Form Submitted Successfully!");
+
+                    // Reset form
+                    $("#seminarForm")[0].reset();
+
+                    // Reset button after submission
+                    $("#submitBtn").text("SUBMIT").prop("disabled", false);
+                },
+                error: function() {
+                    alert("Error in form submission!");
+                    $("#submitBtn").text("SUBMIT").prop("disabled", false);
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
