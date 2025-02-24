@@ -22,16 +22,9 @@
         <label>CLI HQ:</label>
         <input type="text" id="cli_hq" name="cli_hq" readonly><br><br>
 
-        <label>Crew ID:</label>
-        <input type="text" id="crew_id" name="crew_id" required placeholder="Example: BSP0068" oninput="formatCrewID()" maxlength="10">
-        <label>Crew Name:</label>
-        <input type="text" id="crew_name" name="crew_name" readonly>
-        <label>DESG:</label>
-        <input type="text" id="desg" name="desg" readonly>
-        <label>HQ:</label>
-        <input type="text" id="hq" name="hq" readonly><br><br>
+        <label>Crew ID(s):</label>
+        <input type="text" id="crew_id" name="crew_id" required placeholder="Example: BSP0068,BSP0075,BSP3637,BSP3630" oninput="formatCrewIDs()">
 
-        <!-- NEW FIELD: Counselling on VCD Done -->
         <label>Counselling on VCD Done:</label>
         <select id="vcd_counselling" name="vcd_counselling" required>
             <option value="">Select</option>
@@ -52,20 +45,19 @@
     <script>
         let cliData = {};
         let crewData = {};
-        let isSubmitting = false; // Prevent multiple submissions
-    
+        let isSubmitting = false;
+
         function formatCLIID() {
             let input = document.getElementById("cli_id");
             input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
             fetchCLIData();
         }
-    
-        function formatCrewID() {
+
+        function formatCrewIDs() {
             let input = document.getElementById("crew_id");
-            input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            fetchCrewData();
+            input.value = input.value.toUpperCase().replace(/[^A-Z0-9,]/g, '');
         }
-    
+
         function loadCLIData() {
             fetch('CLIMICRO.csv')
                 .then(response => response.text())
@@ -81,7 +73,7 @@
                     });
                 });
         }
-    
+
         function loadCrewData() {
             fetch('CREWM.csv')
                 .then(response => response.text())
@@ -97,7 +89,7 @@
                     });
                 });
         }
-    
+
         function fetchCLIData() {
             let cliID = document.getElementById("cli_id").value;
             if (cliData[cliID]) {
@@ -108,68 +100,57 @@
                 document.getElementById("cli_hq").value = "";
             }
         }
-    
-        function fetchCrewData() {
-            let crewID = document.getElementById("crew_id").value;
-            if (crewData[crewID]) {
-                document.getElementById("crew_name").value = crewData[crewID].name;
-                document.getElementById("desg").value = crewData[crewID].desg;
-                document.getElementById("hq").value = crewData[crewID].hq;
-            } else {
-                document.getElementById("crew_name").value = "";
-                document.getElementById("desg").value = "";
-                document.getElementById("hq").value = "";
-            }
-        }
-    
+
         document.getElementById("microSleepForm").addEventListener("submit", function(event) {
             event.preventDefault();
-    
+
             if (isSubmitting) {
                 alert("Form already submitted, please wait...");
                 return;
             }
-    
-            isSubmitting = true; // Prevent duplicate submissions
+
+            isSubmitting = true;
             let submitButton = document.querySelector("button[type='submit']");
-            
+
             submitButton.disabled = true;
             submitButton.innerText = "Submitting...";
-            submitButton.style.backgroundColor = "#FF8C00"; // Dark Orange
-    
+            submitButton.style.backgroundColor = "#FF8C00";
+
             let formData = new FormData(this);
-            let jsonData = {};
-            formData.forEach((value, key) => { jsonData[key] = value; });
-    
-            fetch("https://script.google.com/macros/s/AKfycbxMYVU7x3P5bV0gRu9L_ocLImRLOvv2YvIPImjQot6ErTSbeWFcT9jgiklwI175CKcT/exec", {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(jsonData)
-            }).then(() => {
-                alert("Data Successfully Submitted!");
-                document.getElementById("microSleepForm").reset();
-                
-                isSubmitting = false; // Allow next submission
-                
-                submitButton.disabled = false;
-                submitButton.innerText = "Submit";
-                submitButton.style.backgroundColor = "#007BFF";
-            }).catch(error => {
-                console.log("Error:", error);
-                isSubmitting = false;
-    
-                submitButton.disabled = false;
-                submitButton.innerText = "Submit";
-                submitButton.style.backgroundColor = "#007BFF";
+            let crewIDs = formData.get("crew_id").split(',');
+
+            crewIDs.forEach(crewID => {
+                crewID = crewID.trim();
+                let jsonData = {};
+                formData.forEach((value, key) => {
+                    jsonData[key] = value;
+                });
+                jsonData["crew_id"] = crewID;
+                jsonData["crew_name"] = crewData[crewID] ? crewData[crewID].name : "";
+                jsonData["desg"] = crewData[crewID] ? crewData[crewID].desg : "";
+                jsonData["hq"] = crewData[crewID] ? crewData[crewID].hq : "";
+
+                fetch("https://script.google.com/macros/s/AKfycbxMYVU7x3P5bV0gRu9L_ocLImRLOvv2YvIPImjQot6ErTSbeWFcT9jgiklwI175CKcT/exec", {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(jsonData)
+                });
             });
+
+            alert("Data Successfully Submitted!");
+            document.getElementById("microSleepForm").reset();
+
+            isSubmitting = false;
+            submitButton.disabled = false;
+            submitButton.innerText = "Submit";
+            submitButton.style.backgroundColor = "#007BFF";
         });
-    
+
         window.onload = function() {
             loadCLIData();
             loadCrewData();
         };
     </script>
-
 </body>
 </html>
