@@ -177,11 +177,19 @@
         <label for="location">Location:</label>
         <input type="text" id="location" name="location"><br><br>
 
-        <label for="twdName">TWD/TMO NAME:</label>
+        <label for="twdName">CREW NAME:</label>
         <input type="text" id="twdName" name="twdName"><br><br>
 
-        <label for="twdHq">TWD/TMO HQ:</label>
+        <label for="twdHq">CREW HQ:</label>
         <input type="text" id="twdHq" name="twdHq"><br><br>
+
+        <label for="desg">CREW DESG:</label>
+        <select id="desg" name="desg">
+            <option value="" disabled selected>Select CREW DESG</option>
+            <option value="Tower Wagon Driver">Tower Wagon Driver</option>
+            <option value="Track Machine Operator">Track Machine Operator</option>
+        </select>
+           
 
         <label for="baAmbush">BA AMBUSH COUNT:</label>
         <input type="number" id="baAmbush" name="baAmbush"><br><br>
@@ -209,7 +217,7 @@
             const data = {};
             formData.forEach((value, key) => { data[key] = value });
 
-            fetch('https://script.google.com/macros/s/AKfycbwQ019DXtKpT6ov70-iShCtx5TJbE9jBOUatRCtiVCSSComeDJSDvKFI5lr39pZnsn9oA/exec', {
+            fetch('https://script.google.com/macros/s/AKfycbz41GVa1Bdxt9ELPDRFzfA5PUjsqQroiTT_VKjs0xmtasJ7sTgkoRzk4j8FslXb9N1W_A/exec', {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
