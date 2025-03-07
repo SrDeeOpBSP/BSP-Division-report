@@ -4,72 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CREW STATION LAYOUT DIAGRAM TEST VIA CLI</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        form {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0px 0px 10px gray;
-            max-width: 500px;
-            margin: auto;
-        }
-        label {
-            font-weight: bold;
-            margin-top: 10px;
-            display: block;
-        }
-        input, select, button {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            background-color: blue;
-            color: white;
-            font-size: 16px;
-            margin-top: 15px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: darkblue;
-        }
-    </style>
+    <link rel="stylesheet" href="microsleep.css">
 </head>
 <body>
     <h2 style="text-align: center;">CREW STATION HAND DRAWN LAYOUT DIAGRAM PRACTICE BY CLI</h2>
     
     <form id="crewForm">
         <label for="date">DATE:</label>
-        <input type="date" id="date" name="date" required>
+        <input type="date" id="date" name="DATE" required>
         
         <label for="cli_id">CLI ID:</label>
-        <input type="text" id="cli_id" name="cli_id" required oninput="fetchCLI()">
+        <input type="text" id="cli_id" name="CLI ID" required oninput="fetchCLI()">
 
         <label for="cli_name">CLI NAME:</label>
-        <input type="text" id="cli_name" name="cli_name" readonly>
+        <input type="text" id="cli_name" name="CLI NAME" readonly>
 
         <label for="cli_hq">CLI HQ:</label>
-        <input type="text" id="cli_hq" name="cli_hq" readonly>
+        <input type="text" id="cli_hq" name="CLI HQ" readonly>
 
         <label for="crew_id">CREW ID:</label>
-        <input type="text" id="crew_id" name="crew_id" required oninput="fetchCrew()">
+        <input type="text" id="crew_id" name="CREW ID" required oninput="fetchCrew()">
 
         <label for="crew_name">CREW NAME:</label>
-        <input type="text" id="crew_name" name="crew_name" readonly>
+        <input type="text" id="crew_name" name="CREW NAME" readonly>
 
         <label for="crew_desg">CREW DESG:</label>
-        <input type="text" id="crew_desg" name="crew_desg" readonly>
+        <input type="text" id="crew_desg" name="CREW DESG" readonly>
 
         <label for="crew_hq">CREW HQ:</label>
-        <input type="text" id="crew_hq" name="crew_hq" readonly>
+        <input type="text" id="crew_hq" name="CREW HQ" readonly>
 
         <label for="station_num">NUMBER OF LAYOUTS DRAWN:</label>
         <select id="station_num" name="station_num" required>
@@ -82,7 +45,7 @@
         </select>
         
         <label for="station_name">STATION NAME:</label>
-        <input type="text" id="station_name" name="station_name" required style="text-transform: uppercase;">
+        <input type="text" id="station_name" name="STATION NAME" required style="text-transform: uppercase;">
 
         <label for="correct_diagram">Correct Diagram Created?</label>
         <select id="correct_diagram" name="correct_diagram" required>
@@ -99,70 +62,9 @@
             <option value="5">5</option>
         </select>
 
-        <button type="submit">SUBMIT</button>
+        <button type="submit" id="submitBtn">SUBMIT</button>
     </form>
 
-    <script>
-        async function fetchCLI() {
-            let cliId = document.getElementById("cli_id").value;
-            if (!cliId) return;
-            try {
-                const response = await fetch("CLIMICRO.csv");
-                const data = await response.text();
-                const rows = data.split("\n").map(row => row.split(","));
-                let cliDetails = rows.find(row => row[0].trim() === cliId);
-                if (cliDetails) {
-                    document.getElementById("cli_name").value = cliDetails[1];
-                    document.getElementById("cli_hq").value = cliDetails[2];
-                }
-            } catch (error) {
-                console.error("Error fetching CLI data", error);
-            }
-        }
-        
-        async function fetchCrew() {
-            let crewId = document.getElementById("crew_id").value;
-            if (!crewId) return;
-            try {
-                const response = await fetch("CREWM.csv");
-                const data = await response.text();
-                const rows = data.split("\n").map(row => row.split(","));
-                let crewDetails = rows.find(row => row[0].trim() === crewId);
-                if (crewDetails) {
-                    document.getElementById("crew_name").value = crewDetails[1];
-                    document.getElementById("crew_desg").value = crewDetails[2];
-                    document.getElementById("crew_hq").value = crewDetails[3];
-                }
-            } catch (error) {
-                console.error("Error fetching Crew data", error);
-            }
-        }
-        
-        document.getElementById("crewForm").addEventListener("submit", async function (event) {
-            event.preventDefault();
-            const formData = new FormData(this);
-            const jsonData = Object.fromEntries(formData.entries());
-
-            const googleSheetURL = "https://script.google.com/macros/s/AKfycbybvQ9K1NEpBp9VogibjHI296VUzCYQWUSvTMH5QxGP-nGqIq1Ey_8G9hfztDgGkJSpUA/exec"; // ⚠️ Yaha New URL Paste Karna
-
-            try {
-                const response = await fetch(googleSheetURL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(jsonData),
-                });
-
-                const result = await response.json();
-                if (result.status === "success") {
-                    alert("Data successfully submitted!");
-                    this.reset();
-                } else {
-                    alert("Error: " + result.message);
-                }
-            } catch (error) {
-                alert("Network error: " + error);
-            }
-        });
-    </script>
+    <script src="station.js"></script>
 </body>
 </html>
