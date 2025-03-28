@@ -36,6 +36,7 @@ label {
 input[type="text"],
 input[type="date"],
 input[type="number"],
+input[type="time"], /* Added for FROM TIME and TO TIME */
 select,
 textarea {
     width: 100%;
@@ -51,11 +52,30 @@ textarea {
 input[type="text"]:focus,
 input[type="date"]:focus,
 input[type="number"]:focus,
+input[type="time"]:focus, /* Already included, ensuring consistency */
 select:focus,
 textarea:focus {
     border-color: #ff7e5f;
     box-shadow: 0 0 10px rgba(255, 126, 95, 0.5);
     outline: none;
+}
+
+/* New styling for time inputs to make them visually appealing */
+input[type="time"] {
+    background-color: #fff;
+    color: #333;
+    cursor: pointer; /* Makes it clear it's interactive */
+}
+
+/* Optional: Adjust width for FROM TIME and TO TIME if side-by-side layout is desired */
+.time-group {
+    display: flex;
+    gap: 10px; /* Space between FROM TIME and TO TIME */
+    margin-bottom: 15px;
+}
+
+.time-group input[type="time"] {
+    width: 48%; /* Adjust width to fit side-by-side */
 }
 
 input[type="submit"] {
@@ -122,6 +142,16 @@ textarea {
     input[type="submit"] {
         width: 100%;
         padding: 14px;
+    }
+
+    /* Stack FROM TIME and TO TIME vertically on mobile */
+    .time-group {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .time-group input[type="time"] {
+        width: 100%;
     }
 }
 
