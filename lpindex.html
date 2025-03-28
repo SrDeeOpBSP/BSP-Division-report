@@ -29,13 +29,19 @@
             
             <label for="hq">HQ:</label>
             <input type="text" id="hq" name="HQ" readonly><br><br>
+
+            <label for="majorBeat">MAJOR BEAT:</label>
+            <select id="majorBeat" name="MAJOR BEAT" required>
+            <option value="">Select MAJOR BEAT</option>
+            </select><br><br>
             
             <label for="BEAT">BEAT:</label>
             <select id="BEAT" name="BEAT" required>
                 <option value="">Select BEAT</option>
-                <option value="AKT-USL">AKT-USL</option>
                 <option value="AKT-RIG">AKT-RIG</option>
+                <option value="RIG-AKT">RIG-AKT</option>
                 <option value="AKT-KRBA">AKT-KRBA</option>
+                <option value="KRBA-AKT">KRBA-AKT</option>
                 <option value="BSP-SDL">BSP-SDL</option>
                 <option value="BSP-RIG">BSP-RIG</option>
                 <option value="BSP-KRBA">BSP-KRBA</option>
@@ -61,6 +67,7 @@
                 <option value="BRJN-RIG">BRJN-RIG</option>
                 <option value="BRJN-SBP">BRJN-SBP</option>
                 <option value="KRBA-DPK">KRBA-DPK</option>
+                <option value="KRBA-GAD">KRBA-GAD</option>
                 <option value="KRBA-USL">KRBA-USL</option>
                 <option value="KRBA-RIG">KRBA-RIG</option>
                 <option value="BJRI-ABKP">BJRI-ABKP</option>
@@ -74,20 +81,33 @@
                 <option value="USL-RSD">USL-RSD</option>
                 <option value="BSP-RSD">BSP-RSD</option>
                 <option value="BSP-NGP">BSP-NGP</option>
+                <option value="NGP-BSP">NGP-BSP</option>
                 <option value="BSP-CKP">BSP-CKP</option>
                 <option value="BSP-TATA">BSP-TATA</option>
                 <option value="BSP-ROU">BSP-ROU</option>
                 <option value="BSP-SBP">BSP-SBP</option>
-                <option value="OTHER">OTHER BEAT</option>
+                <option value="OTHER">OTHER</option>
             </select>
             
             <!-- Hidden input field for OTHER BEAT -->
             <input type="text" id="otherBeatInput" name="otherBeat" placeholder="Enter other beat" style="display: none; margin-top: 10px;">
             
             <br><br>
-            
+
+            <label for="LOCO NUMBER">LOCO NUMBER:</label>
+            <input type="number" id="LOCO NUMBER" name="LOCO NUMBER" required>
+
+            <label for="TRAIN NUMBER">TRAIN NUMBER:</label>
+            <input type="text" id="TRAIN NUMBER" name="TRAIN NUMBER" required>
+
             <label for="DATE">DATE:</label>
             <input type="date" id="DATE" name="DATE" required><br><br>
+            
+            <label for="FROM TIME">FROM TIME:</label>
+            <input type="time" id="FROM TIME" name="FROM TIME" required><br><br>
+            
+            <label for="TO TIME">TO TIME:</label>
+            <input type="time" id="TO TIME" name="TO TIME" required><br><br>
 
             <button id="submitButton" type="submit">SUBMIT</button>
         </form>

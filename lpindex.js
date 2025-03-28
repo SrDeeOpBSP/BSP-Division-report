@@ -1,4 +1,4 @@
-// Fetch the CSV file and parse it using PapaParse
+// Fetch the CLI.csv file (existing code remains unchanged)
 fetch('CLI.csv')
     .then(response => response.text())
     .then(csvText => {
@@ -6,16 +6,29 @@ fetch('CLI.csv')
             header: true,
             skipEmptyLines: true
         }).data;
-
         populateCliNames(data);
     })
     .catch(error => {
-        console.error('Error fetching the CSV file:', error);
+        console.error('Error fetching the CLI.csv file:', error);
     });
 
-// Populate the CLI Names dropdown with unique values from the CSV data
+// Fetch the BEAT.csv file for MAJOR BEAT
+let beatData = []; // Global variable to store BEAT.csv data
+fetch('BEAT.csv')
+    .then(response => response.text())
+    .then(csvText => {
+        beatData = Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true
+        }).data;
+    })
+    .catch(error => {
+        console.error('Error fetching the BEAT.csv file:', error);
+    });
+
+// Populate CLI Names (unchanged)
 function populateCliNames(data) {
-    const cliNames = [...new Set(data.map(item => item['CLI NAME']))]; // Get unique CLI NAMEs
+    const cliNames = [...new Set(data.map(item => item['CLI NAME']))];
     const cliNameDropdown = document.getElementById('cliName');
 
     cliNames.forEach(cli => {
@@ -30,12 +43,12 @@ function populateCliNames(data) {
     });
 }
 
-// Populate the ALP ID dropdown based on the selected CLI Name
+// Populate LP IDs (unchanged)
 function populateLpIds(data, selectedCliName) {
     const filteredData = data.filter(item => item['CLI NAME'] === selectedCliName);
     const lpIdDropdown = document.getElementById('lpId');
 
-    lpIdDropdown.innerHTML = '<option value="">Select LP ID</option>'; // Reset ALP ID dropdown
+    lpIdDropdown.innerHTML = '<option value="">Select LP ID</option>';
 
     filteredData.forEach(item => {
         const option = document.createElement('option');
@@ -49,16 +62,36 @@ function populateLpIds(data, selectedCliName) {
     });
 }
 
-// Auto-fill the form details based on the selected LP ID
+// Auto-fill details including MAJOR BEAT
 function autoFillDetails(data, selectedLpId) {
     const selectedData = data.find(item => item['LP ID'] === selectedLpId);
 
     document.getElementById('lpName').value = selectedData['LP NAME'] || '';
     document.getElementById('desg').value = selectedData['DESG'] || '';
     document.getElementById('hq').value = selectedData['HQ'] || '';
+
+    // Populate MAJOR BEAT based on HQ
+    const hqValue = selectedData['HQ'] || '';
+    populateMajorBeat(hqValue);
 }
 
-// Handle the BEAT field, including the "OTHER" option
+// New function to populate MAJOR BEAT dropdown
+function populateMajorBeat(hq) {
+    const majorBeatDropdown = document.getElementById('majorBeat');
+    majorBeatDropdown.innerHTML = '<option value="">Select MAJOR BEAT</option>'; // Reset dropdown
+
+    if (hq && beatData.length > 0) {
+        const filteredBeats = beatData.filter(item => item['HQ'] === hq); // Filter BEAT.csv based on HQ
+        filteredBeats.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item['BEAT'];
+            option.textContent = item['BEAT'];
+            majorBeatDropdown.appendChild(option);
+        });
+    }
+}
+
+// Handle BEAT field (unchanged)
 document.getElementById('BEAT').addEventListener('change', function() {
     var otherBeatInput = document.getElementById('otherBeatInput');
     if (this.value === 'OTHER') {
@@ -70,18 +103,15 @@ document.getElementById('BEAT').addEventListener('change', function() {
     }
 });
 
-// Handle form submission
+// Handle form submission (unchanged, MAJOR BEAT automatically included in formData)
 document.getElementById('footplateForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent the default form submission
-
+    event.preventDefault();
     const submitButton = this.querySelector('button[type="submit"]');
-    submitButton.disabled = true; // Disable the submit button to prevent multiple submissions
+    submitButton.disabled = true;
 
-    // Handle the BEAT field if "OTHER" is selected
     var selectBeat = document.getElementById('BEAT');
     var otherBeatInput = document.getElementById('otherBeatInput');
     
-    // If "OTHER" is selected, replace the BEAT value with the custom input value
     if (selectBeat.value === 'OTHER') {
         selectBeat.setAttribute('name', 'BEAT_OTHER');
         otherBeatInput.setAttribute('name', 'BEAT');
@@ -91,9 +121,9 @@ document.getElementById('footplateForm').addEventListener('submit', function(eve
     var data = {};
     formData.forEach((value, key) => data[key] = value);
 
-    console.log('Final Data being submitted:', data); // Debugging line
+    console.log('Final Data being submitted:', data);
 
-    fetch('https://script.google.com/macros/s/AKfycby3eD7SlhNdZ632fu5_h7rSnanaMvmH-hwAYhFjK21ulEbswrX7rjCyMnNIpNMoJwFd/exec', { // Replace with your actual Web App URL
+    fetch('https://script.google.com/macros/s/AKfycby3eD7SlhNdZ632fu5_h7rSnanaMvmH-hwAYhFjK21ulEbswrX7rjCyMnNIpNMoJwFd/exec', {
         method: 'POST',
         mode: 'no-cors',
         headers: {
@@ -103,9 +133,7 @@ document.getElementById('footplateForm').addEventListener('submit', function(eve
     })
     .then(response => {
         alert('Form data submitted successfully!');
-        document.getElementById('footplateForm').reset(); // Reset the form after submission
-
-        // Reset the BEAT field handling
+        document.getElementById('footplateForm').reset();
         selectBeat.setAttribute('name', 'BEAT');
         otherBeatInput.setAttribute('name', 'BEAT_OTHER');
     })
@@ -113,6 +141,6 @@ document.getElementById('footplateForm').addEventListener('submit', function(eve
         console.error('Error:', error);
     })
     .finally(() => {
-        submitButton.disabled = false; // Re-enable the submit button after submission is complete
+        submitButton.disabled = false;
     });
 });
