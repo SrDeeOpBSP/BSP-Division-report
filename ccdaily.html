@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="Google Sheet.css">
+    <title>CREW CONTROLLER FOR DAILY REPORT</title>
+    <style>
+        form {
+            max-width: 600px;
+            margin: auto;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 10px;
+        }
+        textarea {
+            height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <h2>CREW CONTROLLER DAILY REPORT</h2>
+    <form id="crewcontrollerReportForm" action="https://script.google.com/macros/s/AKfycbxYvxpwP2-oWVsm4hxP1fIJSm9S1oc7CVgbwtg4OHB-lxtRK9_AiK9Kqliu5ETlu4XH/exec" method ="post">
+
+        <label for="LOBBY">LOBBY:</label>
+        <select id="LOBBY"name="LOBBY" required>
+            <option value="" disabled selected>Select your LOBBY</option>
+            <option value="AKT">AKT</option>
+            <option value="BJRI">BJRI</option>
+            <option value="BRJN">BRJN</option>
+            <option value="BSP">BSP</option>
+            <option value="KHS">KHS</option>
+            <option value="KRBA">KRBA</option>
+            <option value="PND">PND</option>
+            <option value="RIG">RIG</option>
+            <option value="SDL">SDL</option>
+            <option value="SJQ">SJQ</option>
+            <option value="USL">USL</option>
+
+        </select>
+
+            
+        
+        <label for="DATE">DATE:</label>
+        <input type="DATE" id="DATE" name="DATE" required>
+        
+        <label for="Family Seminar(Number of Crew)">Family Seminar(Number of Crew):</label>
+        <input type="number" id="Family Seminar(Number of Crew)" name="Family Seminar(Number of Crew)" min="0" required>
+
+        <label for="Safety Seminar(Number of Crew)">Safety Seminar(Number of Crew):</label>
+        <input type="number" id="Safety Seminar(Number of Crew)" name="Safety Seminar(Number of Crew)"min="0" required>
+        
+        <label for="SAFETY DRIVE/CIRCULAR COUNSELLING(Number of Crew)">SAFETY DRIVE/CIRCULAR COUNSELLING(Number of Crew):</label>
+        <input type="number" id="SAFETY DRIVE/CIRCULAR COUNSELLING(Number of Crew)" name="SAFETY DRIVE/CIRCULAR COUNSELLING(Number of Crew)"min="0" required>
+
+        <label for="TECHNICAL CIRCULAR COUNSELLING(Number of Crew)">TECHNICAL CIRCULAR COUNSELLING(Number of Crew):</label>
+        <input type="number" id="TECHNICAL CIRCULAR COUNSELLING(Number of Crew)" name="TECHNICAL CIRCULAR COUNSELLING(Number of Crew)"min="0" required>
+        
+        <label for="CHALAK PATRA COUNSELLING(Number of Crew)">CHALAK PATRA COUNSELLING(Number of Crew):</label>
+        <input type="number" id="CHALAK PATRA COUNSELLING(Number of Crew)" name="CHALAK PATRA COUNSELLING(Number of Crew)"min="0">
+
+        <label for="Recent Incidence Discussion With Crew(Number of Crew)">Recent Incidence Discussion With Crew(Number of Crew):</label>
+        <input type="number" id="Recent Incidence Discussion With Crew(Number of Crew)" name="Recent Incidence Discussion With Crew(Number of Crew)"min="0">
+
+        <label for="Number of Crew is Waiting for Bed in Running Room">Number of Crew is Waiting for Bed in Running Room:</label>
+        <input type="number" id="Number of Crew is Waiting for Bed in Running Room" name="Number of Crew is Waiting for Bed in Running Room"min="0" required>
+        
+        <label for="Number of Crew who got Meal late Ready in Running Room">Number of Crew who got Meal late Ready in Running Room:</label>
+        <input type="number" id="Number of Crew who got Meal late Ready in Running Room" name="Number of Crew who got Meal late Ready in Running Room"min="0" required>
+
+        <label for="Number of complaint lodged by crew in Running Room">Number of complaint lodged by crew in Running Room:</label>
+        <input type="number" id="Number of complaint lodged by crew in Running Room" name="Number of complaint lodged by crew in Running Room"min="0" required>
+        
+        <label for="Mobile screen time during rest in running Room">Mobile screen time during rest in running Room:</label>
+        <input type="number" id="Mobile screen time during rest in running Room" name="Mobile screen time during rest in running Room"min="0" required>
+
+        <label for="Total Number of Yard Layout Drawn & Counselling to Crew in Lobby">Total Number of Yard Layout Drawn & Counselling to Crew in Lobby:</label>
+        <input type="number" id="Total Number of Yard Layout Drawn & Counselling to Crew in Lobby" name="Total Number of Yard Layout Drawn & Counselling to Crew in Lobby"min="0" required>
+        
+        <label for="Total Number of Automatic Signal Competency found overdue in Lobby">Total Number of Automatic Signal Competency found overdue in Lobby:</label>
+        <input type="number" id="Total Number of Automatic Signal Competency found overdue in Lobby" name="Total Number of Automatic Signal Competency found overdue in Lobby"min="0" required>
+
+        <label for="Knowledge of GR 9.12 checked in Lobby">Knowledge of GR 9.12 checked in Lobby:</label>
+        <input type="number" id="Knowledge of GR 9.12 checked in Lobby" name="Knowledge of GR 9.12 checked in Lobby"min="0" required>
+
+        <label for="Signal Booklet Verification for Updating in Lobby">Signal Booklet Verification for Updating in Lobby:</label>
+        <input type="number" id="Signal Booklet Verification for Updating in Lobby" name="Signal Booklet Verification for Updating in Lobby"min="0" required>
+
+        <label for="RS Flap Valve Test Conduct(Number of Crew)">RS Flap Valve Test Conduct(Number of Crew):</label>
+        <input type="number" id="RS Flap Valve Test Conduct(Number of Crew)" name="RS Flap Valve Test Conduct(Number of Crew)"min="0" required>
+        
+        <label for="Gist of Green Notice Available & Crew Acknowledgement in Lobby">Gist of Green Notice Available & Crew Acknowledgement in Lobby:</label>
+        <input type="number" id="Gist of Green Notice Available & Crew Acknowledgement in Lobby" name="Gist of Green Notice Available & Crew Acknowledgement in Lobby"min="0" required>
+
+        <label for="Any Irregularities of Signal Visibility recorded in Abnormality Register in Lobby">Any Irregularities of Signal Visibility recorded in Abnormality Register in Lobby:</label>
+        <input type="number" id="Any Irregularities of Signal Visibility recorded in Abnormality Register in Lobby" name="Any Irregularities of Signal Visibility recorded in Abnormality Register in Lobby"min="0" required>
+
+        <label for="ABNORMALITIES DESCRIPTION RELATED ABOVE ALL FIELD IN DETAILS">ABNORMALITIES DESCRIPTION RELATED ABOVE ALL FIELD IN DETAILS:</label>
+        <textarea id="ABNORMALITIES DESCRIPTION RELATED ABOVE ALL FIELD IN DETAILS" name="ABNORMALITIES DESCRIPTION RELATED ABOVE ALL FIELD IN DETAILS"></textarea>
+        
+        <button id="submitButton" type="submit">SUBMIT</button>
+    </form>
+    <script src="ccdaily.js"></script>
+</body>
+</html>
