@@ -78,19 +78,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 const lastQuarter = Math.max(...selectedQuarters);
 
                 const quarterStartDates = {
-                    1: '2024-01-01',
-                    2: '2024-04-01',
-                    3: '2024-07-01',
-                    4: '2024-10-01',
-                    5: '2025-01-01'
+                    1: '2025-01-01',
+                    2: '2025-04-01',
+                    3: '2025-07-01',
+                    4: '2025-10-01',
+                    5: '2026-01-01'
                 };
 
                 const quarterEndDates = {
-                    1: '2024-03-31',
-                    2: '2024-06-30',
-                    3: '2024-10-07',
-                    4: '2024-12-31',
-                    5: '2025-03-31'
+                    1: '2025-03-31',
+                    2: '2025-06-30',
+                    3: '2025-09-30',
+                    4: '2025-12-31',
+                    5: '2026-03-31'
                 };
 
                 fromDateInput.value = quarterStartDates[firstQuarter];
