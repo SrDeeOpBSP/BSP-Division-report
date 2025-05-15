@@ -70,19 +70,26 @@
         let crewData = {};
 
         async function loadCrewData() {
-            const response = await fetch('CREWM.csv');
-            const data = await response.text();
-            const rows = data.split("\n").map(row => row.split(","));
+            try {
+                const response = await fetch('CREWM.csv');
+                if (!response.ok) throw new Error("Failed to fetch CREWM.csv");
+                const data = await response.text();
+                const rows = data.split("\n").map(row => row.split(","));
 
-            for (let i = 1; i < rows.length; i++) {
-                let [id, name, desg, hq, cli] = rows[i];
-                crewData[id.trim().toUpperCase()] = { name, desg, hq, cli };
+                for (let i = 1; i < rows.length; i++) {
+                    if (rows[i].length < 5) continue;
+                    let [id, name, desg, hq, cli] = rows[i];
+                    crewData[id.trim().toUpperCase()] = { name, desg, hq, cli };
+                }
+            } catch (error) {
+                console.error("Error loading crew data:", error);
+                alert("Unable to load crew data. Please try again later.");
             }
         }
 
         function fillCrewDetails() {
             const crewIdInput = document.getElementById("crew_id");
-            crewIdInput.value = crewIdInput.value.toUpperCase(); // ✅ Capitalize Crew ID
+            crewIdInput.value = crewIdInput.value.toUpperCase();
 
             const crewId = crewIdInput.value.trim();
             if (crewData[crewId]) {
@@ -98,12 +105,24 @@
         function toggleFields() {
             const mobileUsage = document.getElementById("mobile_usage").value;
             const reasonField = document.getElementById("reason_field");
+            const mobileNumberField = document.getElementById("mobile_number_field");
+            const mobileUsedOnRunField = document.getElementById("mobile_used_on_run_field");
 
             if (mobileUsage === "YES") {
                 reasonField.classList.remove("hidden");
+                mobileNumberField.classList.remove("hidden");
+                mobileUsedOnRunField.classList.remove("hidden");
+                document.getElementById("personal_mobile").required = true;
+                document.getElementById("mobile_used_on_run").required = true;
             } else {
                 reasonField.classList.add("hidden");
+                mobileNumberField.classList.add("hidden");
+                mobileUsedOnRunField.classList.add("hidden");
                 document.getElementById("reason").value = "";
+                document.getElementById("personal_mobile").value = "";
+                document.getElementById("mobile_used_on_run").value = "";
+                document.getElementById("personal_mobile").required = false;
+                document.getElementById("mobile_used_on_run").required = false;
             }
         }
 
@@ -116,27 +135,23 @@
 
             const formData = new FormData(document.getElementById("inspection_form"));
 
-            fetch("https://script.google.com/macros/s/AKfycbxoJcAWbhRqRH53IKVYI7XppLCNs1lVA9WuyKGKQyYj61h9P14jeozyI8ugr8iLCjjoww/exec", {
+            fetch("https://script.google.com/macros/s/AKfycbwxdxvdUiFHeZnp29DAf4ChBQ7Dz5VLW38aZf-_7Q_i5dIoYNiruxIBG1oJh99i96Tq-A/exec", {
                 method: "POST",
                 body: formData
             })
             .then(response => response.text())
             .then(data => {
                 alert("Form submitted successfully!");
-
-                // ✅ Enable submit button after submission
                 submitBtn.disabled = false;
                 submitBtn.innerText = "SUBMIT";
-
-                // ✅ Reset form after submission
                 document.getElementById("inspection_form").reset();
                 document.getElementById("reason_field").classList.add("hidden");
+                document.getElementById("mobile_number_field").classList.add("hidden");
+                document.getElementById("mobile_used_on_run_field").classList.add("hidden");
             })
             .catch(error => {
                 console.error("Error submitting form:", error);
                 alert("Form submission failed!");
-
-                // ✅ Enable submit button if error occurs
                 submitBtn.disabled = false;
                 submitBtn.innerText = "SUBMIT";
             });
@@ -164,10 +179,8 @@
             <label>CLI NAME:</label>
             <input type="text" id="cli_name" name="cli_name" readonly>
 
-            <!-- New Field Added here -->
             <label>AMBUSH DONE BY (Enter CLI ID):</label>
             <input type="text" name="ambush_done_by" id="ambush_done_by" required placeholder="BSP0132 (alphabet in capital letters only)" pattern="^[A-Z0-9]+$">
-
 
             <label>Whether Crew carrying personal mobile other than CUG:</label>
             <select id="mobile_usage" name="mobile_usage" onchange="toggleFields()" required>
@@ -176,13 +189,25 @@
                 <option value="NO">NO</option>
             </select>
 
-            <!-- Reason field appears only when "YES" is selected -->
             <div id="reason_field" class="hidden">
                 <label>Reason:</label>
                 <textarea name="reason" id="reason"></textarea>
             </div>
 
-            <!-- Extra fields are always visible -->
+            <div id="mobile_used_on_run_field" class="hidden">
+                <label>Whether Crew used personal mobile while on run:</label>
+                <select name="mobile_used_on_run" id="mobile_used_on_run">
+                    <option value="">Select</option>
+                    <option value="YES">YES</option>
+                    <option value="NO">NO</option>
+                </select>
+            </div>
+
+            <div id="mobile_number_field" class="hidden">
+                <label>Personal Mobile Number:</label>
+                <input type="tel" name="personal_mobile" id="personal_mobile" placeholder="Enter 10-digit mobile number" pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number">
+            </div>
+
             <label>Number of Calls made/received after on duty?</label>
             <input type="number" name="calls_after_duty" min="0">
 
