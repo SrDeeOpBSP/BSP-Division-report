@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ambush Analysis Form</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e0e7ff, #f3f4f6);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .form-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 700px;
+            width: 100%;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h2 {
+            text-align: center;
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            font-weight: 600;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1f2937;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1em;
+            background-color: #f9fafb;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+        }
+        textarea {
+            height: 180px;
+            resize: vertical;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(to right, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+        }
+        button:hover:not(:disabled) {
+            background: linear-gradient(to right, #2563eb, #1e40af);
+            transform: translateY(-2px);
+        }
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .error {
+            color: #dc2626;
+            font-size: 0.9em;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+        .success {
+            color: #16a34a;
+            font-size: 0.9em;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-container {
+                padding: 20px;
+            }
+        }
+        /* Dialog box styles */
+        .dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            width: 300px;
+        }
+        .dialog h3 {
+            margin: 0 0 15px;
+            color: #1e3a8a;
+            font-size: 1.2em;
+        }
+        .dialog input {
+            margin-bottom: 15px;
+        }
+        .dialog button {
+            width: 100%;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Ambush Analysis Form</h2>
+        <form id="ambushForm" onsubmit="handleSubmit(event)">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="analysisMonth">Analysis Month:</label>
+                    <input type="month" id="analysisMonth" name="analysisMonth" required>
+                </div>
+                <div class="form-group">
+                    <label for="cliName">CLI Name:</label>
+                    <select id="cliName" name="cliName" required>
+                        <option value="A.K.BISWAL DSL">A.K.BISWAL DSL</option>
+            <option value="A.K.PANDA">A.K.PANDA</option>
+            <option value="A.N.PANDEY">A.N.PANDEY</option>
+            <option value="ABDUL SAMAD GHAURI">ABDUL SAMAD GHAURI</option>
+            <option value="ADESH SHUKLA">ADESH SHUKLA</option>
+            <option value="ANIL KUMAR">ANIL KUMAR</option>
+            <option value="ASHOK KUMAR">ASHOK KUMAR</option>
+            <option value="ASHOK KUMAR MISHRA">ASHOK KUMAR MISHRA</option>
+            <option value="B BHARADWAJ">B BHARADWAJ</option>
+            <option value="B G RAHULAN">B G RAHULAN</option>
+            <option value="BHASKAR SAHOO">BHASKAR SAHOO</option>
+            <option value="BHAWANAND GOPE">BHAWANAND GOPE</option>
+            <option value="BIDHAN CHANDRA ROY">BIDHAN CHANDRA ROY</option>
+            <option value="BRIJ BHUSHAN SINGH">BRIJ BHUSHAN SINGH</option>
+            <option value="BRIJESH SHARMA">BRIJESH SHARMA</option>
+            <option value="CHAKRESH KUMAR">CHAKRESH KUMAR</option>
+            <option value="CHAMAN LAL">CHAMAN LAL</option>
+            <option value="CHANDRA PRAKASH RATHORE">CHANDRA PRAKASH RATHORE</option>
+            <option value="CHANDRA SHEKHAR SONI">CHANDRA SHEKHAR SONI</option>
+            <option value="CHANDRASHEKHAR">CHANDRASHEKHAR</option>
+            <option value="D.K.RAY">D.K.RAY</option>
+            <option value="D.S.PAIKRA">D.S.PAIKRA</option>
+            <option value="D.SANGA">D.SANGA</option>
+            <option value="DAYARAM PASWAN">DAYARAM PASWAN</option>
+            <option value="DHARAM PAL">DHARAM PAL</option>
+            <option value="DILHARAN LAL ADITYA">DILHARAN LAL ADITYA</option>
+            <option value="DINESH KUMAR RAIDAS">DINESH KUMAR RAIDAS</option>
+            <option value="G L TANDON">G L TANDON</option>
+            <option value="G.GOVIND RAO">G.GOVIND RAO</option>
+            <option value="G.N.ORAM">G.N.ORAM</option>
+            <option value="G.P.KASHYAP DSL">G.P.KASHYAP DSL</option>
+            <option value="GAUKARAN KUMBHAKAR">GAUKARAN KUMBHAKAR</option>
+            <option value="GOPAL DAS DSL">GOPAL DAS DSL</option>
+            <option value="GOPI KUMAR KANWAR">GOPI KUMAR KANWAR</option>
+            <option value="H.N.NAYAK">H.N.NAYAK</option>
+            <option value="HARI SHANKAR SINGH">HARI SHANKAR SINGH</option>
+            <option value="HARISH KUMAR SHARMA">HARISH KUMAR SHARMA</option>
+            <option value="HEMANT KUMAR DEULKAR">HEMANT KUMAR DEULKAR</option>
+            <option value="HEMANT KUMAR MAHOR">HEMANT KUMAR MAHOR</option>
+            <option value="HIMMAT SINGH BHADAURIA">HIMMAT SINGH BHADAURIA</option>
+            <option value="J.P.VERMA">J.P.VERMA</option>
+            <option value="JAGAT PAL BOUDDH">JAGAT PAL BOUDDH</option>
+            <option value="JASWANT SINGH">JASWANT SINGH</option>
+            <option value="KAMESHWAR SINGH RAJPUT">KAMESHWAR SINGH RAJPUT</option>
+            <option value="KARTA LAKRA">KARTA LAKRA</option>
+            <option value="KHELA MARDI">KHELA MARDI</option>
+            <option value="LAXMAN PRASAD">LAXMAN PRASAD</option>
+            <option value="LAXMIKANT SHARAFF">LAXMIKANT SHARAFF</option>
+            <option value="LOKNATH PRADHAN">LOKNATH PRADHAN</option>
+            <option value="M SANYASI">M SANYASI</option>
+            <option value="M.K.PANDAB">M.K.PANDAB</option>
+            <option value="M.K.TIWARI">M.K.TIWARI</option>
+            <option value="M.NAYAK">M.NAYAK</option>
+            <option value="M.S.MARABI">M.S.MARABI</option>
+            <option value="MAHENDRA KUMAR">MAHENDRA KUMAR</option>
+            <option value="MAHESH KUMAR YADAV DSL">MAHESH KUMAR YADAV DSL</option>
+            <option value="MANOJ KUMAR CHANDRAKER">MANOJ KUMAR CHANDRAKER</option>
+            <option value="MD.TANVIR ALAM">MD.TANVIR ALAM</option>
+            <option value="N.K.BANJARE">N.K.BANJARE</option>
+            <option value="N.K.PRASAD">N.K.PRASAD</option>
+            <option value="N.R.MISHRA">N.R.MISHRA</option>
+            <option value="N.SAHU">N.SAHU</option>
+            <option value="NARAYAN PANDA">NARAYAN PANDA</option>
+            <option value="OMPRAKASH">OMPRAKASH</option>
+            <option value="P.K.SHRIVASATAVA">P.K.SHRIVASATAVA</option>
+            <option value="P.LIGARI">P.LIGARI</option>
+            <option value="P.MITRA BRJN DSL">P.MITRA BRJN DSL</option>
+            <option value="PARMANAND">PARMANAND</option>
+            <option value="PRABHAT KUMAR DAS">PRABHAT KUMAR DAS</option>
+            <option value="PRADEEP KUMAR GUPTA">PRADEEP KUMAR GUPTA</option>
+            <option value="PREM PRAKASH TIWARI DSL">PREM PRAKASH TIWARI DSL</option>
+            <option value="R.C.SAHU">R.C.SAHU</option>
+            <option value="R.K.SINGH DSL">R.K.SINGH DSL</option>
+            <option value="R.S.THAKUR">R.S.THAKUR</option>
+            <option value="RAM AWADH">RAM AWADH</option>
+            <option value="RAMESH YADAV DSL">RAMESH YADAV DSL</option>
+            <option value="RAMSAJEEWAN PATEL">RAMSAJEEWAN PATEL</option>
+            <option value="S.C.MAURYA">S.C.MAURYA</option>
+            <option value="S.K.ACHARYA">S.K.ACHARYA</option>
+            <option value="S.K.DAS">S.K.DAS</option>
+            <option value="S.K.GOUDA">S.K.GOUDA</option>
+            <option value="S.K.HOTA">S.K.HOTA</option>
+            <option value="S.K.KUSHWAHA">S.K.KUSHWAHA</option>
+            <option value="S.K.SAHU DSL">S.K.SAHU DSL</option>
+            <option value="S.K.SUMAN">S.K.SUMAN</option>
+            <option value="S.K.TRIPATHY">S.K.TRIPATHY</option>
+            <option value="S.P.DEY">S.P.DEY</option>
+            <option value="S.P.RAMASHANKAR">S.P.RAMASHANKAR</option>
+            <option value="S.PARIDA">S.PARIDA</option>
+            <option value="S.S.KOLWADKAR DSL">S.S.KOLWADKAR DSL</option>
+            <option value="SANDEEP CHOUBEY">SANDEEP CHOUBEY</option>
+            <option value="SANDEEP KUMAR">SANDEEP KUMAR</option>
+            <option value="SANJAY GIRI">SANJAY GIRI</option>
+            <option value="SANT BHUSHAN PATLEY">SANT BHUSHAN PATLEY</option>
+            <option value="SANTOSH KUMAR">SANTOSH KUMAR</option>
+            <option value="SHAKIL AHMED DSL">SHAKIL AHMED DSL</option>
+            <option value="SHASHI BHUSAN">SHASHI BHUSAN</option>
+            <option value="SHYAM BIHARI SINGH">SHYAM BIHARI SINGH</option>
+            <option value="SHYAMAL DAS (DSL)">SHYAMAL DAS (DSL)</option>
+            <option value="SUBHASH CHANDRA">SUBHASH CHANDRA</option>
+            <option value="SUBODH KUMAR DSL">SUBODH KUMAR DSL</option>
+            <option value="SUMANT KUMAR BAGHMAR">SUMANT KUMAR BAGHMAR</option>
+            <option value="SURENDRA KUMAR PRETA DSL">SURENDRA KUMAR PRETA DSL</option>
+            <option value="SURESH CHANDRA">SURESH CHANDRA</option>
+            <option value="SURESH CHANDRA SDL">SURESH CHANDRA SDL</option>
+            <option value="SURESH SINGH CHAUHAN">SURESH SINGH CHAUHAN</option>
+            <option value="T.K.VERMA">T.K.VERMA</option>
+            <option value="U.K.MADHU">U.K.MADHU</option>
+            <option value="U.P.SINHA">U.P.SINHA</option>
+            <option value="UTTAM KUMAR SAHU">UTTAM KUMAR SAHU</option>
+            <option value="VIDYAKAR RAI DSL">VIDYAKAR RAI DSL</option>
+            <option value="VIJAY KUMAR">VIJAY KUMAR</option>
+            <option value="VIKASH KUMAR DSL">VIKASH KUMAR DSL</option>
+            <option value="VINAY KUMAR SAHU">VINAY KUMAR SAHU</option>
+            <option value="VINOD KUMAR">VINOD KUMAR</option>
+            <option value="VINOD KUMAR RAI">VINOD KUMAR RAI</option>
+            <option value="VISHNU MOHAN SINGH RAJPUT">VISHNU MOHAN SINGH RAJPUT</option>
+            <option value="VIVEK KUMAR">VIVEK KUMAR</option>
+            <option value="YASHWANT KUMAR VERMA">YASHWANT KUMAR VERMA</option>
+            <option value="YOGENDRA KUMAR">YOGENDRA KUMAR</option>     
+                    </select>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="cliHQ">CLI HQ:</label>
+                    <select id="cliHQ" name="cliHQ" required>
+                        <option value="">Select CLI HQ</option>
+                        <option value="AKT">AKT</option>
+            <option value="BJRI">BJRI</option>
+            <option value="BRJN">BRJN</option>
+            <option value="BSP">BSP</option>
+            <option value="KHS">KHS</option>
+            <option value="KRBA">KRBA</option>
+            <option value="PND">PND</option>
+            <option value="RIG">RIG</option>
+            <option value="SDL">SDL</option>
+            <option value="SJQ">SJQ</option>
+            <option value="USL">USL</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="dateOfAmbush">Date of Ambush:</label>
+                    <input type="date" id="dateOfAmbush" name="dateOfAmbush" required>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="dateOfEntry">Date of Entry:</label>
+                    <input type="date" id="dateOfEntry" name="dateOfEntry" required>
+                </div>
+                <div class="form-group">
+                    <label for="typeOfAmbush">Type of Ambush:</label>
+                    <select id="typeOfAmbush" name="typeOfAmbush" required onchange="handleAmbushTypeChange()">
+                        <option value="">Select Type of Ambush</option>
+                        <option value="Auto Ambush">Auto Ambush</option>
+                        <option value="IB Ambush">IB Ambush</option>
+                        <option value="BA Ambush">BA Ambush</option>
+                        <option value="Random BA Ambush">Random BA Ambush</option>
+                        <option value="BPT & BFT Ambush">BPT & BFT Ambush</option>
+                        <option value="BPC Ambush">BPC Ambush</option>
+                        <option value="SPAD Counselling">SPAD Counselling</option>
+                        <option value="Safety Drive">Safety Drive</option>
+                        <option value="Safety Seminar">Safety Seminar</option>
+                        <option value="Family Seminar">Family Seminar</option>
+                        <option value="Mobile Checking Ambush">Mobile Checking Ambush</option>
+                        <option value="Running Room Inspection">Running Room Inspection</option>
+                        <option value="Lobby Inspection">Lobby Inspection</option>
+                        <option value="Station Inspection">Station Inspection</option>
+                        <option value="Surprise Crew Cabin Inspection">Surprise Crew Cabin Inspection</option>
+                        <option value="Level Crossing Ambush">Level Crossing Ambush</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="abnormalities">Abnormalities (Describe in Detail):</label>
+                <textarea id="abnormalities" name="abnormalities" placeholder="Enter detailed description of abnormalities observed..." required></textarea>
+            </div>
+            <button type="submit" id="submitBtn">Submit</button>
+            <p id="errorMsg" class="error">Failed to submit data. Please try again.</p>
+            <p id="successMsg" class="success">Data submitted successfully!</p>
+        </form>
+    </div>
+
+    <!-- Dialog for custom ambush type -->
+    <div class="overlay" id="dialogOverlay"></div>
+    <div class="dialog" id="customAmbushDialog">
+        <h3>Enter Type of Ambush</h3>
+        <input type="text" id="customAmbushType" placeholder="Type of Ambush" required>
+        <button onclick="submitCustomAmbushType()">Submit</button>
+    </div>
+
+    <script>
+        // Handle Type of Ambush dropdown change
+        function handleAmbushTypeChange() {
+            const typeOfAmbush = document.getElementById('typeOfAmbush');
+            const dialogOverlay = document.getElementById('dialogOverlay');
+            const customAmbushDialog = document.getElementById('customAmbushDialog');
+            const customAmbushType = document.getElementById('customAmbushType');
+
+            if (typeOfAmbush.value === 'Other') {
+                dialogOverlay.style.display = 'block';
+                customAmbushDialog.style.display = 'block';
+                customAmbushType.value = '';
+                customAmbushType.focus();
+            }
+        }
+
+        // Submit custom ambush type from dialog
+        function submitCustomAmbushType() {
+            const typeOfAmbush = document.getElementById('typeOfAmbush');
+            const customAmbushType = document.getElementById('customAmbushType');
+            const dialogOverlay = document.getElementById('dialogOverlay');
+            const customAmbushDialog = document.getElementById('customAmbushDialog');
+
+            if (customAmbushType.value.trim()) {
+                // Set the custom value in the dropdown
+                const customOption = new Option(customAmbushType.value, customAmbushType.value, true, true);
+                typeOfAmbush.add(customOption);
+                typeOfAmbush.value = customAmbushType.value;
+
+                // Close dialog
+                dialogOverlay.style.display = 'none';
+                customAmbushDialog.style.display = 'none';
+            } else {
+                alert('Please enter a valid ambush type.');
+            }
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const form = document.getElementById('ambushForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const errorMsg = document.getElementById('errorMsg');
+            const successMsg = document.getElementById('successMsg');
+
+            // Disable button and show "Submitting..."
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+
+            const formData = new FormData(form);
+            const timestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+            const submissionId = `${timestamp}-${Math.random().toString(36).substr(2, 9)}`;
+            formData.append('timestamp', timestamp);
+            formData.append('submissionId', submissionId);
+
+            // Log form data for debugging
+            console.log('Form Data:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbwU2c8h2LTTYzaKBIpxpLHVnMLwXURE00TOGok9xPwEVBsuiL9oDD-gJ1yCHdO-eL7r/exec';
+
+            try {
+                const response = await fetch(scriptURL, {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'no-cors' // Use no-cors to avoid CORS issues
+                });
+
+                console.log('Fetch completed (no-cors mode)');
+
+                // Assume success if no error
+                successMsg.style.display = 'block';
+                form.reset();
+                errorMsg.style.display = 'none';
+            } catch (error) {
+                console.error('Error:', error.message);
+                errorMsg.style.display = 'block';
+                successMsg.style.display = 'none';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+            }
+        }
+    </script>
+</body>
+</html>
