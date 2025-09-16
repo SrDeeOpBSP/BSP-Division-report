@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WINTER PRECAUTION SAFETY DRIVE</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <link rel="stylesheet" href="microsleep.css">
+</head>
+<body>
+    <h2>WINTER PRECAUTION SAFETY DRIVE</h2>
+
+    <form id="safetyDriveForm">
+        <label>Date:</label>
+        <input type="date" id="date" name="date" required><br><br>
+
+        <label>CLI ID:</label>
+        <input type="text" id="cli_id" name="cli_id" required placeholder="Example: BSP0068" oninput="formatCLIID()" maxlength="10">
+        <label>CLI Name:</label>
+        <input type="text" id="cli_name" name="cli_name" readonly>
+        <label>CLI HQ:</label>
+        <input type="text" id="cli_hq" name="cli_hq" readonly><br><br>
+
+        <label>Crew ID(s):</label>
+        <input type="text" id="crew_id" name="crew_id" required placeholder="Example: BSP0068,BSP0075,BSP3637,BSP3630" oninput="formatCrewIDs()"><br><br>
+
+        <label>Counselling on Winter Precaution Safety Drive:</label>
+        <select id="safety_counselling" name="safety_counselling" required>
+            <option value="">Select</option>
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+        </select><br><br>
+
+        <label>Winter Precaution Safety Drive Counselling Done at:</label>
+        <select id="counselling_location" name="counselling_location" required>
+            <option value="">Select</option>
+            <option value="LOBBY">LOBBY</option>
+            <option value="FOOTPLATE">FOOTPLATE</option>
+        </select><br><br>
+
+        <label>Remark:</label><br>
+        <textarea id="remark" name="remark" rows="4" cols="50" placeholder="Enter any remarks"></textarea><br><br>
+
+        <button type="submit">SUBMIT</button>
+    </form>
+
+    <script>
+        let cliData = {};
+        let crewData = {};
+        let isSubmitting = false;
+
+        function formatCLIID() {
+            let input = document.getElementById("cli_id");
+            input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            fetchCLIData();
+        }
+
+        function formatCrewIDs() {
+            let input = document.getElementById("crew_id");
+            input.value = input.value.toUpperCase().replace(/[^A-Z0-9,]/g, '');
+        }
+
+        function loadCLIData() {
+            fetch('CLIMICRO.csv')
+                .then(response => response.text())
+                .then(data => {
+                    Papa.parse(data, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: function(results) {
+                            results.data.forEach(row => {
+                                cliData[row["LI ID"]] = { name: row["NAME"], hq: row["HQ"] };
+                            });
+                        }
+                    });
+                });
+        }
+
+        function loadCrewData() {
+            fetch('CREWM.csv')
+                .then(response => response.text())
+                .then(data => {
+                    Papa.parse(data, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: function(results) {
+                            results.data.forEach(row => {
+                                crewData[row["CREW ID"]] = { name: row["CREW NAME"], desg: row["DESG"], hq: row["HQ"] };
+                            });
+                        }
+                    });
+                });
+        }
+
+        function fetchCLIData() {
+            let cliID = document.getElementById("cli_id").value;
+            if (cliData[cliID]) {
+                document.getElementById("cli_name").value = cliData[cliID].name;
+                document.getElementById("cli_hq").value = cliData[cliID].hq;
+            } else {
+                document.getElementById("cli_name").value = "";
+                document.getElementById("cli_hq").value = "";
+            }
+        }
+
+        document.getElementById("safetyDriveForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            if (isSubmitting) {
+                alert("Form already submitted, please wait...");
+                return;
+            }
+
+            isSubmitting = true;
+            let submitButton = document.querySelector("button[type='submit']");
+
+            submitButton.disabled = true;
+            submitButton.innerText = "Submitting...";
+            submitButton.style.backgroundColor = "#FF8C00";
+
+            let formData = new FormData(this);
+            let crewIDs = formData.get("crew_id").split(',');
+
+            crewIDs.forEach(crewID => {
+                crewID = crewID.trim();
+                let jsonData = {};
+                formData.forEach((value, key) => {
+                    jsonData[key] = value;
+                });
+                jsonData["crew_id"] = crewID;
+                jsonData["crew_name"] = crewData[crewID] ? crewData[crewID].name : "";
+                jsonData["desg"] = crewData[crewID] ? crewData[crewID].desg : "";
+                jsonData["hq"] = crewData[crewID] ? crewData[crewID].hq : "";
+                jsonData["timestamp"] = new Date().toISOString();
+
+                fetch("https://script.google.com/macros/s/AKfycbxLXAzzmE2JAg6wHVr4GosGsDUzIngbDGJU-UXL4XDvtnQkLyyzRXNBhEh0JcjRJ2g9gQ/exec", {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(jsonData)
+                });
+            });
+
+            alert("Data Successfully Submitted!");
+            document.getElementById("safetyDriveForm").reset();
+
+            isSubmitting = false;
+            submitButton.disabled = false;
+            submitButton.innerText = "Submit";
+            submitButton.style.backgroundColor = "#007BFF";
+        });
+
+        window.onload = function() {
+            loadCLIData();
+            loadCrewData();
+        };
+    </script>
+</body>
+</html>
