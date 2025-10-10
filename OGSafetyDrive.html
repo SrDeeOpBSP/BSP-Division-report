@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REGULAR AND ONGOING SAFETY DRIVE</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+    /* === PAGE BACKGROUND (Colorful Gradient) === */
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: linear-gradient(135deg, #a1c4fd 20%, #c2e9fb 60%, #f6cfbe 100%);
+        background-attachment: fixed;
+        color: #333;
+        padding: 20px;
+        line-height: 1.6;
+    }
+
+    h2 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 30px;
+    }
+
+    /* === FORM STYLING (Frosted Glass Effect) === */
+    form {
+        max-width: 600px;
+        margin: auto;
+        padding: 30px;
+        background-color: rgba(255, 255, 255, 0.85); 
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    form:hover {
+        box-shadow: 0 10px 40px rgba(31, 38, 135, 0.25);
+    }
+
+    /* === LABELS AND INPUT FIELDS === */
+    label {
+        display: block;
+        margin-top: 15px;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #34495e;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 12px;
+        margin-top: 5px;
+        box-sizing: border-box;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        background-color: #ffffff;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #007BFF;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+        outline: none;
+    }
+    
+    /* === DRIVE SECTION STYLING === */
+    .drive-section {
+        border: 1px solid #e9ecef;
+        padding: 20px;
+        margin-top: 20px;
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .drive-section > label {
+         margin-top: 0;
+         margin-bottom: 10px;
+         color: #2c3e50;
+    }
+
+    .location-label, .remark-label { /* Dono labels ke liye same style */
+        margin-top: 15px !important; 
+        font-weight: normal !important;
+        color: #555;
+    }
+
+    /* === BUTTON STYLING === */
+    button {
+        background: linear-gradient(45deg, #007BFF, #0056b3);
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        margin-top: 20px;
+        width: 100%;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+    }
+
+    button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+    }
+    
+    button:disabled {
+        background: linear-gradient(45deg, #ff9d2f, #ff6b00);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    /* === ONGOING DRIVE LINKS (GREEN BUTTONS) === */
+    .ongoing-drive-links {
+        display: flex;
+        gap: 10px;
+        margin-top: 5px;
+        flex-wrap: wrap;
+    }
+
+    .drive-link-button {
+        flex-grow: 1;
+        padding: 12px;
+        text-align: center;
+        text-decoration: none;
+        color: white;
+        background: linear-gradient(45deg, #28a745, #218838);
+        border-radius: 8px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        min-width: 150px;
+        box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+    }
+
+    .drive-link-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+    }
+</style>
+</head>
+<body>
+    <h2 style="text-align: center;">REGULAR AND ONGOING SAFETY DRIVE</h2>
+
+    <form id="safetyDriveForm">
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required><br><br>
+
+        <label for="cli_id">CLI ID:</label>
+        <input type="text" id="cli_id" name="cli_id" required placeholder="Example: BSP0068" oninput="formatCLIID()" maxlength="10">
+        
+        <label for="cli_name">CLI Name:</label>
+        <input type="text" id="cli_name" name="cli_name" readonly>
+        
+        <label for="cli_hq">CLI HQ:</label>
+        <input type="text" id="cli_hq" name="cli_hq" readonly><br><br>
+
+        <label>REGULAR DRIVE (Enter details for each drive):</label>
+
+        <div class="drive-section">
+            <label for="crew_ids_spad">RAILWAY BOARD SAFETY DRIVE COUNSELLING ON SPAD</label>
+            <input 
+                type="text" 
+                id="crew_ids_spad" 
+                class="crew-input" 
+                data-drive-name="RAILWAY BOARD SAFETY DRIVE COUNSELLING ON SPAD"
+                placeholder="Enter Crew IDs, separated by comma..." 
+                oninput="formatCrewIDs(this)">
+            
+            <label class="location-label">Counselling Done at:</label>
+            <select class="location-select">
+                <option value="">Select Location</option>
+                <option value="LOBBY">LOBBY</option>
+                <option value="FOOTPLATE">FOOTPLATE</option>
+            </select>
+
+            <label class="remark-label">Remark for this drive:</label>
+            <textarea class="remark-input" rows="3" placeholder="Enter SPAD specific remarks"></textarea>
+        </div>
+
+        <div class="drive-section">
+            <label for="crew_ids_winter">WINTER PRECAUTION SAFETY DRIVE</label>
+            <input 
+                type="text" 
+                id="crew_ids_winter" 
+                class="crew-input" 
+                data-drive-name="WINTER PRECAUTION SAFETY DRIVE"
+                placeholder="Enter Crew IDs, separated by comma..." 
+                oninput="formatCrewIDs(this)">
+                
+            <label class="location-label">Counselling Done at:</label>
+            <select class="location-select">
+                <option value="">Select Location</option>
+                <option value="LOBBY">LOBBY</option>
+                <option value="FOOTPLATE">FOOTPLATE</option>
+            </select>
+
+            <label class="remark-label">Remark for this drive:</label>
+            <textarea class="remark-input" rows="3" placeholder="Enter Winter specific remarks"></textarea>
+        </div>
+        
+        <br>
+        <label>ONGOING SAFETY DRIVE (Click to view Sheet):</label>
+        <div class="ongoing-drive-links">
+            <a href="https://docs.google.com/spreadsheets/d/1C0FPK7_Qv0mV5tcqHLdcyup-GfRsD0HJ5QCnz0p2NsY/edit?usp=sharing" target="_blank" class="drive-link-button">15 days special safety drive to check protection at worksite. </a>
+            <a href="https://forms.gle/ZTgp5pipvN2Rbx2B7" target="_blank" class="drive-link-button">Securing of load RB drive to ensure proper procedure of securing from 05/10/2025</a>
+             <a href="https://docs.google.com/spreadsheets/d/1ejglvkneJDcuJWp8euJ1v4W8dcp2FZo04rwD37IOu8I/edit?usp=sharing" target="_blank" class="drive-link-button"> 30 days special drive on SPAD covering all LPs, ALPs, Track Machine Operators and Tower Wagon Operators at all locations of Indian Railways.(RB)</a>
+        </div>
+        <br><br>
+
+        <button type="submit">SUBMIT</button>
+    </form>
+
+    <script>
+        let cliData = {};
+        let crewData = {};
+        let isSubmitting = false;
+
+        function formatCLIID() {
+            let input = document.getElementById("cli_id");
+            input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            fetchCLIData();
+        }
+
+        function formatCrewIDs(inputElement) {
+            inputElement.value = inputElement.value.toUpperCase().replace(/[^A-Z0-9,]/g, '');
+        }
+
+        function loadCLIData() {
+            fetch('CLIMICRO.csv')
+                .then(response => response.text())
+                .then(data => { Papa.parse(data, { header: true, skipEmptyLines: true, complete: r => { r.data.forEach(row => cliData[row["LI ID"]] = { name: row["NAME"], hq: row["HQ"] }); }}); });
+        }
+
+        function loadCrewData() {
+            fetch('CREWM.csv')
+                .then(response => response.text())
+                .then(data => { Papa.parse(data, { header: true, skipEmptyLines: true, complete: r => { r.data.forEach(row => crewData[row["CREW ID"]] = { name: row["CREW NAME"], desg: row["DESG"], hq: row["HQ"] }); }}); });
+        }
+
+        function fetchCLIData() {
+            let cliID = document.getElementById("cli_id").value;
+            document.getElementById("cli_name").value = cliData[cliID] ? cliData[cliID].name : "";
+            document.getElementById("cli_hq").value = cliData[cliID] ? cliData[cliID].hq : "";
+        }
+
+        document.getElementById("safetyDriveForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            if (isSubmitting) {
+                alert("Form already submitted, please wait...");
+                return;
+            }
+
+            let crewInputs = document.querySelectorAll('.crew-input');
+            let totalCrewEntered = 0;
+            let validationError = false;
+
+            crewInputs.forEach(input => {
+                if (input.value.trim() !== "") {
+                    totalCrewEntered++;
+                    const driveSection = input.closest('.drive-section');
+                    const locationSelect = driveSection.querySelector('.location-select');
+                    if (locationSelect.value === "") {
+                        validationError = true;
+                        const driveLabel = driveSection.querySelector('label').innerText;
+                        alert(`Please select a location for the drive: "${driveLabel}"`);
+                    }
+                }
+            });
+
+            if (validationError) return;
+
+            if (totalCrewEntered === 0) {
+                alert("Please enter at least one Crew ID in any of the drive sections.");
+                return;
+            }
+            
+            isSubmitting = true;
+            let submitButton = document.querySelector("button[type='submit']");
+            submitButton.disabled = true;
+            submitButton.innerText = "Submitting...";
+            submitButton.style.backgroundColor = "#FF8C00";
+
+            let commonFormData = new FormData(this);
+            let submissionPromises = [];
+            
+            crewInputs.forEach(inputField => {
+                let driveName = inputField.dataset.driveName;
+                let crewIDsString = inputField.value.trim();
+                if (crewIDsString === "") return;
+
+                const driveSection = inputField.closest('.drive-section');
+                // Drive-specific location aur remark yahan se lenge
+                const locationValue = driveSection.querySelector('.location-select').value;
+                const remarkValue = driveSection.querySelector('.remark-input').value; // <<< YAHAN BADLAV KIYA GAYA HAI
+                
+                let crewIDs = crewIDsString.split(',').filter(id => id.trim() !== "");
+
+                crewIDs.forEach(crewID => {
+                    crewID = crewID.trim();
+                    let jsonData = {};
+                    
+                    // Common data (date, cli_id) form se lenge
+                    jsonData['date'] = commonFormData.get('date');
+                    jsonData['cli_id'] = commonFormData.get('cli_id');
+                    jsonData['cli_name'] = commonFormData.get('cli_name');
+                    jsonData['cli_hq'] = commonFormData.get('cli_hq');
+
+                    // Drive-specific data add karenge
+                    jsonData["drive_name"] = driveName;
+                    jsonData["counselling_location"] = locationValue;
+                    jsonData["remark"] = remarkValue; // <<< YAHAN BADLAV KIYA GAYA HAI
+                    jsonData["crew_id"] = crewID;
+                    jsonData["crew_name"] = crewData[crewID] ? crewData[crewID].name : "Not Found";
+                    jsonData["desg"] = crewData[crewID] ? crewData[crewID].desg : "N/A";
+                    jsonData["hq"] = crewData[crewID] ? crewData[crewID].hq : "N/A";
+                    jsonData["timestamp"] = new Date().toISOString();
+
+                    let promise = fetch("https://script.google.com/macros/s/AKfycbxcHjGqLFAVKLgvKn1MUVKqjeyw1ZAF9nmoQLIESRm3my6f5Tmy1Ihl5kTY-CXSOTtE8Q/exec", {
+                        method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(jsonData)
+                    });
+                    submissionPromises.push(promise);
+                });
+            });
+
+            Promise.all(submissionPromises).then(() => {
+                 setTimeout(() => {
+                    alert("Data Successfully Submitted!");
+                    document.getElementById("safetyDriveForm").reset();
+                    isSubmitting = false;
+                    submitButton.disabled = false;
+                    submitButton.innerText = "Submit";
+                    submitButton.style.backgroundColor = "#007BFF";
+                }, 500);
+            });
+        });
+
+        window.onload = function() {
+            loadCLIData();
+            loadCrewData();
+            document.getElementById('date').valueAsDate = new Date();
+        };
+    </script>
+</body>
+</html>

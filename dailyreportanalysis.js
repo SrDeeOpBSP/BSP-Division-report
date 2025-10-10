@@ -1,4 +1,12 @@
 let barChart, pieChart;
+// API key from your original script
+const API_KEY = 'AIzaSyAw23pJz0K9fZb2rRRAe2C2cJDilRc0Kac'; 
+
+// URLs for the specific sheets
+const SPM_SHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/1GbWplsBRpKY0OqNGImdS_OBTWsVdVBMIIqCCfqpYT-g/values/Sheet1!B:T?key=${API_KEY}`;
+const CVVRS_SHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/1BEVUi7CPmrbGYdoom30vr94tGHkSsGeWGLfYLZJX76Q/values/Sheet1!B:T?key=${API_KEY}`;
+const MAIN_REPORT_URL = `https://sheets.googleapis.com/v4/spreadsheets/1Pn0sosMuxX2XZYRe9qIvkGM06GcyIWdEeaD0gfPeRZU/values/DAILY REPORT!A:AE?key=${API_KEY}`;
+
 
 document.addEventListener('DOMContentLoaded', function() {
     populateDropdowns();
@@ -7,54 +15,50 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function populateDropdowns() {
-    const response = await fetch('https://sheets.googleapis.com/v4/spreadsheets/1Pn0sosMuxX2XZYRe9qIvkGM06GcyIWdEeaD0gfPeRZU/values/DAILY REPORT!A:AE?key=AIzaSyAw23pJz0K9fZb2rRRAe2C2cJDilRc0Kac');
-    const data = await response.json();
-    
-    const cliNames = new Set();
-    const cliLobbies = new Set();
+    try {
+        const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/1Pn0sosMuxX2XZYRe9qIvkGM06GcyIWdEeaD0gfPeRZU/values/DAILY REPORT!A:B?key=${API_KEY}`);
+        const data = await response.json();
+        
+        if (!data.values || data.values.length <= 1) return;
 
-    data.values.forEach(row => {
-        cliNames.add(row[0]); // CLI NAME (Column A)
-        cliLobbies.add(row[1]); // CLI LOBBY (Column B)
-    });
+        const cliNames = new Set();
+        const cliLobbies = new Set();
 
-    // Convert sets to sorted arrays
-    const sortedCliNames = Array.from(cliNames).sort();
-    const sortedCliLobbies = Array.from(cliLobbies).sort();
+        for (let i = 1; i < data.values.length; i++) {
+            const row = data.values[i];
+            if (row[0]) cliNames.add(row[0]);
+            if (row[1]) cliLobbies.add(row[1]);
+        }
 
-    // Populate CLI NAME dropdown
-    const cliNameSelect = document.getElementById('cliName');
-    sortedCliNames.forEach(name => {
-        const option = document.createElement('option');
-        option.value = name;
-        option.textContent = name;
-        cliNameSelect.appendChild(option);
-    });
+        const sortedCliNames = Array.from(cliNames).sort();
+        const sortedCliLobbies = Array.from(cliLobbies).sort();
 
-    // Add 'ALL' option
-    const allOptionCliName = document.createElement('option');
-    allOptionCliName.value = 'ALL';
-    allOptionCliName.textContent = 'ALL';
-    cliNameSelect.appendChild(allOptionCliName);
+        const cliNameSelect = document.getElementById('cliName');
+        cliNameSelect.innerHTML = '<option value="" disabled selected>Select CLI Name</option>';
+        sortedCliNames.forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            cliNameSelect.appendChild(option);
+        });
+        cliNameSelect.insertAdjacentHTML('beforeend', '<option value="ALL">ALL</option>');
 
-    // Populate CLI LOBBY dropdown
-    const cliLobbySelect = document.getElementById('cliLobby');
-    sortedCliLobbies.forEach(lobby => {
-        const option = document.createElement('option');
-        option.value = lobby;
-        option.textContent = lobby;
-        cliLobbySelect.appendChild(option);
-    });
-
-    // Add 'ALL' option
-    const allOptionCliLobby = document.createElement('option');
-    allOptionCliLobby.value = 'ALL';
-    allOptionCliLobby.textContent = 'ALL';
-    cliLobbySelect.appendChild(allOptionCliLobby);
+        const cliLobbySelect = document.getElementById('cliLobby');
+        cliLobbySelect.innerHTML = '<option value="" disabled selected>Select CLI Lobby</option>';
+        sortedCliLobbies.forEach(lobby => {
+            const option = document.createElement('option');
+            option.value = lobby;
+            option.textContent = lobby;
+            cliLobbySelect.appendChild(option);
+        });
+        cliLobbySelect.insertAdjacentHTML('beforeend', '<option value="ALL">ALL</option>');
+    } catch (error) {
+        console.error("Error populating dropdowns:", error);
+    }
 }
 
 document.getElementById('dutyForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent form submission
+    event.preventDefault(); 
     
     const cliName = document.getElementById('cliName').value;
     const cliLobby = document.getElementById('cliLobby').value;
@@ -64,311 +68,239 @@ document.getElementById('dutyForm').addEventListener('submit', function(event) {
     fetchData(cliName, cliLobby, fromDate, toDate);
 });
 
-async function fetchData(cliName, cliLobby, fromDate, toDate) {
-    const response = await fetch('https://sheets.googleapis.com/v4/spreadsheets/1Pn0sosMuxX2XZYRe9qIvkGM06GcyIWdEeaD0gfPeRZU/values/DAILY REPORT!A:AE?key=AIzaSyAw23pJz0K9fZb2rRRAe2C2cJDilRc0Kac');
-    const data = await response.json();
-    
-    const filteredData = data.values.filter(row => {
-        const cliNameMatches = cliName === 'ALL' || row[0] === cliName;
-        const cliLobbyMatches = cliLobby === 'ALL' || row[1] === cliLobby;
-        const dateMatches = new Date(row[2]) >= new Date(fromDate) && new Date(row[2]) <= new Date(toDate);
-        return cliNameMatches && cliLobbyMatches && dateMatches;
-    });
 
-    displayData(filteredData);
+// ======================================================================================
+// THIS FUNCTION NOW HAS EXTRA LOGGING
+// ======================================================================================
+async function fetchExternalSheetData(sheetUrl, fromDate, toDate, cliName, sheetName) {
+    let doneCount = 0;
+    let abnormalitySum = 0;
+    
+    try {
+        const response = await fetch(sheetUrl);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        
+        if (data.values) {
+            const startDate = new Date(fromDate);
+            const endDate = new Date(toDate);
+            
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setHours(23, 59, 59, 999);
+
+            // LOGGING: Show the date range we are searching for
+            console.log(`[${sheetName}] Searching for dates between:`, startDate.toLocaleDateString(), 'AND', endDate.toLocaleDateString());
+
+            for (let i = 1; i < data.values.length; i++) {
+                const row = data.values[i];
+                const originalTimestampStr = row[0];
+                if (!originalTimestampStr) continue;
+
+                const dateTimeParts = originalTimestampStr.split(' ');
+                const dateParts = dateTimeParts[0].split('/');
+                
+                if (dateParts.length !== 3) {
+                    if (i < 10) console.log(`[${sheetName}] Row ${i + 1}: Skipping due to unexpected date format ->`, originalTimestampStr);
+                    continue;
+                }
+                
+                // Assuming format is DD/MM/YYYY
+                const day = parseInt(dateParts[0], 10);
+                const month = parseInt(dateParts[1], 10);
+                const year = parseInt(dateParts[2], 10);
+
+                if (isNaN(day) || isNaN(month) || isNaN(year)) {
+                    if (i < 10) console.log(`[${sheetName}] Row ${i + 1}: Skipping because date parts are not numbers ->`, originalTimestampStr);
+                    continue;
+                }
+
+                const timestamp = new Date(year, month - 1, day);
+
+                if (isNaN(timestamp.getTime())) {
+                    if (i < 10) console.log(`[${sheetName}] Row ${i + 1}: Could not parse a valid date from ->`, originalTimestampStr);
+                    continue;
+                }
+
+                const rowCliName = row[2]; // Column D
+                const dateMatches = timestamp >= startDate && timestamp <= endDate;
+                const cliMatches = cliName === 'ALL' || rowCliName === cliName;
+                
+                // LOGGING: Show the first few comparisons
+                if (i > 0 && i < 15) {
+                    console.log(`[${sheetName}] Row ${i + 1}: Comparing Sheet Date "${timestamp.toLocaleDateString()}" | DateMatch=${dateMatches}, CliMatch=${cliMatches}`);
+                }
+
+                if (dateMatches && cliMatches) {
+                    doneCount++;
+                    abnormalitySum += parseInt(row[18], 10) || 0;
+                }
+            }
+        }
+        console.log(`[${sheetName}] Final Count:`, { done: doneCount, abnormality: abnormalitySum });
+        return { done: doneCount, abnormality: abnormalitySum };
+    } catch (error) {
+        console.error(`Error fetching ${sheetName} data:`, error);
+        alert(`Could not fetch data for ${sheetName}.`);
+        return { done: 0, abnormality: 0 };
+    }
 }
 
-function displayData(filteredData) {
+
+async function fetchData(cliName, cliLobby, fromDate, toDate) {
+    try {
+        const [mainDataResponse, spmData, cvvrsData] = await Promise.all([
+            fetch(MAIN_REPORT_URL),
+            fetchExternalSheetData(SPM_SHEET_URL, fromDate, toDate, cliName, 'SPM'),
+            fetchExternalSheetData(CVVRS_SHEET_URL, fromDate, toDate, cliName, 'CVVRS')
+        ]);
+
+        const mainData = await mainDataResponse.json();
+        const filteredData = mainData.values ? mainData.values.filter(row => {
+            const rowDate = new Date(row[2]);
+            if (isNaN(rowDate.getTime())) return false;
+            const cliNameMatches = cliName === 'ALL' || row[0] === cliName;
+            const cliLobbyMatches = cliLobby === 'ALL' || row[1] === cliLobby;
+            const dateMatches = rowDate >= new Date(fromDate) && rowDate <= new Date(new Date(toDate).setHours(23,59,59,999));
+            return cliNameMatches && cliLobbyMatches && dateMatches;
+        }) : [];
+
+        displayData(filteredData, spmData, cvvrsData);
+    } catch (error) {
+        console.error("Error during data fetching:", error);
+    }
+}
+
+
+function displayData(filteredData, spmData, cvvrsData) {
     const tableBody = document.getElementById('reportFormBody');
     tableBody.innerHTML = '';
 
     const parameters = {
-        'FOOTPLATE DURING WEE HOURS': 3,
-        'FOOTPLATE EXCLUDING WEE HOURS': 5,
-        'SPECIAL FOOTPLATE': 7,
-        'AUTO AND IB AMBUSH(NO OF TRAINS)': 8,
-        'LEVEL CROSSING AMBUSH(NO OF TRAINS)': 10,
-        'CD ZONES AMBUSH(NO OF TRAINS)': 12,
-        'BA AMBUSH(NO OF CREWS)': 14,
-        'SPEED GUN CHECKING(NO OF TRAINS)': 16,
+        'FOOTPLATE DURING WEE HOURS': 3, 'FOOTPLATE EXCLUDING WEE HOURS': 5,
+        'SPECIAL FOOTPLATE': 7, 'AUTO AND IB AMBUSH(NO OF TRAINS)': 8,
+        'LEVEL CROSSING AMBUSH(NO OF TRAINS)': 10, 'CD ZONES AMBUSH(NO OF TRAINS)': 12,
+        'BA AMBUSH(NO OF CREWS)': 14, 'SPEED GUN CHECKING(NO OF TRAINS)': 16,
         'COUNCELLING AT LOBBY CONCERNED TO SAFETY(NO OF CREWS)': 18,
-        'CVVRS ANALYSIS(NO OF TRAINS)': 19,
-        'SPM ANALYSIS(NO OF TRAINS)': 21,
         'SHUNTING PROCEDURE & RULES INVOLVED AS PER GR 5.13': 23,
-        'COUNSELLING FOR PERSONAL SAFETY OF CREW': 24,
-        'LONG HOURS DUTY OF CREW': 25,
-        'FAMILY/SAFETY SEMINAR': 26,
-        'RUNNING ROOM INSPECTION': 27,
+        'COUNSELLING FOR PERSONAL SAFETY OF CREW': 24, 'LONG HOURS DUTY OF CREW': 25,
+        'FAMILY/SAFETY SEMINAR': 26, 'RUNNING ROOM INSPECTION': 27,
         'LOBBY INSPECTION': 29
     };
-
+    
     const abnormalityColumns = {
-        'FOOTPLATE DURING WEE HOURS': 4,
-        'FOOTPLATE EXCLUDING WEE HOURS': 6,
-        'AUTO AND IB AMBUSH(NO OF TRAINS)': 9,
-        'LEVEL CROSSING AMBUSH(NO OF TRAINS)': 11,
-        'CD ZONES AMBUSH(NO OF TRAINS)': 13,
-        'BA AMBUSH(NO OF CREWS)': 15,
-        'SPEED GUN CHECKING(NO OF TRAINS)': 17,
-        'CVVRS ANALYSIS(NO OF TRAINS)': 20,
-        'SPM ANALYSIS(NO OF TRAINS)': 22,
-        'RUNNING ROOM INSPECTION': 28,
+        'FOOTPLATE DURING WEE HOURS': 4, 'FOOTPLATE EXCLUDING WEE HOURS': 6,
+        'AUTO AND IB AMBUSH(NO OF TRAINS)': 9, 'LEVEL CROSSING AMBUSH(NO OF TRAINS)': 11,
+        'CD ZONES AMBUSH(NO OF TRAINS)': 13, 'BA AMBUSH(NO OF CREWS)': 15,
+        'SPEED GUN CHECKING(NO OF TRAINS)': 17, 'RUNNING ROOM INSPECTION': 28,
         'LOBBY INSPECTION': 30
     };
 
-    const highlightParameters = [
-        'FOOTPLATE DURING WEE HOURS',
-        'FOOTPLATE EXCLUDING WEE HOURS',
-        'CVVRS ANALYSIS(NO OF TRAINS)',
-        'SPM ANALYSIS(NO OF TRAINS)',
-        'RUNNING ROOM INSPECTION',
-        'LOBBY INSPECTION'
+    const allParametersInOrder = [
+        'FOOTPLATE DURING WEE HOURS', 'FOOTPLATE EXCLUDING WEE HOURS', 'SPECIAL FOOTPLATE', 
+        'AUTO AND IB AMBUSH(NO OF TRAINS)', 'LEVEL CROSSING AMBUSH(NO OF TRAINS)', 
+        'CD ZONES AMBUSH(NO OF TRAINS)', 'BA AMBUSH(NO OF CREWS)', 'SPEED GUN CHECKING(NO OF TRAINS)', 
+        'COUNCELLING AT LOBBY CONCERNED TO SAFETY(NO OF CREWS)', 'CVVRS ANALYSIS(NO OF TRAINS)', 
+        'SPM ANALYSIS(NO OF TRAINS)', 'SHUNTING PROCEDURE & RULES INVOLVED AS PER GR 5.13', 
+        'COUNSELLING FOR PERSONAL SAFETY OF CREW', 'LONG HOURS DUTY OF CREW', 'FAMILY/SAFETY SEMINAR', 
+        'RUNNING ROOM INSPECTION', 'LOBBY INSPECTION'
     ];
+
+    const highlightParameters = ['FOOTPLATE DURING WEE HOURS', 'FOOTPLATE EXCLUDING WEE HOURS', 'CVVRS ANALYSIS(NO OF TRAINS)', 'SPM ANALYSIS(NO OF TRAINS)', 'RUNNING ROOM INSPECTION', 'LOBBY INSPECTION'];
 
     const total = {};
     const abnormalities = {};
-    let totalDone = 0;
-    let totalAbnormalities = 0;
+
+    allParametersInOrder.forEach(param => {
+        total[param] = 0;
+        abnormalities[param] = 0;
+    });
 
     filteredData.forEach(row => {
-        Object.keys(parameters).forEach(param => {
-            const index = parameters[param];
-            const value = parseInt(row[index], 10) || 0;
-            if (!total[param]) total[param] = 0;
-            total[param] += value;
-            totalDone += value;
-        });
-
-        Object.keys(abnormalityColumns).forEach(param => {
-            const index = abnormalityColumns[param];
-            const value = parseInt(row[index], 10) || 0;
-            if (!abnormalities[param]) abnormalities[param] = 0;
-            abnormalities[param] += value;
-            totalAbnormalities += value;
-        });
-    });
-
-    Object.keys(parameters).forEach(param => {
-        const newRow = document.createElement('tr');
-
-        const paramCell = document.createElement('td');
-        paramCell.textContent = param;
-        newRow.appendChild(paramCell);
-
-        const doneCell = document.createElement('td');
-        doneCell.textContent = total[param] || '0';
-        newRow.appendChild(doneCell);
-
-        const abnormalityCell = document.createElement('td');
-        abnormalityCell.textContent = abnormalities[param] || '0';
-        newRow.appendChild(abnormalityCell);
-
-        // Highlight the specified parameters
-        if (highlightParameters.includes(param)) {
-            newRow.style.backgroundColor = 'lightgreen';
+        for (const param in parameters) {
+            total[param] += parseInt(row[parameters[param]], 10) || 0;
         }
-
-        tableBody.appendChild(newRow);
+        for (const param in abnormalityColumns) {
+            abnormalities[param] += parseInt(row[abnormalityColumns[param]], 10) || 0;
+        }
     });
 
-    // Add TOTAL row
-    const totalRow = document.createElement('tr');
-    const totalParamCell = document.createElement('td');
-    totalParamCell.textContent = 'TOTAL';
-    totalParamCell.style.fontWeight = 'bold';  // Make text bold
-    totalParamCell.style.backgroundColor = 'yellow';  // Background color yellow
-    totalRow.appendChild(totalParamCell);
+    total['SPM ANALYSIS(NO OF TRAINS)'] = spmData.done;
+    abnormalities['SPM ANALYSIS(NO OF TRAINS)'] = spmData.abnormality;
+    total['CVVRS ANALYSIS(NO OF TRAINS)'] = cvvrsData.done;
+    abnormalities['CVVRS ANALYSIS(NO OF TRAINS)'] = cvvrsData.abnormality;
+    
+    const totalDone = Object.values(total).reduce((sum, val) => sum + val, 0);
+    const totalAbnormalities = Object.values(abnormalities).reduce((sum, val) => sum + val, 0);
 
-    const totalDoneCell = document.createElement('td');
-    totalDoneCell.textContent = totalDone || '0';
-    totalDoneCell.style.fontWeight = 'bold';  // Make text bold
-    totalDoneCell.style.backgroundColor = 'yellow';  // Background color yellow
-    totalRow.appendChild(totalDoneCell);
+    allParametersInOrder.forEach(param => {
+        const row = tableBody.insertRow();
+        row.insertCell().textContent = param;
+        row.insertCell().textContent = total[param] || '0';
+        row.insertCell().textContent = abnormalities[param] || '0';
+        if (highlightParameters.includes(param)) {
+            row.style.backgroundColor = 'lightgreen';
+        }
+    });
 
-    const totalAbnormalityCell = document.createElement('td');
-    totalAbnormalityCell.textContent = totalAbnormalities || '0';
-    totalAbnormalityCell.style.fontWeight = 'bold';  // Make text bold
-    totalAbnormalityCell.style.backgroundColor = 'yellow';  // Background color yellow
-    totalRow.appendChild(totalAbnormalityCell);
+    const totalRow = tableBody.insertRow();
+    totalRow.style.fontWeight = 'bold';
+    totalRow.style.backgroundColor = 'yellow';
+    totalRow.insertCell().textContent = 'TOTAL';
+    totalRow.insertCell().textContent = totalDone;
+    totalRow.insertCell().textContent = totalAbnormalities;
 
-    tableBody.appendChild(totalRow);
-
-    // Add border to the table
-    const table = document.getElementById('reportForm');
-    table.style.border = '2px solid black';  // Medium thick black border
+    document.getElementById('reportForm').style.border = '2px solid black';
 
     renderBarChart(total);
     renderPieChart(abnormalities);
 }
 
 
-
+// No changes needed below
 function renderBarChart(total) {
     const ctx = document.getElementById('barGraphCanvas').getContext('2d');
-    if (barChart) barChart.destroy(); // Destroy previous chart instance if it exists
-
+    if (barChart) barChart.destroy();
     barChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: Object.keys(total),
-            datasets: [{
-                label: 'Total',
-                data: Object.values(total),
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
+        type: 'bar', data: { labels: Object.keys(total), datasets: [{ label: 'Total Done', data: Object.values(total), backgroundColor: 'rgba(75, 192, 192, 0.2)', borderColor: 'rgba(75, 192, 192, 1)', borderWidth: 1 }] },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+}
+function renderPieChart(abnormalities) {
+    const ctx = document.getElementById('pieChartCanvas').getContext('2d');
+    if (pieChart) pieChart.destroy();
+    const chartLabels = Object.keys(abnormalities).filter(key => abnormalities[key] > 0);
+    const chartData = chartLabels.map(key => abnormalities[key]);
+    pieChart = new Chart(ctx, {
+        type: 'pie', data: { labels: chartLabels, datasets: [{ label: 'Abnormalities', data: chartData, backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(255, 159, 64, 0.2)', 'rgba(255, 99, 132, 0.5)', 'rgba(54, 162, 235, 0.5)', 'rgba(255, 206, 86, 0.5)'], borderWidth: 1 }] },
+        options: { responsive: true }
+    });
+}
+function printReport() {
+    const reportForm = document.getElementById('reportForm');
+    const cliName = document.getElementById('cliName').value;
+    const fromDate = document.getElementById('fromDate').value;
+    const toDate = document.getElementById('toDate').value;
+    const newWindow = window.open('', '', 'width=800,height=600');
+    newWindow.document.write(`<html><head><title>Print Report</title><style>body { font-family: Arial, sans-serif; } table { width: 100%; border-collapse: collapse; } table, th, td { border: 1px solid black; } th, td { padding: 8px; text-align: left; } tr:last-child { font-weight: bold; background-color: yellow; }</style></head><body><h1>DAILY REPORT ANALYSIS of ${cliName} from ${fromDate} to ${toDate}</h1>${reportForm.outerHTML}</body></html>`);
+    newWindow.document.close();
+    newWindow.onload = () => newWindow.print();
+}
+function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const { autoTable } = jsPDF;
+    const pdf = new jsPDF();
+    const cliName = document.getElementById('cliName').value;
+    const fromDate = document.getElementById('fromDate').value;
+    const toDate = document.getElementById('toDate').value;
+    pdf.setFontSize(16);
+    pdf.text(`DAILY REPORT ANALYSIS of ${cliName} from ${fromDate} to ${toDate}`, 14, 15);
+    pdf.autoTable({ html: '#reportForm', startY: 25, styles: { font: 'helvetica', fontSize: 10 }, headStyles: { fillColor: [0, 123, 255] },
+        didParseCell: function(data) {
+            if (data.row.index === data.table.body.length - 1) {
+                data.row.styles.fillColor = [255, 255, 0];
+                data.row.styles.fontStyle = 'bold';
             }
         }
     });
-}
-
-function renderPieChart(abnormalities) {
-    const ctx = document.getElementById('pieChartCanvas').getContext('2d');
-    if (pieChart) pieChart.destroy(); // Destroy previous chart instance if it exists
-
-    pieChart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: Object.keys(abnormalities),
-            datasets: [{
-                label: 'Abnormalities',
-                data: Object.values(abnormalities),
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true
-        }
-    });
-}
-
-function printReport() {
-    const reportForm = document.getElementById('reportForm');
-    const originalContent = document.body.innerHTML;
-
-    const newWindow = window.open('', '', 'width=800,height=600');
-    newWindow.document.open();
-    newWindow.document.write(`
-        <html>
-            <head>
-                <title>Print Report</title>
-                <style>
-                    @media print {
-                        .no-print { display: none; }
-                    }
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                    }
-                    table, th, td {
-                        border: 1px solid black;
-                    }
-                    th, td {
-                        padding: 8px;
-                        text-align: left;
-                    }
-                </style>
-            </head>
-            <body>
-                <h1>DAILY REPORT ANALYSIS of ${document.getElementById('cliName').value} from ${document.getElementById('fromDate').value} to ${document.getElementById('toDate').value}</h1>
-                ${reportForm.outerHTML}
-            </body>
-        </html>
-    `);
-    newWindow.document.close();
-
-    newWindow.onload = function() {
-        newWindow.print();
-    };
-}
-
-function downloadPDF() {
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-    
-    // Set up the PDF heading
-    const heading = `DAILY REPORT ANALYSIS of ${document.getElementById('cliName').value} from ${document.getElementById('fromDate').value} to ${document.getElementById('toDate').value}`;
-    pdf.setFontSize(16);
-    pdf.text(heading, 10, 10);
-    
-    // Setup table data
-    const reportTable = document.getElementById('reportForm');
-    const rows = reportTable.querySelectorAll('tr');
-    
-    let y = 30;
-    const margin = 10;
-    const lineHeight = 10;
-    const colWidths = [130, 30, 30]; // Adjust column widths
-    
-    // Table headers
-    const headers = Array.from(rows[0].children).map(cell => cell.textContent);
-    pdf.setFontSize(10);
-    
-    // Draw headers
-    pdf.rect(margin, y - lineHeight, colWidths[0], lineHeight);
-    pdf.text(headers[0], margin + 2, y - 2);
-    
-    pdf.rect(margin + colWidths[0], y - lineHeight, colWidths[1], lineHeight);
-    pdf.text(headers[1], margin + colWidths[0] + 2, y - 2);
-    
-    pdf.rect(margin + colWidths[0] + colWidths[1], y - lineHeight, colWidths[2], lineHeight);
-    pdf.text(headers[2], margin + colWidths[0] + colWidths[1] + 2, y - 2);
-    
-    // Draw rows
-    rows.forEach((row, rowIndex) => {
-        if (rowIndex === 0) return; // Skip header row
-        const cells = Array.from(row.children).map(cell => cell.textContent);
-        y += lineHeight;
-        
-        // Make TOTAL row bold and fill with yellow
-        if (cells[0] === 'TOTAL') {
-            pdf.setFont('helvetica', 'bold');
-            pdf.setFillColor(255, 255, 0);  // Yellow color for the background
-            pdf.rect(margin, y - lineHeight, colWidths[0], lineHeight, 'FD');
-            pdf.rect(margin + colWidths[0], y - lineHeight, colWidths[1], lineHeight, 'FD');
-            pdf.rect(margin + colWidths[0] + colWidths[1], y - lineHeight, colWidths[2], lineHeight, 'FD');
-            
-            pdf.text(cells[0], margin + 2, y - 2); // 'TOTAL' label
-            pdf.text(cells[1], margin + colWidths[0] + 2, y - 2); // 'done' value
-            pdf.text(cells[2], margin + colWidths[0] + colWidths[1] + 2, y - 2); // 'abnormality' value
-        } else {
-            pdf.setFont('helvetica', 'normal');
-            pdf.rect(margin, y - lineHeight, colWidths[0], lineHeight);
-            pdf.text(cells[0], margin + 2, y - 2);
-            
-            pdf.rect(margin + colWidths[0], y - lineHeight, colWidths[1], lineHeight);
-            pdf.text(cells[1], margin + colWidths[0] + 2, y - 2);
-            
-            pdf.rect(margin + colWidths[0] + colWidths[1], y - lineHeight, colWidths[2], lineHeight);
-            pdf.text(cells[2], margin + colWidths[0] + colWidths[1] + 2, y - 2);
-        }
-    });
-    
-    // Save the PDF
     pdf.save('report.pdf');
 }
-

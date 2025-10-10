@@ -130,7 +130,7 @@
                     <label for="cliName">CLI Name:</label>
                     <select id="cliName" name="cliName" required>
                          <option value="" disabled selected>Select your CLI NAME</option>
-         <option value="A.K.BISWAL DSL">A.K.BISWAL DSL</option>
+ <option value="A.K.BISWAL DSL">A.K.BISWAL DSL</option>
             <option value="A.K.PANDA">A.K.PANDA</option>
             <option value="A.N.PANDEY">A.N.PANDEY</option>
             <option value="ANIL KAUSHIK">ANIL KAUSHIK</option>
@@ -277,17 +277,17 @@
                     <label for="cliHQ">CLI HQ:</label>
                     <select id="cliHQ" name="cliHQ" required>
                          <option value="" disabled selected>Select your CLI LOBBY</option>
-            <option value="AKT">AKT</option>
-            <option value="BJRI">BJRI</option>
-            <option value="BRJN">BRJN</option>
-            <option value="BSP">BSP</option>
-            <option value="KHS">KHS</option>
-            <option value="KRBA">KRBA</option>
-            <option value="PND">PND</option>
-            <option value="RIG">RIG</option>
-            <option value="SDL">SDL</option>
-            <option value="SJQ">SJQ</option>
-            <option value="USL">USL</option>
+                         <option value="AKT">AKT</option>
+                         <option value="BJRI">BJRI</option>
+                         <option value="BRJN">BRJN</option>
+                         <option value="BSP">BSP</option>
+                         <option value="KHS">KHS</option>
+                         <option value="KRBA">KRBA</option>
+                         <option value="PND">PND</option>
+                         <option value="RIG">RIG</option>
+                         <option value="SDL">SDL</option>
+                         <option value="SJQ">SJQ</option>
+                         <option value="USL">USL</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -355,10 +355,18 @@
                     <input type="text" id="alpName" name="alpName" required>
                 </div>
             </div>
+
+             <div class="form-group">
+                <label for="totalAbnormalities">Total Number of Abnormalities found:</label>
+                <input type="number" id="totalAbnormalities" name="totalAbnormalities" placeholder="Enter count of abnormalities" required>
+            </div>
+
             <div class="form-group">
                 <label for="abnormalities">Abnormalities (Describe in Detail):</label>
-                <textarea id="abnormalities" name="abnormalities" placeholder="Enter detailed description of abnormalities observed..." required></textarea>
+                <textarea id="abnormalities" name="abnormalities" placeholder="Abnormality description eg:BFT done at 24Kmph..etc" required></textarea>
             </div>
+            
+           
             <button type="submit" id="submitBtn">Submit</button>
             <p id="errorMsg" class="error">Failed to submit data. Please try again.</p>
             <p id="successMsg" class="success">Data submitted successfully!</p>
@@ -392,7 +400,7 @@
                 console.log(`${key}: ${value}`);
             }
 
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbwht9d974fBFTQh9rCY6sTMfbAHd5CobGHNnmSE83-cTVkSEK-zBxQUcHWAao9NrQW-BA/exec';
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbyRl9Uv2YlyBx_I3gpgVugdasGneQ5kHMNkPCpnPd-HCjCD3xyVPZu9OZhGjW0PnbgC5g/exec';
 
             try {
                 const response = await fetch(scriptURL, {
@@ -418,10 +426,4 @@
         }
     </script>
 </body>
-
 </html>
-
-
-
-
-
