@@ -1,35 +1,81 @@
-document.getElementById('abnormalityReportForm').addEventListener('submit', function(e) {
-    e.preventDefault(); // Prevent the default form submission
+document.addEventListener('DOMContentLoaded', () => {
+    // --- PART 1: AUTO-FILL LOGIC FOR CLI ID ---
+    const cliIdInput = document.getElementById('cliId');
+    const cliNameInput = document.getElementById('cliName');
+    const cliHqInput = document.getElementById('cliHq');
 
-    var form = this; // Reference to the form element
-    var submitButton = document.getElementById('submitButton'); // Reference to the submit button
+    const fetchCliData = async (id) => {
+        if (!id) {
+            cliNameInput.value = '';
+            cliHqInput.value = '';
+            return;
+        }
+        try {
+            const response = await fetch('CLIMICRO.csv');
+            if (!response.ok) {
+                console.error("Error: Could not find CLIMICRO.csv");
+                return;
+            }
+            const data = await response.text();
+            const rows = data.trim().split('\n');
+            let found = false;
+            for (const row of rows) {
+                const columns = row.split(',');
+                if (columns.length >= 3 && columns[0].trim().toUpperCase() === id.toUpperCase()) {
+                    cliNameInput.value = columns[1].trim();
+                    cliHqInput.value = columns[2].trim();
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                cliNameInput.value = '';
+                cliHqInput.value = '';
+            }
+        } catch (error) {
+            console.error("Failed to fetch or process CSV:", error);
+        }
+    };
 
-    // Disable the submit button to prevent multiple submissions
-    submitButton.disabled = true;
+    // Listen for input in the CLI ID field
+    cliIdInput.addEventListener('input', (e) => {
+        // This is the key line for your requirement
+        // It converts to uppercase and removes anything that is NOT a capital letter or number
+        const sanitizedValue = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        
+        // Update the input field with the sanitized value
+        e.target.value = sanitizedValue;
+        
+        // Fetch data based on the clean ID
+        fetchCliData(sanitizedValue);
+    });
 
-    var formData = new FormData(form);
+    // --- PART 2: FORM SUBMISSION LOGIC ---
+    const form = document.getElementById('abnormalityReportForm');
+    const submitButton = document.getElementById('submitButton');
 
-    // Debugging: Check form data
-    for (var pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-    }
-
-    // AJAX request to send data to Google Sheets
-    fetch(form.action, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.text())
-    .then(result => {
-        console.log('Success:', result);
-        alert('Form submitted successfully!');
-        form.reset(); // Reset the form
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while submitting the form.');
-    })
-    .finally(() => {
-        submitButton.disabled = false; // Enable the button again after submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitButton.disabled = true;
+        submitButton.textContent = 'Submitting...';
+        const formData = new FormData(form);
+        fetch(form.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(result => {
+            console.log('Success:', result);
+            alert('Form submitted successfully!');
+            form.reset();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while submitting the form.');
+        })
+        .finally(() => {
+            submitButton.disabled = false;
+            submitButton.textContent = 'SUBMIT';
+        });
     });
 });
