@@ -87,10 +87,18 @@
          color: #2c3e50;
     }
 
-    .location-label, .remark-label { /* Dono labels ke liye same style */
-        margin-top: 15px !important; 
-        font-weight: normal !important;
-        color: #555;
+    .location-label, .remark-label {
+         margin-top: 15px !important; 
+         font-weight: normal !important;
+         color: #555;
+    }
+    
+    /* Style for the helper message */
+    .char-limit-message {
+        color: #d9534f; /* Red color */
+        font-size: 0.85em;
+        margin-top: 5px;
+        height: 15px; /* Reserve space to prevent layout shift */
     }
 
     /* === BUTTON STYLING === */
@@ -176,6 +184,7 @@
                 data-drive-name="RAILWAY BOARD SAFETY DRIVE COUNSELLING ON SPAD"
                 placeholder="Enter Crew IDs, separated by comma..." 
                 oninput="formatCrewIDs(this)">
+            <p class="char-limit-message"></p>
             
             <label class="location-label">Counselling Done at:</label>
             <select class="location-select">
@@ -189,14 +198,15 @@
         </div>
 
         <div class="drive-section">
-            <label for="crew_ids_winter">WINTER PRECAUTION SAFETY DRIVE</label>
+            <label for="crew_ids_winter">WINTER AND FOG PRECAUTION SAFETY DRIVE</label>
             <input 
                 type="text" 
                 id="crew_ids_winter" 
                 class="crew-input" 
-                data-drive-name="WINTER PRECAUTION SAFETY DRIVE"
+                data-drive-name="WINTER AND FOG PRECAUTION SAFETY DRIVE"
                 placeholder="Enter Crew IDs, separated by comma..." 
                 oninput="formatCrewIDs(this)">
+            <p class="char-limit-message"></p>
                 
             <label class="location-label">Counselling Done at:</label>
             <select class="location-select">
@@ -206,151 +216,197 @@
             </select>
 
             <label class="remark-label">Remark for this drive:</label>
-            <textarea class="remark-input" rows="3" placeholder="Enter Winter specific remarks"></textarea>
+            <textarea class="remark-input" rows="3" placeholder="Enter Winter and Fog specific remarks"></textarea>
         </div>
         
         <br>
         <label>ONGOING SAFETY DRIVE (Click to view Sheet):</label>
         <div class="ongoing-drive-links">
-            <a href="https://docs.google.com/spreadsheets/d/1C0FPK7_Qv0mV5tcqHLdcyup-GfRsD0HJ5QCnz0p2NsY/edit?usp=sharing" target="_blank" class="drive-link-button">15 days special safety drive to check protection at worksite. </a>
-            <a href="https://forms.gle/ZTgp5pipvN2Rbx2B7" target="_blank" class="drive-link-button">Securing of load RB drive to ensure proper procedure of securing from 05/10/2025</a>
-             <a href="https://docs.google.com/spreadsheets/d/1ejglvkneJDcuJWp8euJ1v4W8dcp2FZo04rwD37IOu8I/edit?usp=sharing" target="_blank" class="drive-link-button"> 30 days special drive on SPAD covering all LPs, ALPs, Track Machine Operators and Tower Wagon Operators at all locations of Indian Railways.(RB)</a>
+            <a href="https://docs.google.com/spreadsheets/d/1C0FPK7_Qv0mV5tcqHLdcyup-GfRsD0HJ5QCnz0p2NsY/edit?usp=sharing" target="_blank" class="drive-link-button">15 days special safety drive to check protection at worksite.(28.09.25 to 12.10.25) </a>
+            <a href="https://forms.gle/ZTgp5pipvN2Rbx2B7" target="_blank" class="drive-link-button">Securing of load RB drive to ensure proper procedure of securing from 05/10/2025(09.09.2025 to 23.10.2025)</a>
+             <a href="https://docs.google.com/spreadsheets/d/1ejglvkneJDcuJWp8euJ1v4W8dcp2FZo04rwD37IOu8I/edit?usp=sharing" target="_blank" class="drive-link-button"> 30 days special drive on SPAD covering all LPs, ALPs, Track Machine Operators and Tower Wagon Operators at all locations of Indian Railways.(RB)(25.09.25 to 24.10.25)</a>
         </div>
         <br><br>
 
         <button type="submit">SUBMIT</button>
     </form>
 
-    <script>
-        let cliData = {};
-        let crewData = {};
-        let isSubmitting = false;
+<script>
+    let cliData = {};
+    let crewData = {};
+    let isSubmitting = false;
 
-        function formatCLIID() {
-            let input = document.getElementById("cli_id");
-            input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            fetchCLIData();
-        }
+    function formatCLIID() {
+        let input = document.getElementById("cli_id");
+        input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        fetchCLIData();
+    }
 
-        function formatCrewIDs(inputElement) {
-            inputElement.value = inputElement.value.toUpperCase().replace(/[^A-Z0-9,]/g, '');
-        }
+    // *** CHANGE: Logic fixed to show the correct message for each separate condition. ***
+    function formatCrewIDs(inputElement) {
+        const messageElement = inputElement.nextElementSibling;
+        let value = inputElement.value.toUpperCase().replace(/[^A-Z0-9,]/g, '');
+        let ids = value.split(',');
+        let lastIdSegment = ids[ids.length - 1];
+        let message = '';
 
-        function loadCLIData() {
-            fetch('CLIMICRO.csv')
-                .then(response => response.text())
-                .then(data => { Papa.parse(data, { header: true, skipEmptyLines: true, complete: r => { r.data.forEach(row => cliData[row["LI ID"]] = { name: row["NAME"], hq: row["HQ"] }); }}); });
-        }
+        // Priority 1: Check for length violation first. This is the most immediate boundary.
+        if (lastIdSegment.length > 8) {
+            message = 'Please Enter Comma.'; // Message for length error
+            lastIdSegment = lastIdSegment.substring(0, 8);
+            ids[ids.length - 1] = lastIdSegment;
+            value = ids.join(',');
 
-        function loadCrewData() {
-            fetch('CREWM.csv')
-                .then(response => response.text())
-                .then(data => { Papa.parse(data, { header: true, skipEmptyLines: true, complete: r => { r.data.forEach(row => crewData[row["CREW ID"]] = { name: row["CREW NAME"], desg: row["DESG"], hq: row["HQ"] }); }}); });
-        }
+        // Priority 2: If length is okay, then check for combination violation.
+        } else {
+            const letterCount = (lastIdSegment.match(/[A-Z]/g) || []).length;
+            const numberCount = (lastIdSegment.match(/[0-9]/g) || []).length;
 
-        function fetchCLIData() {
-            let cliID = document.getElementById("cli_id").value;
-            document.getElementById("cli_name").value = cliData[cliID] ? cliData[cliID].name : "";
-            document.getElementById("cli_hq").value = cliData[cliID] ? cliData[cliID].hq : "";
-        }
-
-        document.getElementById("safetyDriveForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-
-            if (isSubmitting) {
-                alert("Form already submitted, please wait...");
-                return;
+            if (letterCount > 4 || numberCount > 4) {
+                message = 'Invalid combination (max 4 letters/numbers).'; // Message for combination error
+                lastIdSegment = lastIdSegment.slice(0, -1);
+                ids[ids.length - 1] = lastIdSegment;
+                value = ids.join(',');
             }
+        }
 
-            let crewInputs = document.querySelectorAll('.crew-input');
-            let totalCrewEntered = 0;
-            let validationError = false;
+        // Update the UI with the correct message and value
+        if (messageElement) {
+            messageElement.textContent = message;
+        }
+        inputElement.value = value;
+    }
 
-            crewInputs.forEach(input => {
-                if (input.value.trim() !== "") {
-                    totalCrewEntered++;
-                    const driveSection = input.closest('.drive-section');
-                    const locationSelect = driveSection.querySelector('.location-select');
-                    if (locationSelect.value === "") {
-                        validationError = true;
-                        const driveLabel = driveSection.querySelector('label').innerText;
-                        alert(`Please select a location for the drive: "${driveLabel}"`);
-                    }
-                }
-            });
 
+    function loadCLIData() {
+        fetch('CLIMICRO.csv')
+            .then(response => response.text())
+            .then(data => { Papa.parse(data, { header: true, skipEmptyLines: true, complete: r => { r.data.forEach(row => cliData[row["LI ID"]] = { name: row["NAME"], hq: row["HQ"] }); }}); });
+    }
+
+    function loadCrewData() {
+        fetch('CREWM.csv')
+            .then(response => response.text())
+            .then(data => { Papa.parse(data, { header: true, skipEmptyLines: true, complete: r => { r.data.forEach(row => crewData[row["CREW ID"]] = { name: row["CREW NAME"], desg: row["DESG"], hq: row["HQ"] }); }}); });
+    }
+
+    function fetchCLIData() {
+        let cliID = document.getElementById("cli_id").value;
+        document.getElementById("cli_name").value = cliData[cliID] ? cliData[cliID].name : "";
+        document.getElementById("cli_hq").value = cliData[cliID] ? cliData[cliID].hq : "";
+    }
+
+    document.getElementById("safetyDriveForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        if (isSubmitting) {
+            alert("Form already submitted, please wait...");
+            return;
+        }
+
+        let crewInputs = document.querySelectorAll('.crew-input');
+        let totalCrewEntered = 0;
+        let validationError = false;
+
+        crewInputs.forEach(input => {
             if (validationError) return;
 
-            if (totalCrewEntered === 0) {
-                alert("Please enter at least one Crew ID in any of the drive sections.");
-                return;
-            }
-            
-            isSubmitting = true;
-            let submitButton = document.querySelector("button[type='submit']");
-            submitButton.disabled = true;
-            submitButton.innerText = "Submitting...";
-            submitButton.style.backgroundColor = "#FF8C00";
-
-            let commonFormData = new FormData(this);
-            let submissionPromises = [];
-            
-            crewInputs.forEach(inputField => {
-                let driveName = inputField.dataset.driveName;
-                let crewIDsString = inputField.value.trim();
-                if (crewIDsString === "") return;
-
-                const driveSection = inputField.closest('.drive-section');
-                // Drive-specific location aur remark yahan se lenge
-                const locationValue = driveSection.querySelector('.location-select').value;
-                const remarkValue = driveSection.querySelector('.remark-input').value; // <<< YAHAN BADLAV KIYA GAYA HAI
+            const crewIDsString = input.value.trim();
+            if (crewIDsString !== "") {
+                totalCrewEntered++;
+                const driveSection = input.closest('.drive-section');
+                const driveLabel = driveSection.querySelector('label').innerText;
                 
-                let crewIDs = crewIDsString.split(',').filter(id => id.trim() !== "");
+                const locationSelect = driveSection.querySelector('.location-select');
+                if (locationSelect.value === "") {
+                    validationError = true;
+                    alert(`Please select a location for the drive: "${driveLabel}"`);
+                    return;
+                }
 
-                crewIDs.forEach(crewID => {
-                    crewID = crewID.trim();
-                    let jsonData = {};
-                    
-                    // Common data (date, cli_id) form se lenge
-                    jsonData['date'] = commonFormData.get('date');
-                    jsonData['cli_id'] = commonFormData.get('cli_id');
-                    jsonData['cli_name'] = commonFormData.get('cli_name');
-                    jsonData['cli_hq'] = commonFormData.get('cli_hq');
+                const crewIDs = crewIDsString.split(',').map(id => id.trim()).filter(id => id !== "");
+                for (const id of crewIDs) {
+                    const hasLetter = /[A-Z]/.test(id);
+                    const hasNumber = /[0-9]/.test(id);
+                    const letterCount = (id.match(/[A-Z]/g) || []).length;
+                    const numberCount = (id.match(/[0-9]/g) || []).length;
 
-                    // Drive-specific data add karenge
-                    jsonData["drive_name"] = driveName;
-                    jsonData["counselling_location"] = locationValue;
-                    jsonData["remark"] = remarkValue; // <<< YAHAN BADLAV KIYA GAYA HAI
-                    jsonData["crew_id"] = crewID;
-                    jsonData["crew_name"] = crewData[crewID] ? crewData[crewID].name : "Not Found";
-                    jsonData["desg"] = crewData[crewID] ? crewData[crewID].desg : "N/A";
-                    jsonData["hq"] = crewData[crewID] ? crewData[crewID].hq : "N/A";
-                    jsonData["timestamp"] = new Date().toISOString();
+                    if (id.length > 8 || !hasLetter || !hasNumber || letterCount > 4 || numberCount > 4) {
+                        validationError = true;
+                        alert(`Invalid Crew ID "${id}" in drive "${driveLabel}".\n\n- Max 8 characters.\n- Must be a mix of letters and numbers (max 4 of each).`);
+                        return;
+                    }
+                }
+            }
+        });
 
-                    let promise = fetch("https://script.google.com/macros/s/AKfycbxcHjGqLFAVKLgvKn1MUVKqjeyw1ZAF9nmoQLIESRm3my6f5Tmy1Ihl5kTY-CXSOTtE8Q/exec", {
-                        method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(jsonData)
-                    });
-                    submissionPromises.push(promise);
+        if (validationError) return;
+        if (totalCrewEntered === 0) {
+            alert("Please enter at least one Crew ID in any of the drive sections.");
+            return;
+        }
+        
+        isSubmitting = true;
+        let submitButton = document.querySelector("button[type='submit']");
+        submitButton.disabled = true;
+        submitButton.innerText = "Submitting...";
+        submitButton.style.backgroundColor = "#FF8C00";
+
+        let commonFormData = new FormData(this);
+        let submissionPromises = [];
+        
+        crewInputs.forEach(inputField => {
+            let driveName = inputField.dataset.driveName;
+            let crewIDsString = inputField.value.trim();
+            if (crewIDsString === "") return;
+
+            const driveSection = inputField.closest('.drive-section');
+            const locationValue = driveSection.querySelector('.location-select').value;
+            const remarkValue = driveSection.querySelector('.remark-input').value; 
+            let crewIDs = crewIDsString.split(',').filter(id => id.trim() !== "");
+
+            crewIDs.forEach(crewID => {
+                crewID = crewID.trim();
+                if (!crewID) return;
+                let jsonData = {};
+                
+                jsonData['date'] = commonFormData.get('date');
+                jsonData['cli_id'] = commonFormData.get('cli_id');
+                jsonData['cli_name'] = commonFormData.get('cli_name');
+                jsonData['cli_hq'] = commonFormData.get('cli_hq');
+                jsonData["drive_name"] = driveName;
+                jsonData["counselling_location"] = locationValue;
+                jsonData["remark"] = remarkValue;
+                jsonData["crew_id"] = crewID;
+                jsonData["crew_name"] = crewData[crewID] ? crewData[crewID].name : "Not Found";
+                jsonData["desg"] = crewData[crewID] ? crewData[crewID].desg : "N/A";
+                jsonData["hq"] = crewData[crewID] ? crewData[crewID].hq : "N/A";
+                jsonData["timestamp"] = new Date().toISOString();
+
+                let promise = fetch("https://script.google.com/macros/s/AKfycbxcHjGqLFAVKLgvKn1MUVKqjeyw1ZAF9nmoQLIESRm3my6f5Tmy1Ihl5kTY-CXSOTtE8Q/exec", {
+                    method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(jsonData)
                 });
-            });
-
-            Promise.all(submissionPromises).then(() => {
-                 setTimeout(() => {
-                    alert("Data Successfully Submitted!");
-                    document.getElementById("safetyDriveForm").reset();
-                    isSubmitting = false;
-                    submitButton.disabled = false;
-                    submitButton.innerText = "Submit";
-                    submitButton.style.backgroundColor = "#007BFF";
-                }, 500);
+                submissionPromises.push(promise);
             });
         });
 
-        window.onload = function() {
-            loadCLIData();
-            loadCrewData();
-            document.getElementById('date').valueAsDate = new Date();
-        };
-    </script>
+        Promise.all(submissionPromises).then(() => {
+             setTimeout(() => {
+                alert("Data Successfully Submitted!");
+                document.getElementById("safetyDriveForm").reset();
+                document.querySelectorAll('.char-limit-message').forEach(el => el.textContent = '');
+                isSubmitting = false;
+                submitButton.disabled = false;
+                submitButton.innerText = "Submit";
+                submitButton.style.backgroundColor = "#007BFF";
+            }, 500);
+        });
+    });
+
+    window.onload = function() {
+        loadCLIData();
+        loadCrewData();
+        document.getElementById('date').valueAsDate = new Date();
+    };
+</script>
 </body>
 </html>

@@ -5,39 +5,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MICRO SLEEP COUNSELLING</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <link rel="stylesheet" href="microsleep.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        h2 {
+            text-align: center;
+            color: #1e3a8a;
+            margin-bottom: 25px;
+        }
+
+        form {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #334155;
+            font-size: 0.9em;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        input:read-only {
+            background-color: #e5e7eb;
+            cursor: not-allowed;
+        }
+
+        button {
+            background: linear-gradient(to right, #3b82f6, #2563eb);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .char-limit-message {
+            color: #ef4444;
+            font-size: 0.8em;
+            margin-top: -10px;
+            margin-bottom: 10px;
+            height: 15px;
+        }
+    </style>
 </head>
 <body>
 
-    <h2>MICRO SLEEP COUNSELLING</h2>
-
     <form id="microSleepForm">
-        <label>Date:</label>
-        <input type="date" id="date" name="date" required><br><br>
+        <h2>MICRO SLEEP COUNSELLING</h2>
 
-        <label>CLI ID:</label>
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required>
+
+        <label for="cli_id">CLI ID:</label>
         <input type="text" id="cli_id" name="cli_id" required placeholder="Example: BSP0068" oninput="formatCLIID()" maxlength="10">
-        <label>CLI Name:</label>
+        
+        <label for="cli_name">CLI Name:</label>
         <input type="text" id="cli_name" name="cli_name" readonly>
-        <label>CLI HQ:</label>
-        <input type="text" id="cli_hq" name="cli_hq" readonly><br><br>
+        
+        <label for="cli_hq">CLI HQ:</label>
+        <input type="text" id="cli_hq" name="cli_hq" readonly>
 
-        <label>Crew ID(s):</label>
-        <input type="text" id="crew_id" name="crew_id" required placeholder="Example: BSP0068,BSP0075,BSP3637,BSP3630" oninput="formatCrewIDs()">
+        <label for="crew_id">Crew ID(s):</label>
+        <input type="text" id="crew_id" name="crew_id" required placeholder="Example: BSP0068,BSP0075" oninput="formatCrewIDs(this)">
+        <p class="char-limit-message"></p>
 
-        <label>Counselling on VCD Done:</label>
+        <label for="vcd_counselling">Counselling on VCD Done:</label>
         <select id="vcd_counselling" name="vcd_counselling" required>
             <option value="">Select</option>
             <option value="YES">YES</option>
             <option value="NO">NO</option>
-        </select><br><br>
+        </select>
 
-        <label>Micro Sleep Counselling Done At:</label>
+        <label for="micro_counselling">Micro Sleep Counselling Done At:</label>
         <select id="micro_counselling" name="micro_counselling" required>
             <option value="">Select</option>
             <option value="LOBBY">LOBBY</option>
             <option value="FOOTPLATE">FOOTPLATE</option>
-        </select><br><br>
+        </select>
 
         <button type="submit">SUBMIT</button>
     </form>
@@ -52,10 +148,38 @@
             input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
             fetchCLIData();
         }
+        
+        // --- ADDED VALIDATION LOGIC ---
+        function formatCrewIDs(inputElement) {
+            const messageElement = inputElement.nextElementSibling;
+            let value = inputElement.value.toUpperCase().replace(/[^A-Z0-9,]/g, '');
+            let ids = value.split(',');
+            let lastIdSegment = ids[ids.length - 1];
+            let message = '';
 
-        function formatCrewIDs() {
-            let input = document.getElementById("crew_id");
-            input.value = input.value.toUpperCase().replace(/[^A-Z0-9,]/g, '');
+            // Priority 1: Check for length violation first.
+            if (lastIdSegment.length > 8) {
+                message = 'Please Enter Comma.'; 
+                lastIdSegment = lastIdSegment.substring(0, 8);
+                ids[ids.length - 1] = lastIdSegment;
+                value = ids.join(',');
+            // Priority 2: If length is okay, then check for combination violation.
+            } else {
+                const letterCount = (lastIdSegment.match(/[A-Z]/g) || []).length;
+                const numberCount = (lastIdSegment.match(/[0-9]/g) || []).length;
+
+                if (letterCount > 4 || numberCount > 4) {
+                    message = 'Invalid combination (max 4 letters/numbers).';
+                    lastIdSegment = lastIdSegment.slice(0, -1);
+                    ids[ids.length - 1] = lastIdSegment;
+                    value = ids.join(',');
+                }
+            }
+
+            if (messageElement) {
+                messageElement.textContent = message;
+            }
+            inputElement.value = value;
         }
 
         function loadCLIData() {
@@ -109,47 +233,83 @@
                 return;
             }
 
+            // --- ADDED SUBMISSION VALIDATION ---
+            let validationError = false;
+            const crewIdInput = document.getElementById('crew_id');
+            const crewIDsString = crewIdInput.value.trim();
+            const crewIDs = crewIDsString.split(',').map(id => id.trim()).filter(id => id !== "");
+
+            for (const id of crewIDs) {
+                const hasLetter = /[A-Z]/.test(id);
+                const hasNumber = /[0-9]/.test(id);
+                const letterCount = (id.match(/[A-Z]/g) || []).length;
+                const numberCount = (id.match(/[0-9]/g) || []).length;
+
+                if (id.length > 8 || !hasLetter || !hasNumber || letterCount > 4 || numberCount > 4) {
+                    validationError = true;
+                    alert(`Invalid Crew ID "${id}".\n\n- Max 8 characters.\n- Must be a mix of letters and numbers (max 4 of each).`);
+                    break; 
+                }
+            }
+
+            if (validationError) {
+                return; // Stop submission if validation fails
+            }
+            
             isSubmitting = true;
             let submitButton = document.querySelector("button[type='submit']");
-
             submitButton.disabled = true;
             submitButton.innerText = "Submitting...";
-            submitButton.style.backgroundColor = "#FF8C00";
 
             let formData = new FormData(this);
-            let crewIDs = formData.get("crew_id").split(',');
+            let submissionPromises = []; // To track all fetch requests
 
             crewIDs.forEach(crewID => {
-                crewID = crewID.trim();
                 let jsonData = {};
                 formData.forEach((value, key) => {
-                    jsonData[key] = value;
+                    if (key !== 'crew_id') { // Don't include the whole crew_id string
+                        jsonData[key] = value;
+                    }
                 });
                 jsonData["crew_id"] = crewID;
-                jsonData["crew_name"] = crewData[crewID] ? crewData[crewID].name : "";
-                jsonData["desg"] = crewData[crewID] ? crewData[crewID].desg : "";
-                jsonData["hq"] = crewData[crewID] ? crewData[crewID].hq : "";
+                jsonData["crew_name"] = crewData[crewID] ? crewData[crewID].name : "Not Found";
+                jsonData["desg"] = crewData[crewID] ? crewData[crewID].desg : "N/A";
+                jsonData["hq"] = crewData[crewID] ? crewData[crewID].hq : "N/A";
 
-                fetch("https://script.google.com/macros/s/AKfycbxMYVU7x3P5bV0gRu9L_ocLImRLOvv2YvIPImjQot6ErTSbeWFcT9jgiklwI175CKcT/exec", {
+                let promise = fetch("https://script.google.com/macros/s/AKfycbxMYVU7x3P5bV0gRu9L_ocLImRLOvv2YvIPImjQot6ErTSbeWFcT9jgiklwI175CKcT/exec", {
                     method: "POST",
                     mode: "no-cors",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(jsonData)
                 });
+                submissionPromises.push(promise);
             });
 
-            alert("Data Successfully Submitted!");
-            document.getElementById("microSleepForm").reset();
-
-            isSubmitting = false;
-            submitButton.disabled = false;
-            submitButton.innerText = "Submit";
-            submitButton.style.backgroundColor = "#007BFF";
+            // Wait for all submissions to finish
+            Promise.all(submissionPromises).then(() => {
+                setTimeout(() => { // Small delay to feel more responsive
+                    alert("Data Successfully Submitted!");
+                    document.getElementById("microSleepForm").reset();
+                    document.querySelector('.char-limit-message').textContent = '';
+                    
+                    isSubmitting = false;
+                    submitButton.disabled = false;
+                    submitButton.innerText = "Submit";
+                }, 500);
+            }).catch(error => {
+                 console.error("Error during submission:", error);
+                 alert("An error occurred. Please try again.");
+                 isSubmitting = false;
+                 submitButton.disabled = false;
+                 submitButton.innerText = "Submit";
+            });
         });
 
         window.onload = function() {
             loadCLIData();
             loadCrewData();
+            // Set date to today by default
+            document.getElementById('date').valueAsDate = new Date();
         };
     </script>
 </body>
