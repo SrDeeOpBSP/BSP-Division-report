@@ -1,5 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- PART 1: AUTO-FILL LOGIC FOR CLI ID ---
+    // --- NEW PART: AUTO-FILL NUMBER FIELDS WITH 0 ---
+    // This finds all input fields that are for numbers
+    const numberInputs = document.querySelectorAll('input[type="number"]');
+    // This loops through each one and sets its default value to 0
+    numberInputs.forEach(input => {
+        input.value = 0;
+    });
+    
+    // --- PART 1: AUTO-FILL LOGIC FOR CLI ID (Existing Code) ---
     const cliIdInput = document.getElementById('cliId');
     const cliNameInput = document.getElementById('cliName');
     const cliHqInput = document.getElementById('cliHq');
@@ -50,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchCliData(sanitizedValue);
     });
 
-    // --- PART 2: FORM SUBMISSION LOGIC ---
+    // --- PART 2: FORM SUBMISSION LOGIC (Existing Code) ---
     const form = document.getElementById('abnormalityReportForm');
     const submitButton = document.getElementById('submitButton');
 
@@ -68,6 +76,10 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Success:', result);
             alert('Form submitted successfully!');
             form.reset();
+            // After resetting the form, we need to re-apply the default 0 values
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.value = 0;
+            });
         })
         .catch(error => {
             console.error('Error:', error);

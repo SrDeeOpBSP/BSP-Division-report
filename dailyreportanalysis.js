@@ -2,8 +2,10 @@ let barChart, pieChart;
 // API key from your original script
 const API_KEY = 'AIzaSyAw23pJz0K9fZb2rRRAe2C2cJDilRc0Kac'; 
 
-// URLs for the specific sheets
-const SPM_SHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/1GbWplsBRpKY0OqNGImdS_OBTWsVdVBMIIqCCfqpYT-g/values/Sheet1!B:T?key=${API_KEY}`;
+// ======================================================================================
+// UPDATED SPM_SHEET_URL CONSTANT
+// ======================================================================================
+const SPM_SHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/1XcmhgkXH0fQlUQG3oLmEUrVnUVk3p_gyYqBMPyXfGv0/values/Sheet1!A:AN?key=${API_KEY}`;
 const CVVRS_SHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/1BEVUi7CPmrbGYdoom30vr94tGHkSsGeWGLfYLZJX76Q/values/Sheet1!B:T?key=${API_KEY}`;
 const MAIN_REPORT_URL = `https://sheets.googleapis.com/v4/spreadsheets/1Pn0sosMuxX2XZYRe9qIvkGM06GcyIWdEeaD0gfPeRZU/values/DAILY REPORT!A:AE?key=${API_KEY}`;
 
@@ -70,9 +72,9 @@ document.getElementById('dutyForm').addEventListener('submit', function(event) {
 
 
 // ======================================================================================
-// THIS FUNCTION NOW HAS EXTRA LOGGING
+// THIS FUNCTION IS NOW MORE FLEXIBLE TO HANDLE DIFFERENT COLUMN STRUCTURES
 // ======================================================================================
-async function fetchExternalSheetData(sheetUrl, fromDate, toDate, cliName, sheetName) {
+async function fetchExternalSheetData(sheetUrl, fromDate, toDate, cliName, sheetName, columnConfig) {
     let doneCount = 0;
     let abnormalitySum = 0;
     
@@ -88,51 +90,39 @@ async function fetchExternalSheetData(sheetUrl, fromDate, toDate, cliName, sheet
             startDate.setHours(0, 0, 0, 0);
             endDate.setHours(23, 59, 59, 999);
 
-            // LOGGING: Show the date range we are searching for
             console.log(`[${sheetName}] Searching for dates between:`, startDate.toLocaleDateString(), 'AND', endDate.toLocaleDateString());
 
             for (let i = 1; i < data.values.length; i++) {
                 const row = data.values[i];
-                const originalTimestampStr = row[0];
+                // Use columnConfig to get the correct column index
+                const originalTimestampStr = row[columnConfig.timestamp]; 
                 if (!originalTimestampStr) continue;
 
                 const dateTimeParts = originalTimestampStr.split(' ');
                 const dateParts = dateTimeParts[0].split('/');
                 
-                if (dateParts.length !== 3) {
-                    if (i < 10) console.log(`[${sheetName}] Row ${i + 1}: Skipping due to unexpected date format ->`, originalTimestampStr);
-                    continue;
-                }
+                if (dateParts.length !== 3) continue;
                 
                 // Assuming format is DD/MM/YYYY
                 const day = parseInt(dateParts[0], 10);
                 const month = parseInt(dateParts[1], 10);
                 const year = parseInt(dateParts[2], 10);
 
-                if (isNaN(day) || isNaN(month) || isNaN(year)) {
-                    if (i < 10) console.log(`[${sheetName}] Row ${i + 1}: Skipping because date parts are not numbers ->`, originalTimestampStr);
-                    continue;
-                }
+                if (isNaN(day) || isNaN(month) || isNaN(year)) continue;
 
                 const timestamp = new Date(year, month - 1, day);
 
-                if (isNaN(timestamp.getTime())) {
-                    if (i < 10) console.log(`[${sheetName}] Row ${i + 1}: Could not parse a valid date from ->`, originalTimestampStr);
-                    continue;
-                }
+                if (isNaN(timestamp.getTime())) continue;
 
-                const rowCliName = row[2]; // Column D
+                // Use columnConfig to get the correct column index
+                const rowCliName = row[columnConfig.cliName]; 
                 const dateMatches = timestamp >= startDate && timestamp <= endDate;
                 const cliMatches = cliName === 'ALL' || rowCliName === cliName;
                 
-                // LOGGING: Show the first few comparisons
-                if (i > 0 && i < 15) {
-                    console.log(`[${sheetName}] Row ${i + 1}: Comparing Sheet Date "${timestamp.toLocaleDateString()}" | DateMatch=${dateMatches}, CliMatch=${cliMatches}`);
-                }
-
                 if (dateMatches && cliMatches) {
                     doneCount++;
-                    abnormalitySum += parseInt(row[18], 10) || 0;
+                    // Use columnConfig to get the correct column index
+                    abnormalitySum += parseInt(row[columnConfig.abnormality], 10) || 0;
                 }
             }
         }
@@ -146,12 +136,19 @@ async function fetchExternalSheetData(sheetUrl, fromDate, toDate, cliName, sheet
 }
 
 
+// ======================================================================================
+// THIS FUNCTION NOW SENDS THE CORRECT COLUMN CONFIGURATIONS
+// ======================================================================================
 async function fetchData(cliName, cliLobby, fromDate, toDate) {
     try {
+        // Define column configurations for each sheet
+        const spmColumns = { timestamp: 0, cliName: 19, abnormality: 39 }; // A=0, T=19, AN=39
+        const cvvrsColumns = { timestamp: 0, cliName: 2, abnormality: 18 }; // B=0, D=2, T=18 (relative to B:T range)
+
         const [mainDataResponse, spmData, cvvrsData] = await Promise.all([
             fetch(MAIN_REPORT_URL),
-            fetchExternalSheetData(SPM_SHEET_URL, fromDate, toDate, cliName, 'SPM'),
-            fetchExternalSheetData(CVVRS_SHEET_URL, fromDate, toDate, cliName, 'CVVRS')
+            fetchExternalSheetData(SPM_SHEET_URL, fromDate, toDate, cliName, 'SPM', spmColumns),
+            fetchExternalSheetData(CVVRS_SHEET_URL, fromDate, toDate, cliName, 'CVVRS', cvvrsColumns)
         ]);
 
         const mainData = await mainDataResponse.json();
@@ -171,6 +168,9 @@ async function fetchData(cliName, cliLobby, fromDate, toDate) {
 }
 
 
+// ======================================================================================
+// NO CHANGES NEEDED IN THE REST OF THE CODE
+// ======================================================================================
 function displayData(filteredData, spmData, cvvrsData) {
     const tableBody = document.getElementById('reportFormBody');
     tableBody.innerHTML = '';
@@ -189,7 +189,7 @@ function displayData(filteredData, spmData, cvvrsData) {
     
     const abnormalityColumns = {
         'FOOTPLATE DURING WEE HOURS': 4, 'FOOTPLATE EXCLUDING WEE HOURS': 6,
-        'AUTO AND IB AMBUSH(NO OF TRAINS)': 9, 'LEVEL CROSSING AMBUSH(NO OF TRAINS)': 11,
+        'AUTO AND IB AMBUSH(NO OF TRAINS)': 9, 'LEVEL CROSSिंग AMBUSH(NO OF TRAINS)': 11,
         'CD ZONES AMBUSH(NO OF TRAINS)': 13, 'BA AMBUSH(NO OF CREWS)': 15,
         'SPEED GUN CHECKING(NO OF TRAINS)': 17, 'RUNNING ROOM INSPECTION': 28,
         'LOBBY INSPECTION': 30
@@ -255,8 +255,6 @@ function displayData(filteredData, spmData, cvvrsData) {
     renderPieChart(abnormalities);
 }
 
-
-// No changes needed below
 function renderBarChart(total) {
     const ctx = document.getElementById('barGraphCanvas').getContext('2d');
     if (barChart) barChart.destroy();
