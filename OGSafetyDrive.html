@@ -24,7 +24,7 @@
 
     /* === FORM STYLING (Frosted Glass Effect) === */
     form {
-        max-width: 600px;
+        max-width: 800px; /* Increased width to better accommodate the new table */
         margin: auto;
         padding: 30px;
         background-color: rgba(255, 255, 255, 0.85); 
@@ -129,31 +129,63 @@
         box-shadow: none;
     }
     
-    /* === ONGOING DRIVE LINKS (GREEN BUTTONS) === */
-    .ongoing-drive-links {
-        display: flex;
-        gap: 10px;
-        margin-top: 5px;
-        flex-wrap: wrap;
+    /* === ONGOING DRIVE TABLE STYLING === */
+    .ongoing-drive-table {
+        display: grid;
+        grid-template-columns: 3fr 1fr; /* 1st column is 3x wider than 2nd */
+        gap: 15px;
+        margin-top: 10px;
+        padding: 20px;
+        background-color: rgba(255, 255, 255, 0.5);
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
     }
 
-    .drive-link-button {
-        flex-grow: 1;
+    .table-header {
+        grid-column: 1 / -1; /* Header spans both columns */
+        display: grid;
+        grid-template-columns: 3fr 1fr;
+        gap: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #ced4da;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+
+    .table-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* === BUTTON STYLES FOR THE TABLE === */
+    .drive-link-button, .pdf-link-button {
+        width: 100%; /* Make buttons fill the cell width */
         padding: 12px;
         text-align: center;
         text-decoration: none;
         color: white;
-        background: linear-gradient(45deg, #28a745, #218838);
         border-radius: 8px;
         font-weight: bold;
         transition: all 0.3s ease;
-        min-width: 150px;
-        box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        display: flex; /* Added for vertical centering */
+        align-items: center; /* Added for vertical centering */
+        justify-content: center; /* Added for horizontal centering */
+        min-height: 60px; /* Ensures buttons have a consistent height */
     }
 
-    .drive-link-button:hover {
+    .drive-link-button:hover, .pdf-link-button:hover {
         transform: translateY(-3px);
-        box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+
+    .drive-link-button {
+        background: linear-gradient(45deg, #28a745, #218838); /* Green */
+    }
+
+    .pdf-link-button {
+        background: linear-gradient(45deg, #fd7e14, #ffc107); /* Orange */
     }
 </style>
 </head>
@@ -220,13 +252,38 @@
         </div>
         
         <br>
-        <label>ONGOING SAFETY DRIVE (Click to view Sheet):</label>
-        <div class="ongoing-drive-links">
-            <a href="https://docs.google.com/spreadsheets/d/1AsWuh9HTvSVSRAshc6tY7Ef7HvZP7lnyxG_uK0V7Oz0/edit?gid=0#gid=0" target="_blank" class="drive-link-button"> 7 days Special drive covering all MEMU (14.10.2025 to 20.10.2025)</a>
-            <a href="https://docs.google.com/spreadsheets/d/1IKH3MHKzQXJrPLSMJVega4UOeKhlnGDtYCZ3-n46ZpU/edit?gid=0#gid=0" target="_blank" class="drive-link-button">Zonal Safety Drive on Ambush Check during shunting for observance of shunting rules and precautions -  BSP Division (From 14.10.2025 to 28.10.2025) </a>
-            <a href="https://forms.gle/ZTgp5pipvN2Rbx2B7" target="_blank" class="drive-link-button">Securing of load RB drive to ensure proper procedure of securing from 05/10/2025(09.09.2025 to 23.10.2025)</a>
-             <a href="https://docs.google.com/spreadsheets/d/1ejglvkneJDcuJWp8euJ1v4W8dcp2FZo04rwD37IOu8I/edit?usp=sharing" target="_blank" class="drive-link-button"> 30 days special drive on SPAD covering all LPs, ALPs, Track Machine Operators and Tower Wagon Operators at all locations of Indian Railways.(RB)(25.09.25 to 24.10.25)</a>      
-      </div>
+        <label>ONGOING SAFETY DRIVE:</label>
+        <div class="ongoing-drive-table">
+            <div class="table-header">
+                <div>Drive / Google Link</div>
+                <div>Download PDF</div>
+            </div>
+
+            <div class="table-cell">
+                <a href="https://docs.google.com/spreadsheets/d/1AsWuh9HTvSVSRAshc6tY7Ef7HvZP7lnyxG_uK0V7Oz0/edit?gid=0#gid=0" target="_blank" class="drive-link-button">7 days Special drive covering all MEMU (14.10.2025 to 20.10.2025)</a>
+            </div>
+            <div class="table-cell">
+                <a href="https://drive.google.com/file/d/1QPSrZ5XJXXqv2feqC6zcXdGZ1KJHyZqR/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> </div>
+
+            <div class="table-cell">
+                <a href="https://docs.google.com/spreadsheets/d/1IKH3MHKzQXJrPLSMJVega4UOeKhlnGDtYCZ3-n46ZpU/edit?gid=0#gid=0" target="_blank" class="drive-link-button">Zonal Safety Drive on Ambush Check during shunting for observance of shunting rules and precautions -  BSP Division (From 14.10.2025 to 28.10.2025)</a>
+            </div>
+            <div class="table-cell">
+                <a href="https://drive.google.com/file/d/12M18ZZ73REPSZom3V6H_t7jAJ6Lq01xJ/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> </div>
+            
+            <div class="table-cell">
+                <a href="https://forms.gle/ZTgp5pipvN2Rbx2B7" target="_blank" class="drive-link-button">Securing of load RB drive to ensure proper procedure of securing from 05/10/2025(09.09.2025 to 23.10.2025)</a>
+            </div>
+            <div class="table-cell">
+                <a href="https://drive.google.com/file/d/1M0u03M4drAVur70T_3EH_i3llKO_b6ge/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> </div>
+            
+            <div class="table-cell">
+                 <a href="https://docs.google.com/spreadsheets/d/1ejglvkneJDcuJWp8euJ1v4W8dcp2FZo04rwD37IOu8I/edit?usp=sharing" target="_blank" class="drive-link-button">30 days special drive on SPAD covering all LPs, ALPs, Track Machine Operators and Tower Wagon Operators at all locations of Indian Railways.(RB)(25.09.25 to 24.10.25)</a>
+            </div>
+            <div class="table-cell">
+                <a href="https://drive.google.com/file/d/1LTUDLNg3Y2tZSKmsWLEemQCeaJpmX9gN/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> </div>
+
+        </div>
         <br><br>
 
         <button type="submit">SUBMIT</button>
@@ -242,8 +299,7 @@
         input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
         fetchCLIData();
     }
-
-    // *** CHANGE: Logic fixed to show the correct message for each separate condition. ***
+    
     function formatCrewIDs(inputElement) {
         const messageElement = inputElement.nextElementSibling;
         let value = inputElement.value.toUpperCase().replace(/[^A-Z0-9,]/g, '');
@@ -251,27 +307,24 @@
         let lastIdSegment = ids[ids.length - 1];
         let message = '';
 
-        // Priority 1: Check for length violation first. This is the most immediate boundary.
         if (lastIdSegment.length > 8) {
-            message = 'Please Enter Comma.'; // Message for length error
+            message = 'Please Enter Comma.';
             lastIdSegment = lastIdSegment.substring(0, 8);
             ids[ids.length - 1] = lastIdSegment;
             value = ids.join(',');
 
-        // Priority 2: If length is okay, then check for combination violation.
         } else {
             const letterCount = (lastIdSegment.match(/[A-Z]/g) || []).length;
             const numberCount = (lastIdSegment.match(/[0-9]/g) || []).length;
 
             if (letterCount > 4 || numberCount > 4) {
-                message = 'Invalid combination (max 4 letters/numbers).'; // Message for combination error
+                message = 'Invalid combination (max 4 letters/numbers).';
                 lastIdSegment = lastIdSegment.slice(0, -1);
                 ids[ids.length - 1] = lastIdSegment;
                 value = ids.join(',');
             }
         }
 
-        // Update the UI with the correct message and value
         if (messageElement) {
             messageElement.textContent = message;
         }
@@ -410,6 +463,4 @@
     };
 </script>
 </body>
-
 </html>
-
