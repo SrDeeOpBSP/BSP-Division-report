@@ -142,7 +142,7 @@ async function fetchExternalSheetData(sheetUrl, fromDate, toDate, cliName, sheet
 async function fetchData(cliName, cliLobby, fromDate, toDate) {
     try {
         // Define column configurations for each sheet
-        const spmColumns = { timestamp: 0, cliName: 19, abnormality: 39 }; // A=0, T=19, AN=39
+        const spmColumns = { timestamp: 0, cliName: 19, abnormality: 40 }; // A=0, T=19, AN=39
         const cvvrsColumns = { timestamp: 0, cliName: 2, abnormality: 18 }; // B=0, D=2, T=18 (relative to B:T range)
 
         const [mainDataResponse, spmData, cvvrsData] = await Promise.all([
@@ -301,4 +301,5 @@ function downloadPDF() {
         }
     });
     pdf.save('report.pdf');
+
 }
