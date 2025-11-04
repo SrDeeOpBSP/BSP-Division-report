@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Railway CLI Form</title>
-    <!-- PapaParse library for reading CSV files -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         body {
@@ -60,7 +59,6 @@
             border-color: #3b82f6;
             box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
         }
-        /* Style for readonly fields */
         input:read-only {
             background-color: #e5e7eb;
             cursor: not-allowed;
@@ -115,6 +113,29 @@
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
+        
+        /* --- NEW CSS FOR RADIO BUTTONS --- */
+        .radio-group {
+            padding-top: 5px;
+        }
+        .radio-group div {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px; /* Spacing between radio options */
+        }
+        .radio-group input[type="radio"] {
+            width: auto; /* Override default input width */
+            margin: 0 10px 0 0; /* Top, Right, Bottom, Left */
+            margin-bottom: 0; /* Override default margin-bottom */
+            cursor: pointer;
+        }
+        .radio-group label {
+            margin-bottom: 0; /* Override default label margin */
+            font-weight: 400; /* Lighter font for options */
+            cursor: pointer;
+        }
+        /* --- END OF NEW CSS --- */
+
         @media (max-width: 600px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -224,6 +245,23 @@
                 <textarea id="abnormalities" name="abnormalities" placeholder="Description of abnormality as reported in CVVRS Format" required></textarea>
             </div>
             
+            <div class="form-group">
+                <label>Action Taken:</label>
+                <div class="radio-group">
+                    <div>
+                        <input type="radio" id="actionCounselling" name="actionTaken" value="Intensive counselling to crew" required>
+                        <label for="actionCounselling">Intensive counselling to crew</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="actionWarning" name="actionTaken" value="Warning Letter issued to LP and ALP">
+                        <label for="actionWarning">Warning Letter issued to LP and ALP</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="actionNil" name="actionTaken" value="Nil">
+                        <label for="actionNil">Nil</label>
+                    </div>
+                </div>
+            </div>
             <button type="submit" id="submitBtn">Submit</button>
             <p id="errorMsg" class="error">Failed to submit data. Please try again.</p>
             <p id="successMsg" class="success">Data submitted successfully!</p>
@@ -303,7 +341,7 @@
                 console.log(`${key}: ${value}`);
             }
 
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbz7LfUTot6JQEeq6j6ZVUX1Ma_vCqjFWEKZwY7WnZnYKw6ytdV0JQ2ieDv-yCQzQ4NE/exec';
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbxjG2zKE1-f3fCCh0VW0gRm6Bckz-f06hJc63pUui82BbR6dX6mVf-vueMFOtcN6Ejo/exec';
 
             try {
                 const response = await fetch(scriptURL, {
@@ -329,4 +367,3 @@
     </script>
 </body>
 </html>
-
