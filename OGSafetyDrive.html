@@ -250,7 +250,28 @@
             <label class="remark-label">Remark for this drive:</label>
             <textarea class="remark-input" rows="3" placeholder="Enter Winter and Fog specific remarks"></textarea>
         </div>
-        
+
+        <div class="drive-section">
+            <label for="crew_ids_rs_valve">Counselling to ALPs to conduct thorough RS valve checks during CTO and after every cab change</label>
+            <input 
+                type="text" 
+                id="crew_ids_rs_valve" 
+                class="crew-input" 
+                data-drive-name="Counselling to ALPs to conduct thorough RS valve checks during CTO and after every cab change"
+                placeholder="Enter Crew IDs, separated by comma..." 
+                oninput="formatCrewIDs(this)">
+            <p class="char-limit-message"></p>
+            
+            <label class="location-label">Counselling Done at:</label>
+            <select class="location-select">
+                <option value="">Select Location</option>
+                <option value="LOBBY">LOBBY</option>
+                <option value="FOOTPLATE">FOOTPLATE</option>
+            </select>
+
+            <label class="remark-label">Remark for this drive:</label>
+            <textarea class="remark-input" rows="3" placeholder="Enter RS valve check specific remarks"></textarea>
+        </div>
         <br>
         <label>ONGOING SAFETY DRIVE:</label>
         <div class="ongoing-drive-table">
@@ -258,6 +279,11 @@
                 <div>Drive / Google Link</div>
                 <div>Download PDF</div>
             </div>
+             <div class="table-cell">
+                <a href="https://forms.gle/muNYDjsXXVxJ2fAa8" target="_blank" class="drive-link-button">REPORTING FOR: MEMU FP DRIVE + 10 DAYS SPAD PREVENTION DRIVE FROM HQ + 15 DAYS SPAD PREVENTION DRIVE FROM RB</a>
+            </div>
+            <div class="table-cell">
+                <a href="https://drive.google.com/file/d/19PrBKPQzbB4jx3MlMEvfM3gFg8ybt0yM/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> </div>
 
             <div class="table-cell">
                 <a href="https://docs.google.com/spreadsheets/d/1FsxJngQ02n7k91uHUy3Er97DpNwFGl6Ie66olDOW8y4/edit?gid=0#gid=0" target="_blank" class="drive-link-button">CBC Uncoupling Prevention Drive(29.10.2025 to 28.11.2025)</a>
@@ -433,14 +459,14 @@
 
         Promise.all(submissionPromises).then(() => {
              setTimeout(() => {
-                alert("Data Successfully Submitted!");
-                document.getElementById("safetyDriveForm").reset();
-                document.querySelectorAll('.char-limit-message').forEach(el => el.textContent = '');
-                isSubmitting = false;
-                submitButton.disabled = false;
-                submitButton.innerText = "Submit";
-                submitButton.style.backgroundColor = "#007BFF";
-            }, 500);
+                 alert("Data Successfully Submitted!");
+                 document.getElementById("safetyDriveForm").reset();
+                 document.querySelectorAll('.char-limit-message').forEach(el => el.textContent = '');
+                 isSubmitting = false;
+                 submitButton.disabled = false;
+                 submitButton.innerText = "Submit";
+                 submitButton.style.backgroundColor = "#007BFF";
+             }, 500);
         });
     });
 
@@ -452,6 +478,3 @@
 </script>
 </body>
 </html>
-
-
-
