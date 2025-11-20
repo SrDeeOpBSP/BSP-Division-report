@@ -18,12 +18,11 @@
             width: 100%;
             padding: 8px;
             margin: 5px 0 10px;
-            box-sizing: border-box; /* Added for consistent sizing */
+            box-sizing: border-box;
         }
         textarea {
             height: 100px;
         }
-        /* Style for read-only fields to look disabled */
         input[readonly] {
             background-color: #f0f0f0;
             cursor: not-allowed;
@@ -57,7 +56,34 @@
 
         <label for="ABNORMALITIES ON FOOTPLATE EXCLUDING WEE HOURS">ABNORMALITIES ON FOOTPLATE EXCLUDING WEE HOURS:</label>
         <input type="number" id="ABNORMALITIES ON FOOTPLATE EXCLUDING WEE HOURS" name="ABNORMALITIES ON FOOTPLATE EXCLUDING WEE HOURS" min="0" required>
+
+        <label for="FOOT PLATE DONE IN COACHING">FOOT PLATE DONE IN COACHING:</label>
+        <input type="number" id="FOOT PLATE DONE IN COACHING" name="FOOT PLATE DONE IN COACHING" min="0" required>
+
+        <label for="ABNORMALITY COUNT DURING FOOTPLATE IN COACHING">ABNORMALITY COUNT DURING FOOTPLATE IN COACHING:</label>
+        <input type="number" id="ABNORMALITY COUNT DURING FOOTPLATE IN COACHING" name="ABNORMALITY COUNT DURING FOOTPLATE IN COACHING" min="0" required>
         
+        <label for="ABNORMALITY DETAIL DURING FOOTPLATE IN COACHING">ABNORMALITY DETAIL DURING FOOTPLATE IN COACHING:</label>
+        <textarea id="ABNORMALITY DETAIL DURING FOOTPLATE IN COACHING" name="ABNORMALITY DETAIL DURING FOOTPLATE IN COACHING">NIL</textarea>
+
+        <label for="FOOT PLATE DONE IN MEMU">FOOT PLATE DONE IN MEMU:</label>
+        <input type="number" id="FOOT PLATE DONE IN MEMU" name="FOOT PLATE DONE IN MEMU" min="0" required>
+
+        <label for="ABNORMALITY COUNT DURING FOOTPLATE IN MEMU">ABNORMALITY COUNT DURING FOOTPLATE IN MEMU:</label>
+        <input type="number" id="ABNORMALITY COUNT DURING FOOTPLATE IN MEMU" name="ABNORMALITY COUNT DURING FOOTPLATE IN MEMU" min="0" required>
+        
+        <label for="ABNORMALITY DETAIL DURING FOOTPLATE IN MEMU">ABNORMALITY DETAIL DURING FOOTPLATE IN MEMU:</label>
+        <textarea id="ABNORMALITY DETAIL DURING FOOTPLATE IN MEMU" name="ABNORMALITY DETAIL DURING FOOTPLATE IN MEMU">NIL</textarea>
+
+        <label for="FOOT PLATE DONE IN GOODS TRAIN">FOOT PLATE DONE IN GOODS TRAIN:</label>
+        <input type="number" id="FOOT PLATE DONE IN GOODS TRAIN" name="FOOT PLATE DONE IN GOODS TRAIN" min="0" required>
+
+        <label for="ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN">ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN:</label>
+        <input type="number" id="ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN" name="ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN" min="0" required>
+        
+        <label for="ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN">ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN:</label>
+        <textarea id="ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN" name="ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN">NIL</textarea>
+
         <label for="SIGNAL CALLING RHS/LHS DONE(YES/NO)">SIGNAL CALLING RHS/LHS DONE(YES/NO):</label>
         <select id="SIGNAL CALLING RHS/LHS DONE(YES/NO)" name="SIGNAL CALLING RHS/LHS DONE(YES/NO)" required>
             <option value="">--Select--</option>
@@ -195,6 +221,47 @@
     </form>
     
     <script src="Google sheet.js"></script>
+
+    <script>
+        function setupAutoFill(countId, detailId) {
+            var countInput = document.getElementById(countId);
+            var detailInput = document.getElementById(detailId);
+
+            if (countInput && detailInput) {
+                countInput.addEventListener('input', function() {
+                    var val = parseInt(this.value); // Convert input to number
+
+                    if (val > 0) {
+                        // Agar count 0 se bada hai aur abhi NIL likha hai, toh clear kardo
+                        if (detailInput.value === 'NIL') {
+                            detailInput.value = '';
+                        }
+                    } else {
+                        // Agar count 0 ya khali hai, toh wapas NIL likh do
+                        detailInput.value = 'NIL';
+                    }
+                });
+            }
+        }
+
+        // Setup for Coaching
+        setupAutoFill(
+            'ABNORMALITY COUNT DURING FOOTPLATE IN COACHING', 
+            'ABNORMALITY DETAIL DURING FOOTPLATE IN COACHING'
+        );
+
+        // Setup for MEMU
+        setupAutoFill(
+            'ABNORMALITY COUNT DURING FOOTPLATE IN MEMU', 
+            'ABNORMALITY DETAIL DURING FOOTPLATE IN MEMU'
+        );
+
+        // Setup for Goods Train
+        setupAutoFill(
+            'ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN', 
+            'ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN'
+        );
+    </script>
 
 </body>
 </html>
