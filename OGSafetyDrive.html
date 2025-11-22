@@ -6,7 +6,7 @@
     <title>REGULAR AND ONGOING SAFETY DRIVE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
-    /* === PAGE BACKGROUND (Colorful Gradient) === */
+    /* === PAGE BACKGROUND === */
     body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         background: linear-gradient(135deg, #a1c4fd 20%, #c2e9fb 60%, #f6cfbe 100%);
@@ -16,15 +16,11 @@
         line-height: 1.6;
     }
 
-    h2 {
-        text-align: center;
-        color: #2c3e50;
-        margin-bottom: 30px;
-    }
+    h2 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
 
-    /* === FORM STYLING (Frosted Glass Effect) === */
+    /* === FORM STYLING === */
     form {
-        max-width: 800px; /* Increased width to better accommodate the new table */
+        max-width: 800px;
         margin: auto;
         padding: 30px;
         background-color: rgba(255, 255, 255, 0.85); 
@@ -33,14 +29,8 @@
         border: 1px solid rgba(255, 255, 255, 0.4);
         border-radius: 15px;
         box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-        transition: all 0.3s ease;
     }
 
-    form:hover {
-        box-shadow: 0 10px 40px rgba(31, 38, 135, 0.25);
-    }
-
-    /* === LABELS AND INPUT FIELDS === */
     label {
         display: block;
         margin-top: 15px;
@@ -49,10 +39,7 @@
         color: #34495e;
     }
 
-    input[type="text"],
-    input[type="date"],
-    select,
-    textarea {
+    input[type="text"], input[type="date"], select, textarea {
         width: 100%;
         padding: 12px;
         margin-top: 5px;
@@ -63,15 +50,12 @@
         transition: border-color 0.3s, box-shadow 0.3s;
     }
 
-    input[type="text"]:focus,
-    input[type="date"]:focus,
-    select:focus,
-    textarea:focus {
+    input:focus, select:focus, textarea:focus {
         border-color: #007BFF;
         box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
         outline: none;
     }
-    
+
     /* === DRIVE SECTION STYLING === */
     .drive-section {
         border: 1px solid #e9ecef;
@@ -81,27 +65,37 @@
         background-color: rgba(255, 255, 255, 0.5);
     }
 
-    .drive-section > label {
-         margin-top: 0;
-         margin-bottom: 10px;
-         color: #2c3e50;
-    }
-
-    .location-label, .remark-label {
+    .location-label, .remark-label, .abnormality-label {
          margin-top: 15px !important; 
          font-weight: normal !important;
          color: #555;
     }
     
-    /* Style for the helper message */
-    .char-limit-message {
-        color: #d9534f; /* Red color */
-        font-size: 0.85em;
-        margin-top: 5px;
-        height: 15px; /* Reserve space to prevent layout shift */
+    .char-limit-message { color: #d9534f; font-size: 0.85em; margin-top: 5px; height: 15px; }
+
+    /* === ACTION TAKEN SECTION === */
+    .action-taken-container {
+        margin-top: 15px;
+        padding: 15px;
+        border: 1px dashed #007BFF;
+        border-radius: 8px;
+        background-color: rgba(0, 123, 255, 0.05);
+        display: none; /* Hidden by default */
     }
 
-    /* === BUTTON STYLING === */
+    .checkbox-group {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+        width: auto;
+        margin-right: 5px;
+    }
+
+    /* === BUTTONS === */
     button {
         background: linear-gradient(45deg, #007BFF, #0056b3);
         color: white;
@@ -116,78 +110,22 @@
         transition: all 0.3s ease;
         box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
     }
+    button:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3); }
+    button:disabled { background: linear-gradient(45deg, #ff9d2f, #ff6b00); cursor: not-allowed; transform: none; }
 
-    button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
-    }
-    
-    button:disabled {
-        background: linear-gradient(45deg, #ff9d2f, #ff6b00);
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-    }
-    
-    /* === ONGOING DRIVE TABLE STYLING === */
+    /* === TABLE STYLES === */
     .ongoing-drive-table {
-        display: grid;
-        grid-template-columns: 3fr 1fr; /* 1st column is 3x wider than 2nd */
-        gap: 15px;
-        margin-top: 10px;
-        padding: 20px;
-        background-color: rgba(255, 255, 255, 0.5);
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
+        display: grid; grid-template-columns: 3fr 1fr; gap: 15px; margin-top: 10px; padding: 20px;
+        background-color: rgba(255, 255, 255, 0.5); border: 1px solid #e9ecef; border-radius: 8px;
     }
-
-    .table-header {
-        grid-column: 1 / -1; /* Header spans both columns */
-        display: grid;
-        grid-template-columns: 3fr 1fr;
-        gap: 15px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #ced4da;
-        font-weight: bold;
-        color: #2c3e50;
-    }
-
-    .table-cell {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    /* === BUTTON STYLES FOR THE TABLE === */
+    .table-header { grid-column: 1 / -1; display: grid; grid-template-columns: 3fr 1fr; gap: 15px; padding-bottom: 10px; border-bottom: 2px solid #ced4da; font-weight: bold; color: #2c3e50; }
+    .table-cell { display: flex; align-items: center; justify-content: center; }
     .drive-link-button, .pdf-link-button {
-        width: 100%; /* Make buttons fill the cell width */
-        padding: 12px;
-        text-align: center;
-        text-decoration: none;
-        color: white;
-        border-radius: 8px;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        display: flex; /* Added for vertical centering */
-        align-items: center; /* Added for vertical centering */
-        justify-content: center; /* Added for horizontal centering */
-        min-height: 60px; /* Ensures buttons have a consistent height */
+        width: 100%; padding: 12px; text-align: center; text-decoration: none; color: white; border-radius: 8px; font-weight: bold; display: flex; align-items: center; justify-content: center; min-height: 60px;
     }
-
-    .drive-link-button:hover, .pdf-link-button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-    }
-
-    .drive-link-button {
-        background: linear-gradient(45deg, #28a745, #218838); /* Green */
-    }
-
-    .pdf-link-button {
-        background: linear-gradient(45deg, #fd7e14, #ffc107); /* Orange */
-    }
-</style>
+    .drive-link-button { background: linear-gradient(45deg, #28a745, #218838); }
+    .pdf-link-button { background: linear-gradient(45deg, #fd7e14, #ffc107); }
+    </style>
 </head>
 <body>
     <h2 style="text-align: center;">REGULAR AND ONGOING SAFETY DRIVE</h2>
@@ -209,13 +147,7 @@
 
         <div class="drive-section">
             <label for="crew_ids_spad">RAILWAY BOARD SAFETY DRIVE COUNSELLING ON SPAD</label>
-            <input 
-                type="text" 
-                id="crew_ids_spad" 
-                class="crew-input" 
-                data-drive-name="RAILWAY BOARD SAFETY DRIVE COUNSELLING ON SPAD"
-                placeholder="Enter Crew IDs, separated by comma..." 
-                oninput="formatCrewIDs(this)">
+            <input type="text" id="crew_ids_spad" class="crew-input" data-drive-name="RAILWAY BOARD SAFETY DRIVE COUNSELLING ON SPAD" placeholder="Enter Crew IDs, separated by comma..." oninput="formatCrewIDs(this)">
             <p class="char-limit-message"></p>
             
             <label class="location-label">Counselling Done at:</label>
@@ -225,19 +157,25 @@
                 <option value="FOOTPLATE">FOOTPLATE</option>
             </select>
 
+            <label class="abnormality-label">Abnormalities Found on this drive:</label>
+            <input type="text" class="abnormality-input" value="NIL" oninput="checkAbnormalities(this)">
+
+            <div class="action-taken-container">
+                <label style="margin-top:0;">Action Taken:</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" class="action-cms"> Reported in CMS</label>
+                    <label><input type="checkbox" class="action-other" onchange="toggleOtherText(this)"> Other</label>
+                </div>
+                <input type="text" class="action-other-text" placeholder="Please specify other action taken..." style="display:none;">
+            </div>
+
             <label class="remark-label">Remark for this drive:</label>
-            <textarea class="remark-input" rows="3" placeholder="Enter SPAD specific remarks"></textarea>
+            <textarea class="remark-input" rows="3" placeholder="Enter remarks"></textarea>
         </div>
 
         <div class="drive-section">
             <label for="crew_ids_winter">WINTER AND FOG PRECAUTION SAFETY DRIVE</label>
-            <input 
-                type="text" 
-                id="crew_ids_winter" 
-                class="crew-input" 
-                data-drive-name="WINTER AND FOG PRECAUTION SAFETY DRIVE"
-                placeholder="Enter Crew IDs, separated by comma..." 
-                oninput="formatCrewIDs(this)">
+            <input type="text" id="crew_ids_winter" class="crew-input" data-drive-name="WINTER AND FOG PRECAUTION SAFETY DRIVE" placeholder="Enter Crew IDs, separated by comma..." oninput="formatCrewIDs(this)">
             <p class="char-limit-message"></p>
                 
             <label class="location-label">Counselling Done at:</label>
@@ -247,19 +185,25 @@
                 <option value="FOOTPLATE">FOOTPLATE</option>
             </select>
 
+            <label class="abnormality-label">Abnormalities Found on this drive:</label>
+            <input type="text" class="abnormality-input" value="NIL" oninput="checkAbnormalities(this)">
+
+            <div class="action-taken-container">
+                <label style="margin-top:0;">Action Taken:</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" class="action-cms"> Reported in CMS</label>
+                    <label><input type="checkbox" class="action-other" onchange="toggleOtherText(this)"> Other</label>
+                </div>
+                <input type="text" class="action-other-text" placeholder="Please specify other action taken..." style="display:none;">
+            </div>
+
             <label class="remark-label">Remark for this drive:</label>
-            <textarea class="remark-input" rows="3" placeholder="Enter Winter and Fog specific remarks"></textarea>
+            <textarea class="remark-input" rows="3" placeholder="Enter remarks"></textarea>
         </div>
 
         <div class="drive-section">
             <label for="crew_ids_rs_valve">Counselling to ALPs to conduct thorough RS valve checks during CTO and after every cab change</label>
-            <input 
-                type="text" 
-                id="crew_ids_rs_valve" 
-                class="crew-input" 
-                data-drive-name="Counselling to ALPs to conduct thorough RS valve checks during CTO and after every cab change"
-                placeholder="Enter Crew IDs, separated by comma..." 
-                oninput="formatCrewIDs(this)">
+            <input type="text" id="crew_ids_rs_valve" class="crew-input" data-drive-name="Counselling to ALPs to conduct thorough RS valve checks during CTO and after every cab change" placeholder="Enter Crew IDs, separated by comma..." oninput="formatCrewIDs(this)">
             <p class="char-limit-message"></p>
             
             <label class="location-label">Counselling Done at:</label>
@@ -269,9 +213,22 @@
                 <option value="FOOTPLATE">FOOTPLATE</option>
             </select>
 
+            <label class="abnormality-label">Abnormalities Found on this drive:</label>
+            <input type="text" class="abnormality-input" value="NIL" oninput="checkAbnormalities(this)">
+
+            <div class="action-taken-container">
+                <label style="margin-top:0;">Action Taken:</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" class="action-cms"> Reported in CMS</label>
+                    <label><input type="checkbox" class="action-other" onchange="toggleOtherText(this)"> Other</label>
+                </div>
+                <input type="text" class="action-other-text" placeholder="Please specify other action taken..." style="display:none;">
+            </div>
+
             <label class="remark-label">Remark for this drive:</label>
-            <textarea class="remark-input" rows="3" placeholder="Enter RS valve check specific remarks"></textarea>
+            <textarea class="remark-input" rows="3" placeholder="Enter remarks"></textarea>
         </div>
+
         <br>
         <label>ONGOING SAFETY DRIVE:</label>
         <div class="ongoing-drive-table">
@@ -280,7 +237,7 @@
                 <div>Download PDF</div>
             </div>
              <div class="table-cell">
-                <a href="https://forms.gle/muNYDjsXXVxJ2fAa8" target="_blank" class="drive-link-button">REPORTING FOR: MEMU/OTHER TRAIN FP DRIVE + 10 DAYS SPAD PREVENTION DRIVE FROM HQ + 15 DAYS SPAD PREVENTION DRIVE FROM RB</a>
+                <a href="https://forms.gle/muNYDjsXXVxJ2fAa8" target="_blank" class="drive-link-button">REPORTING FOR: MEMU FP DRIVE + 10 DAYS SPAD PREVENTION DRIVE FROM HQ + 15 DAYS SPAD PREVENTION DRIVE FROM RB</a>
             </div>
             <div class="table-cell">
                 <a href="https://drive.google.com/file/d/19PrBKPQzbB4jx3MlMEvfM3gFg8ybt0yM/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> </div>
@@ -296,7 +253,6 @@
             </div>
             <div class="table-cell">
                 <a href="https://drive.google.com/file/d/1YGfErB9agKUotz2CyfIDxASiRjgu8GUM/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> </div>
-
         </div>
         <br><br>
 
@@ -307,6 +263,38 @@
     let cliData = {};
     let crewData = {};
     let isSubmitting = false;
+
+    // === NEW FUNCTIONS FOR ABNORMALITIES & ACTION TAKEN ===
+    
+    function checkAbnormalities(inputElement) {
+        const driveSection = inputElement.closest('.drive-section');
+        const actionContainer = driveSection.querySelector('.action-taken-container');
+        
+        // If value is NOT "NIL" (case insensitive), show action section
+        if (inputElement.value.trim().toUpperCase() !== 'NIL') {
+            actionContainer.style.display = 'block';
+        } else {
+            actionContainer.style.display = 'none';
+            // Reset fields if hidden
+            driveSection.querySelector('.action-cms').checked = false;
+            driveSection.querySelector('.action-other').checked = false;
+            driveSection.querySelector('.action-other-text').style.display = 'none';
+            driveSection.querySelector('.action-other-text').value = '';
+        }
+    }
+
+    function toggleOtherText(checkbox) {
+        const driveSection = checkbox.closest('.drive-section');
+        const otherTextInput = driveSection.querySelector('.action-other-text');
+        if (checkbox.checked) {
+            otherTextInput.style.display = 'block';
+        } else {
+            otherTextInput.style.display = 'none';
+            otherTextInput.value = '';
+        }
+    }
+
+    // === EXISTING FUNCTIONS ===
 
     function formatCLIID() {
         let input = document.getElementById("cli_id");
@@ -344,7 +332,6 @@
         }
         inputElement.value = value;
     }
-
 
     function loadCLIData() {
         fetch('CLIMICRO.csv')
@@ -429,7 +416,25 @@
 
             const driveSection = inputField.closest('.drive-section');
             const locationValue = driveSection.querySelector('.location-select').value;
-            const remarkValue = driveSection.querySelector('.remark-input').value; 
+            const remarkValue = driveSection.querySelector('.remark-input').value;
+            
+            // === NEW LOGIC FOR ABNORMALITIES & ACTION ===
+            const abnormalitiesValue = driveSection.querySelector('.abnormality-input').value;
+            let actionTakenString = "";
+
+            if (abnormalitiesValue.trim().toUpperCase() !== 'NIL') {
+                let actions = [];
+                if (driveSection.querySelector('.action-cms').checked) {
+                    actions.push("Reported in CMS");
+                }
+                if (driveSection.querySelector('.action-other').checked) {
+                    let otherText = driveSection.querySelector('.action-other-text').value;
+                    actions.push("Other: " + otherText);
+                }
+                actionTakenString = actions.join(', ');
+            }
+            // =============================================
+
             let crewIDs = crewIDsString.split(',').filter(id => id.trim() !== "");
 
             crewIDs.forEach(crewID => {
@@ -444,13 +449,18 @@
                 jsonData["drive_name"] = driveName;
                 jsonData["counselling_location"] = locationValue;
                 jsonData["remark"] = remarkValue;
+                
+                // Add new fields to JSON
+                jsonData["abnormalities"] = abnormalitiesValue;
+                jsonData["action_taken"] = actionTakenString;
+
                 jsonData["crew_id"] = crewID;
                 jsonData["crew_name"] = crewData[crewID] ? crewData[crewID].name : "Not Found";
                 jsonData["desg"] = crewData[crewID] ? crewData[crewID].desg : "N/A";
                 jsonData["hq"] = crewData[crewID] ? crewData[crewID].hq : "N/A";
                 jsonData["timestamp"] = new Date().toISOString();
 
-                let promise = fetch("https://script.google.com/macros/s/AKfycbxcHjGqLFAVKLgvKn1MUVKqjeyw1ZAF9nmoQLIESRm3my6f5Tmy1Ihl5kTY-CXSOTtE8Q/exec", {
+                let promise = fetch("https://script.google.com/macros/s/AKfycbz7VLDi96OQTKCbrveBmauU3mTJSFYyydtlx67qFoO0dPUwI5KU-60HaJGoHwmKlhx-kw/exec", {
                     method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(jsonData)
                 });
                 submissionPromises.push(promise);
@@ -461,6 +471,12 @@
              setTimeout(() => {
                  alert("Data Successfully Submitted!");
                  document.getElementById("safetyDriveForm").reset();
+                 
+                 // Reset UI for new fields
+                 document.querySelectorAll('.action-taken-container').forEach(el => el.style.display = 'none');
+                 document.querySelectorAll('.action-other-text').forEach(el => el.style.display = 'none');
+                 document.querySelectorAll('.abnormality-input').forEach(el => el.value = 'NIL');
+                 
                  document.querySelectorAll('.char-limit-message').forEach(el => el.textContent = '');
                  isSubmitting = false;
                  submitButton.disabled = false;
@@ -478,4 +494,3 @@
 </script>
 </body>
 </html>
-
