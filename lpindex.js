@@ -154,7 +154,7 @@ document.getElementById('footplateForm').addEventListener('submit', function(eve
 
     console.log('Final Data being submitted:', data);
 
-    fetch('https://script.google.com/macros/s/AKfycby3eD7SlhNdZ632fu5_h7rSnanaMvmH-hwAYhFjK21ulEbswrX7rjCyMnNIpNMoJwFd/exec', {
+    fetch('https://script.google.com/macros/s/AKfycbxbHiwAGtuvUh_0M3eGX3gQZ1SGA96ffn9Tw93aKGZbU-8fMtArUmpqzGgfI-CqSOyG/exec', {
         method: 'POST',
         mode: 'no-cors',
         headers: {
@@ -185,4 +185,5 @@ document.getElementById('footplateForm').addEventListener('submit', function(eve
     .finally(() => {
         submitButton.disabled = false;
     });
+
 });
