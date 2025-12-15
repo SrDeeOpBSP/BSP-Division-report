@@ -230,33 +230,14 @@
         </div>
 
         <div class="drive-section">
-            <label for="crew_ids_rs_valve">Counselling to ALPs to conduct thorough RS valve checks during CTO and after every cab change</label>
-            <input type="text" id="crew_ids_rs_valve" class="crew-input" data-drive-name="Counselling to ALPs to conduct thorough RS valve checks during CTO and after every cab change" placeholder="Enter Crew IDs, separated by comma..." oninput="formatCrewIDs(this)">
+            <label for="crew_ids_rs_valve">Practical RS Application during Footplate</label>
+            <input type="text" id="crew_ids_rs_valve" class="crew-input" data-drive-name="Practical RS Application during Footplate" placeholder="Enter Crew IDs, separated by comma..." oninput="formatCrewIDs(this)">
             <p class="char-limit-message"></p>
             
-            <label class="location-label">Counselling Done at:</label>
-            <select class="location-select">
-                <option value="">Select Location</option>
-                <option value="LOBBY">LOBBY</option>
-                <option value="FOOTPLATE">FOOTPLATE</option>
-            </select>
+            <label class="location-label">Practical RS Application done at :</label>
+            <input type="text" class="location-input" placeholder="Enter Location">
 
-            <label class="abnormality-label">Abnormalities Found on this drive:</label>
-            <input type="text" class="abnormality-input" value="NIL" oninput="checkAbnormalities(this)">
-
-            <div class="action-taken-container">
-                <label style="margin-top:0;">Action Taken:</label>
-                <div class="checkbox-group">
-                    <label><input type="checkbox" class="action-cms"> Reported in CMS</label>
-                    <label><input type="checkbox" class="action-other" onchange="toggleOtherText(this)"> Other</label>
-                </div>
-                <input type="text" class="action-other-text" placeholder="Please specify other action taken..." style="display:none;">
             </div>
-
-            <label class="remark-label">Remark for this drive:</label>
-            <textarea class="remark-input" rows="3" placeholder="Enter remarks"></textarea>
-        </div>
-
         <br>
         <label>ONGOING SAFETY DRIVE:</label>
         <div class="ongoing-drive-table">
@@ -291,6 +272,9 @@
         const driveSection = inputElement.closest('.drive-section');
         const actionContainer = driveSection.querySelector('.action-taken-container');
         
+        // Safety check if element exists (since some sections don't have it)
+        if (!actionContainer) return;
+
         // If value is NOT "NIL" (case insensitive), show action section
         if (inputElement.value.trim().toUpperCase() !== 'NIL') {
             actionContainer.style.display = 'block';
@@ -392,10 +376,12 @@
                 const driveSection = input.closest('.drive-section');
                 const driveLabel = driveSection.querySelector('label').innerText;
                 
-                const locationSelect = driveSection.querySelector('.location-select');
-                if (locationSelect.value === "") {
+                // === UPDATED LOCATION CHECK (Supports Select or Input) ===
+                const locationElement = driveSection.querySelector('.location-select') || driveSection.querySelector('.location-input');
+                
+                if (!locationElement || locationElement.value.trim() === "") {
                     validationError = true;
-                    alert(`Please select a location for the drive: "${driveLabel}"`);
+                    alert(`Please enter/select a location for the drive: "${driveLabel}"`);
                     return;
                 }
 
@@ -436,19 +422,27 @@
             if (crewIDsString === "") return;
 
             const driveSection = inputField.closest('.drive-section');
-            const locationValue = driveSection.querySelector('.location-select').value;
-            const remarkValue = driveSection.querySelector('.remark-input').value;
             
-            // === NEW LOGIC FOR ABNORMALITIES & ACTION ===
-            const abnormalitiesValue = driveSection.querySelector('.abnormality-input').value;
+            // === UPDATED DATA RETRIEVAL (Safely handles missing fields) ===
+            const locationElement = driveSection.querySelector('.location-select') || driveSection.querySelector('.location-input');
+            const locationValue = locationElement ? locationElement.value : "";
+
+            const remarkElement = driveSection.querySelector('.remark-input');
+            const remarkValue = remarkElement ? remarkElement.value : "";
+            
+            const abnElement = driveSection.querySelector('.abnormality-input');
+            const abnormalitiesValue = abnElement ? abnElement.value : "NIL"; // Default to NIL if missing
+
             let actionTakenString = "";
 
-            if (abnormalitiesValue.trim().toUpperCase() !== 'NIL') {
+            if (abnormalitiesValue.trim().toUpperCase() !== 'NIL' && abnormalitiesValue !== "NIL") {
                 let actions = [];
-                if (driveSection.querySelector('.action-cms').checked) {
-                    actions.push("Reported in CMS");
-                }
-                if (driveSection.querySelector('.action-other').checked) {
+                // Check if elements exist before accessing 'checked' property
+                let cmsCb = driveSection.querySelector('.action-cms');
+                if (cmsCb && cmsCb.checked) actions.push("Reported in CMS");
+                
+                let otherCb = driveSection.querySelector('.action-other');
+                if (otherCb && otherCb.checked) {
                     let otherText = driveSection.querySelector('.action-other-text').value;
                     actions.push("Other: " + otherText);
                 }
@@ -493,7 +487,7 @@
                  alert("Data Successfully Submitted!");
                  document.getElementById("safetyDriveForm").reset();
                  
-                 // Reset UI for new fields
+                 // Reset UI for new fields (safely)
                  document.querySelectorAll('.action-taken-container').forEach(el => el.style.display = 'none');
                  document.querySelectorAll('.action-other-text').forEach(el => el.style.display = 'none');
                  document.querySelectorAll('.abnormality-input').forEach(el => el.value = 'NIL');
@@ -515,4 +509,3 @@
 </script>
 </body>
 </html>
-
