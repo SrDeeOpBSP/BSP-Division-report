@@ -203,9 +203,38 @@
             'ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN', 
             'ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN'
         );
+        function setDateBoundaries() {
+            var dateInput = document.getElementById("DATE");
+            var today = new Date(); // Aaj ki current date aur time system se lega
+
+            // 1. Aaj ki date (Maximum allowed date) set karna
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+            var yyyy = today.getFullYear();
+            
+            var maxDate = yyyy + '-' + mm + '-' + dd;
+            dateInput.setAttribute("max", maxDate); // User aaj se aage ki date select nahi kar payega
+
+            // 2. Pichle 2 din calculate karna (Minimum allowed date)
+            // Example: Agar aaj 27 hai, toh hum 2 din piche jayenge -> 25
+            var minDateObj = new Date();
+            minDateObj.setDate(today.getDate() - 2); 
+            
+            var min_dd = String(minDateObj.getDate()).padStart(2, '0');
+            var min_mm = String(minDateObj.getMonth() + 1).padStart(2, '0');
+            var min_yyyy = minDateObj.getFullYear();
+
+            var minDate = min_yyyy + '-' + min_mm + '-' + min_dd;
+            dateInput.setAttribute("min", minDate); // User is date se purani date select nahi kar payega
+        }
+
+        // Page load hone par function run karein
+        window.onload = function() {
+            setDateBoundaries();
+            // Agar aapke paas koi aur window.onload function hai toh usse yaha merge kar sakte hain
+        };
     </script>
 
 </body>
 </html>
-
 
