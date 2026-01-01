@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LI GRADING Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+        .header-note {
+            text-align: center;
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 30px;
+        }
+        .date-range {
+            text-align: center;
+            background: #e8f5e9;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #2e7d32;
+        }
+        label {
+            display: block;
+            margin: 12px 0 6px;
+            font-weight: bold;
+        }
+        select, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button#printBtn {
+            background-color: #2196F3;
+            margin-top: 10px;
+        }
+        button#printBtn:hover {
+            background-color: #1976D2;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #summaryReport, #detailReport {
+            margin-top: 25px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 35px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .section-title {
+            color: #333;
+            margin: 30px 0 10px;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 8px;
+            font-size: 1.5em;
+        }
+        .count-badge {
+            background: #ff5722;
+            color: white;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-left: 10px;
+            font-size: 0.95em;
+        }
+        #status {
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+            color: #d32f2f;
+        }
+        .highlight {
+            background-color: #fff3e0 !important;
+            font-weight: bold;
+        }
+        .blank-due {
+            background-color: #ffebee !important;
+            color: #c62828;
+            font-weight: bold;
+        }
+        .print-only {
+            display: none;
+        }
+        @media print {
+            body, .container { background: white; padding: 10px; }
+            button, select, label, #status { display: none !important; }
+            .print-only { display: block !important; text-align: center; margin-bottom: 20px; }
+            .date-range { display: block !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LI Overdue Analysis</h1>
+        <p class="header-note">Crew Overdue Monitoring System</p>
+        
+        <label for="cliSelect">Select CLI Name for Detailed Report:</label>
+        <select id="cliSelect">
+            <option value="">-- Show Summary for All CLI --</option>
+        </select>
+        
+        <label for="dueSelect">Select Due Period:</label>
+        <select id="dueSelect">
+            <option value="present day">Present Day</option>
+            <option value="1 week">1 Week</option>
+            <option value="this month">This Month</option>
+        </select>
+        
+        <button id="showBtn">Show Detailed Report</button>
+        <button id="printBtn">Print / Save as PDF</button>
+        
+        <div id="dateRange" class="date-range" style="display:none;"></div>
+        
+        <div id="status">Loading Excel file...</div>
+        
+        <div id="summaryReport"></div>
+        <div id="detailReport"></div>
+
+        <!-- Print only elements -->
+        <div class="print-only" id="printHeader"></div>
+        <div class="print-only" id="printDateRange"></div>
+    </div>
+
+    <script>
+        let excelData = [];
+        const CLI_ID_COL = 1;   // B
+        const CLI_COL = 2;      // C
+        const CREW_ID_COL = 3;  // D
+        const NAME_COL = 4;     // E
+        const DESIG_COL = 5;    // F
+        const GRADING_DUE_COL = 10; // K
+        const COUNSEL_DUE_COL = 13; // N
+        const FOOTPLATE_DUE_COL = 17; // R
+        const EXCEL_FILE = 'LI GRADING.xlsx';
+
+        const cliSelect = document.getElementById('cliSelect');
+        const dueSelect = document.getElementById('dueSelect');
+        const showBtn = document.getElementById('showBtn');
+        const printBtn = document.getElementById('printBtn');
+        const summaryDiv = document.getElementById('summaryReport');
+        const detailDiv = document.getElementById('detailReport');
+        const dateRangeDiv = document.getElementById('dateRange');
+        const statusDiv = document.getElementById('status');
+        const printHeader = document.getElementById('printHeader');
+        const printDateRange = document.getElementById('printDateRange');
+
+        window.addEventListener('load', loadExcel);
+
+        async function loadExcel() {
+            try {
+                const response = await fetch(EXCEL_FILE);
+                if (!response.ok) throw new Error('File not found or inaccessible');
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                const allRows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+                if (allRows.length < 4) {
+                    statusDiv.textContent = 'Invalid Excel format - insufficient data rows.';
+                    return;
+                }
+                excelData = allRows.slice(3); // Data from row 4 onwards
+
+                populateCLIList();
+                generateSummaryReport();
+
+                statusDiv.textContent = '';
+            } catch (error) {
+                statusDiv.textContent = 'Error loading Excel file: ' + error.message + '. Make sure "LI GRADING.xlsx" is in the same folder.';
+            }
+        }
+
+        function populateCLIList() {
+            const cliSet = new Set();
+            excelData.forEach(row => {
+                const cli = row[CLI_COL];
+                if (cli && typeof cli === 'string' && cli.trim() !== '') {
+                    cliSet.add(cli.trim());
+                }
+            });
+
+            // Sort CLI names alphabetically
+            const sortedCLIs = Array.from(cliSet).sort();
+            sortedCLIs.forEach(cli => {
+                const option = document.createElement('option');
+                option.value = cli;
+                option.textContent = cli;
+                cliSelect.appendChild(option);
+            });
+        }
+
+        function generateSummaryReport() {
+            const currentDate = new Date();
+            const today = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+
+            const cliMap = new Map();
+
+            excelData.forEach(row => {
+                const cliID = row[CLI_ID_COL] || '';
+                const cliName = row[CLI_COL] ? row[CLI_COL].trim() : '';
+                const desig = row[DESIG_COL];
+
+                if (!cliName) return;
+
+                if (!cliMap.has(cliName)) {
+                    cliMap.set(cliName, {
+                        cliID: cliID,
+                        cliName: cliName,
+                        grading: 0,
+                        counsel: 0,
+                        footplate: 0
+                    });
+                }
+
+                const entry = cliMap.get(cliName);
+
+                if (desig !== 'LPG' && desig !== 'LPP' && desig !== 'LPM') return;
+
+                if (isOverdue(row[GRADING_DUE_COL], today)) entry.grading++;
+                if (isOverdue(row[COUNSEL_DUE_COL], today)) entry.counsel++;
+                if (isOverdue(row[FOOTPLATE_DUE_COL], today)) entry.footplate++;
+            });
+
+            let html = `
+                <h2 class="section-title">Overdue Summary (As on Today: ${currentDate.toLocaleDateString('en-GB')})</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>CLI ID</th>
+                            <th>CLI Name</th>
+                            <th>GRADING</th>
+                            <th>COUNSEL</th>
+                            <th>FOOTPLATE</th>
+                            <th>TOTAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+            const sortedEntries = Array.from(cliMap.values()).sort((a, b) => a.cliName.localeCompare(b.cliName));
+
+            let grandTotal = 0;
+            sortedEntries.forEach(item => {
+                const total = item.grading + item.counsel + item.footplate;
+                grandTotal += total;
+                const rowClass = total > 0 ? 'class="highlight"' : '';
+                html += `<tr ${rowClass}>
+                    <td>${item.cliID}</td>
+                    <td>${item.cliName}</td>
+                    <td>${item.grading}</td>
+                    <td>${item.counsel}</td>
+                    <td>${item.footplate}</td>
+                    <td><strong>${total}</strong></td>
+                </tr>`;
+            });
+
+            html += `<tr style="background:#4CAF50; color:white; font-weight:bold;">
+                <td colspan="5">GRAND TOTAL</td>
+                <td>${grandTotal}</td>
+            </tr>`;
+
+            html += `</tbody></table>`;
+            summaryDiv.innerHTML = html;
+            detailDiv.innerHTML = '';
+            dateRangeDiv.style.display = 'none';
+
+            // For print
+            printHeader.innerHTML = '<h1>LI GRADING Overdue Summary Report</h1><p>Generated on: ' + currentDate.toLocaleDateString('en-GB') + '</p>';
+            printDateRange.innerHTML = '';
+        }
+
+        showBtn.addEventListener('click', () => {
+            const selectedCLI = cliSelect.value;
+
+            if (!selectedCLI) {
+                generateSummaryReport();
+                return;
+            }
+
+            generateDetailedReport(selectedCLI);
+        });
+
+        function generateDetailedReport(selectedCLI) {
+            const selectedDue = dueSelect.value;
+            const currentDate = new Date();
+            let dueEnd = new Date(currentDate);
+
+            let rangeText = '';
+            if (selectedDue === 'present day') {
+                rangeText = `Report for Present Day: ${currentDate.toLocaleDateString('en-GB')}`;
+            } else if (selectedDue === '1 week') {
+                dueEnd.setDate(dueEnd.getDate() + 7);
+                rangeText = `Report for 1 Week: From ${currentDate.toLocaleDateString('en-GB')} to ${dueEnd.toLocaleDateString('en-GB')}`;
+            } else if (selectedDue === 'this month') {
+                dueEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+                rangeText = `Report for This Month (up to): ${dueEnd.toLocaleDateString('en-GB')}`;
+            }
+
+            dateRangeDiv.textContent = rangeText;
+            dateRangeDiv.style.display = 'block';
+
+            const cliRows = excelData.filter(row => row[CLI_COL] && row[CLI_COL].trim() === selectedCLI);
+
+            let gradingOverdue = cliRows.filter(row => {
+                const desig = row[DESIG_COL];
+                return (desig === 'LPG' || desig === 'LPP' || desig === 'LPM') && isOverdue(row[GRADING_DUE_COL], dueEnd);
+            });
+            gradingOverdue.sort((a, b) => compareDates(a[GRADING_DUE_COL], b[GRADING_DUE_COL]));
+
+            let counselOverdue = cliRows.filter(row => {
+                const desig = row[DESIG_COL];
+                return (desig === 'LPG' || desig === 'LPP' || desig === 'LPM') && isOverdue(row[COUNSEL_DUE_COL], dueEnd);
+            });
+            counselOverdue.sort((a, b) => compareDates(a[COUNSEL_DUE_COL], b[COUNSEL_DUE_COL]));
+
+            let footplateOverdue = cliRows.filter(row => {
+                const desig = row[DESIG_COL];
+                return (desig === 'LPG' || desig === 'LPP' || desig === 'LPM') && isOverdue(row[FOOTPLATE_DUE_COL], dueEnd);
+            });
+            footplateOverdue.sort((a, b) => compareDates(a[FOOTPLATE_DUE_COL], b[FOOTPLATE_DUE_COL]));
+
+            let html = `<h2 class="section-title">Detailed Overdue Report for CLI: ${selectedCLI}</h2>`;
+
+            html += `<h3 style="margin:20px 0 10px; color:#d32f2f;">GRADING Overdue <span class="count-badge">${gradingOverdue.length} Crew</span></h3>`;
+            html += generateTable(gradingOverdue, GRADING_DUE_COL);
+
+            html += `<h3 style="margin:20px 0 10px; color:#d32f2f;">COUNSEL Overdue <span class="count-badge">${counselOverdue.length} Crew</span></h3>`;
+            html += generateTable(counselOverdue, COUNSEL_DUE_COL);
+
+            html += `<h3 style="margin:20px 0 10px; color:#d32f2f;">FOOTPLATE Overdue <span class="count-badge">${footplateOverdue.length} Crew</span></h3>`;
+            html += generateTable(footplateOverdue, FOOTPLATE_DUE_COL);
+
+            detailDiv.innerHTML = html;
+            summaryDiv.innerHTML = '';
+
+            // For print
+            printHeader.innerHTML = `<h1>Detailed Overdue Report - ${selectedCLI}</h1><p>Generated on: ${currentDate.toLocaleDateString('en-GB')}</p>`;
+            printDateRange.innerHTML = `<h3>${rangeText}</h3>`;
+        }
+
+        // Print functionality
+        printBtn.addEventListener('click', () => {
+            window.print();
+        });
+
+        function compareDates(dateStrA, dateStrB) {
+            if (!dateStrA || dateStrA.trim() === '') return -1;
+            if (!dateStrB || dateStrB.trim() === '') return 1;
+
+            const dateA = parseDate(dateStrA);
+            const dateB = parseDate(dateStrB);
+
+            if (!dateA) return 1;
+            if (!dateB) return -1;
+
+            return dateA - dateB;
+        }
+
+        function isOverdue(dueStr, dueEnd) {
+            if (!dueStr || dueStr.trim() === '') return true;
+            const dueDate = parseDate(dueStr);
+            if (!dueDate) return false;
+            return dueDate <= dueEnd;
+        }
+
+        function parseDate(str) {
+            if (!str || str.trim() === '') return null;
+            const parts = str.trim().split('-');
+            if (parts.length !== 3) return null;
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1;
+            const year = parseInt(parts[2], 10);
+            if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+            return new Date(year, month, day);
+        }
+
+        function generateTable(rows, dueCol) {
+            if (rows.length === 0) return '<p style="text-align:center; color:#666; font-style:italic; font-size:1.1em;">No overdue items found.</p>';
+            
+            let html = '<table><thead><tr><th>S.No</th><th>CREW ID</th><th>NAME</th><th>DESIG.</th><th>DUE DATE</th></tr></thead><tbody>';
+            rows.forEach((row, index) => {
+                const dueDate = row[dueCol] ? row[dueCol].trim() : 'Blank';
+                const rowClass = (dueDate === 'Blank') ? 'class="blank-due"' : '';
+                html += `<tr ${rowClass}><td>${index + 1}</td><td>${row[CREW_ID_COL] || ''}</td><td>${row[NAME_COL] || ''}</td><td>${row[DESIG_COL] || ''}</td><td>${dueDate}</td></tr>`;
+            });
+            html += '</tbody></table>';
+            return html;
+        }
+    </script>
+</body>
+</html>
