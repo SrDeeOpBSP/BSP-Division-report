@@ -30,7 +30,17 @@
             text-align: center;
             font-size: 1.1em;
             color: #555;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
+        }
+        .data-date {
+            text-align: center;
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #1565c0;
         }
         .date-range {
             text-align: center;
@@ -120,6 +130,11 @@
             color: #c62828;
             font-weight: bold;
         }
+        .total-row {
+            background: #4CAF50 !important;
+            color: white;
+            font-weight: bold;
+        }
         .print-only {
             display: none;
         }
@@ -127,7 +142,7 @@
             body, .container { background: white; padding: 10px; }
             button, select, label, #status { display: none !important; }
             .print-only { display: block !important; text-align: center; margin-bottom: 20px; }
-            .date-range { display: block !important; }
+            .date-range, .data-date { display: block !important; }
         }
     </style>
 </head>
@@ -135,6 +150,8 @@
     <div class="container">
         <h1>LI Overdue Analysis</h1>
         <p class="header-note">Crew Overdue Monitoring System</p>
+        
+        <div id="dataDate" class="data-date">Loading data date...</div>
         
         <label for="cliSelect">Select CLI Name for Detailed Report:</label>
         <select id="cliSelect">
@@ -160,11 +177,14 @@
 
         <!-- Print only elements -->
         <div class="print-only" id="printHeader"></div>
+        <div class="print-only" id="printDataDate"></div>
         <div class="print-only" id="printDateRange"></div>
     </div>
 
     <script>
         let excelData = [];
+        let excelPrintDate = "Not Available";
+
         const CLI_ID_COL = 1;   // B
         const CLI_COL = 2;      // C
         const CREW_ID_COL = 3;  // D
@@ -183,7 +203,9 @@
         const detailDiv = document.getElementById('detailReport');
         const dateRangeDiv = document.getElementById('dateRange');
         const statusDiv = document.getElementById('status');
+        const dataDateDiv = document.getElementById('dataDate');
         const printHeader = document.getElementById('printHeader');
+        const printDataDate = document.getElementById('printDataDate');
         const printDateRange = document.getElementById('printDateRange');
 
         window.addEventListener('load', loadExcel);
@@ -202,10 +224,24 @@
                     statusDiv.textContent = 'Invalid Excel format - insufficient data rows.';
                     return;
                 }
-                excelData = allRows.slice(3); // Data from row 4 onwards
+
+                // Extract Print Date from Row 2
+                const row2 = allRows[1];
+                if (row2 && row2.length > 0) {
+                    const fullRowText = row2.join(' ');
+                    const match = fullRowText.match(/Print Date Time\s*:\s*(\d{2}-\d{2}-\d{4})/i);
+                    if (match && match[1]) {
+                        excelPrintDate = match[1];
+                    }
+                }
+
+                excelData = allRows.slice(3);
 
                 populateCLIList();
                 generateSummaryReport();
+
+                dataDateDiv.textContent = `Data as on: ${excelPrintDate}`;
+                dataDateDiv.style.display = 'block';
 
                 statusDiv.textContent = '';
             } catch (error) {
@@ -222,7 +258,6 @@
                 }
             });
 
-            // Sort CLI names alphabetically
             const sortedCLIs = Array.from(cliSet).sort();
             sortedCLIs.forEach(cli => {
                 const option = document.createElement('option');
@@ -237,6 +272,9 @@
             const today = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
 
             const cliMap = new Map();
+            let totalGrading = 0;
+            let totalCounsel = 0;
+            let totalFootplate = 0;
 
             excelData.forEach(row => {
                 const cliID = row[CLI_ID_COL] || '';
@@ -259,9 +297,18 @@
 
                 if (desig !== 'LPG' && desig !== 'LPP' && desig !== 'LPM') return;
 
-                if (isOverdue(row[GRADING_DUE_COL], today)) entry.grading++;
-                if (isOverdue(row[COUNSEL_DUE_COL], today)) entry.counsel++;
-                if (isOverdue(row[FOOTPLATE_DUE_COL], today)) entry.footplate++;
+                if (isOverdue(row[GRADING_DUE_COL], today)) {
+                    entry.grading++;
+                    totalGrading++;
+                }
+                if (isOverdue(row[COUNSEL_DUE_COL], today)) {
+                    entry.counsel++;
+                    totalCounsel++;
+                }
+                if (isOverdue(row[FOOTPLATE_DUE_COL], today)) {
+                    entry.footplate++;
+                    totalFootplate++;
+                }
             });
 
             let html = `
@@ -296,9 +343,13 @@
                 </tr>`;
             });
 
-            html += `<tr style="background:#4CAF50; color:white; font-weight:bold;">
-                <td colspan="5">GRAND TOTAL</td>
-                <td>${grandTotal}</td>
+            // Only one total row
+            html += `<tr class="total-row">
+                <td colspan="2"><strong>TOTAL</strong></td>
+                <td><strong>${totalGrading}</strong></td>
+                <td><strong>${totalCounsel}</strong></td>
+                <td><strong>${totalFootplate}</strong></td>
+                <td><strong>${grandTotal}</strong></td>
             </tr>`;
 
             html += `</tbody></table>`;
@@ -306,19 +357,17 @@
             detailDiv.innerHTML = '';
             dateRangeDiv.style.display = 'none';
 
-            // For print
             printHeader.innerHTML = '<h1>LI GRADING Overdue Summary Report</h1><p>Generated on: ' + currentDate.toLocaleDateString('en-GB') + '</p>';
+            printDataDate.innerHTML = `<h3>Data as on: ${excelPrintDate}</h3>`;
             printDateRange.innerHTML = '';
         }
 
         showBtn.addEventListener('click', () => {
             const selectedCLI = cliSelect.value;
-
             if (!selectedCLI) {
                 generateSummaryReport();
                 return;
             }
-
             generateDetailedReport(selectedCLI);
         });
 
@@ -375,12 +424,11 @@
             detailDiv.innerHTML = html;
             summaryDiv.innerHTML = '';
 
-            // For print
             printHeader.innerHTML = `<h1>Detailed Overdue Report - ${selectedCLI}</h1><p>Generated on: ${currentDate.toLocaleDateString('en-GB')}</p>`;
+            printDataDate.innerHTML = `<h3>Data as on: ${excelPrintDate}</h3>`;
             printDateRange.innerHTML = `<h3>${rangeText}</h3>`;
         }
 
-        // Print functionality
         printBtn.addEventListener('click', () => {
             window.print();
         });
@@ -388,13 +436,10 @@
         function compareDates(dateStrA, dateStrB) {
             if (!dateStrA || dateStrA.trim() === '') return -1;
             if (!dateStrB || dateStrB.trim() === '') return 1;
-
             const dateA = parseDate(dateStrA);
             const dateB = parseDate(dateStrB);
-
             if (!dateA) return 1;
             if (!dateB) return -1;
-
             return dateA - dateB;
         }
 
@@ -417,7 +462,7 @@
         }
 
         function generateTable(rows, dueCol) {
-            if (rows.length === 0) return '<p style="text-align:center; color:#666; font-style:italic; font-size:1.1em;">No overdue items found.</p>';
+            if (rows.length === 0) return '<p style="text-align:center; color:#666; font-style:italic; font-size:1.1em;">No overdue Crew found.</p>';
             
             let html = '<table><thead><tr><th>S.No</th><th>CREW ID</th><th>NAME</th><th>DESIG.</th><th>DUE DATE</th></tr></thead><tbody>';
             rows.forEach((row, index) => {
