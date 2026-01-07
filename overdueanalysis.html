@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CLI Overdue Analysis Report</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .file-inputs {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+            color: #34495e;
+        }
+        input[type="file"], input[type="date"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            width: 280px;
+        }
+        button#analyzeBtn {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button#analyzeBtn:hover {
+            background-color: #2980b9;
+        }
+        .export-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        .export-btn {
+            background: #2c3e50;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        .export-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+        }
+        .export-btn.pdf { background: #e74c3c; }
+        .export-btn.excel { background: #27ae60; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        th {
+            background-color: #34495e;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .highlight {
+            font-weight: bold;
+            font-size: 32px;
+            color: #e74c3c;
+        }
+        .detail-table {
+            margin-top: 50px;
+        }
+        .detail-table th {
+            background-color: #c0392b;
+        }
+        h2 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 50px;
+        }
+        h3 {
+            color: #e74c3c;
+            margin-top: 40px;
+        }
+        #result {
+            margin-top: 30px;
+        }
+        @media print {
+            body { background: white; }
+            .controls, .export-buttons { display: none; }
+            .container { box-shadow: none; padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CLI Overdue Analysis Report</h1>
+        <p class="subtitle">Crew Overdue Monitoring System</p>
+        
+        <div class="controls">
+            <div class="file-inputs">
+                <div>
+                    <label for="backFile">Back Day Excel File:</label>
+                    <input type="file" id="backFile" accept=".xlsx,.xls">
+                </div>
+                <div>
+                    <label for="currentFile">Current Day Excel File:</label>
+                    <input type="file" id="currentFile" accept=".xlsx,.xls">
+                </div>
+                <div>
+                    <label for="presentDate">Present Date:</label>
+                    <input type="date" id="presentDate" value="2026-01-07">
+                </div>
+                <div style="align-self: end;">
+                    <button id="analyzeBtn" onclick="analyze()">Generate Report</button>
+                </div>
+            </div>
+            
+            <div class="export-buttons" style="display:none;" id="exportSection">
+                <button class="export-btn pdf" title="Download PDF" onclick="exportToPDF()">
+                    <i class="fas fa-file-pdf"></i>
+                </button>
+                <button class="export-btn excel" title="Download Excel" onclick="exportToExcel()">
+                    <i class="fas fa-file-excel"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function parseDate(dateStr) {
+            if (!dateStr || dateStr.trim() === '') return null;
+            const parts = dateStr.trim().split('-');
+            if (parts.length !== 3) return null;
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1;
+            const year = parseInt(parts[2], 10);
+            if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+            return new Date(year, month, day);
+        }
+
+        function formatDateToDDMMYYYY(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
+        }
+
+        function isOverdue(dueStr, checkDate) {
+            if (!dueStr || dueStr.trim() === '') return true;
+            const due = parseDate(dueStr);
+            if (!due) return false;
+            return due <= checkDate;
+        }
+
+        function readExcel(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = e.target.result;
+                        const workbook = XLSX.read(data, { type: 'binary', cellDates: true });
+                        const sheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[sheetName];
+                        const range = XLSX.utils.decode_range(worksheet['!ref']);
+                        range.s.r = 2;
+                        const json = XLSX.utils.sheet_to_json(worksheet, {
+                            header: 1,
+                            range: XLSX.utils.encode_range(range),
+                            defval: '',
+                            blankrows: false
+                        });
+                        resolve(json);
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsBinaryString(file);
+            });
+        }
+
+        function analyze() {
+            const backFile = document.getElementById('backFile').files[0];
+            const currentFile = document.getElementById('currentFile').files[0];
+            const presentInput = document.getElementById('presentDate').value;
+
+            if (!backFile || !currentFile || !presentInput) {
+                alert('Dono files aur present date select karo!');
+                return;
+            }
+
+            const presentParts = presentInput.split('-');
+            const presentDate = new Date(parseInt(presentParts[0]), parseInt(presentParts[1]) - 1, parseInt(presentParts[2]));
+            const presentDateStr = formatDateToDDMMYYYY(presentDate);
+
+            const backCheckDate = new Date(presentDate);
+            backCheckDate.setDate(backCheckDate.getDate() - 1);
+            const backCheckDateStr = formatDateToDDMMYYYY(backCheckDate);
+
+            Promise.all([readExcel(backFile), readExcel(currentFile)])
+                .then(([backRows, currentRows]) => {
+                    function getOverdueSets(rows, checkDate) {
+                        const gradSet = new Set();
+                        const counSet = new Set();
+                        const footSet = new Set();
+                        for (let i = 1; i < rows.length; i++) {
+                            const row = rows[i];
+                            const desig = row[5] ? row[5].toString().trim() : '';
+                            if (desig !== 'LPG' && desig !== 'LPP' && desig !== 'LPM') continue;
+
+                            const crewId = row[3] ? row[3].toString().trim() : '';
+                            if (!crewId) continue;
+
+                            const dueGrad = row[10] ? row[10].toString().trim() : '';
+                            const dueCoun = row[13] ? row[13].toString().trim() : '';
+                            const dueFoot = row[17] ? row[17].toString().trim() : '';
+
+                            if (isOverdue(dueGrad, checkDate)) gradSet.add(crewId);
+                            if (isOverdue(dueCoun, checkDate)) counSet.add(crewId);
+                            if (isOverdue(dueFoot, checkDate)) footSet.add(crewId);
+                        }
+                        return { grad: gradSet, coun: counSet, foot: footSet };
+                    }
+
+                    const backOverdueSets = getOverdueSets(backRows, backCheckDate);
+                    const currOverdueSets = getOverdueSets(currentRows, presentDate);
+
+                    const backCounts = { grad: backOverdueSets.grad.size, coun: backOverdueSets.coun.size, foot: backOverdueSets.foot.size };
+                    const currCounts = { grad: currOverdueSets.grad.size, coun: currOverdueSets.coun.size, foot: currOverdueSets.foot.size };
+
+                    const newOverdueCounts = {
+                        grad: [...currOverdueSets.grad].filter(id => !backOverdueSets.grad.has(id)).length,
+                        coun: [...currOverdueSets.coun].filter(id => !backOverdueSets.coun.has(id)).length,
+                        foot: [...currOverdueSets.foot].filter(id => !backOverdueSets.foot.has(id)).length
+                    };
+
+                    const donePresent = { grad: new Set(), coun: new Set(), foot: new Set() };
+                    const currentDueMap = new Map();
+                    for (let i = 1; i < currentRows.length; i++) {
+                        const row = currentRows[i];
+                        const desig = row[5] ? row[5].toString().trim() : '';
+                        if (desig !== 'LPG' && desig !== 'LPP' && desig !== 'LPM') continue;
+
+                        const crewId = row[3] ? row[3].toString().trim() : '';
+                        if (!crewId) continue;
+
+                        const doneGrad = row[8] ? row[8].toString().trim() : '';
+                        const doneCoun = row[12] ? row[12].toString().trim() : '';
+                        const doneFoot = row[16] ? row[16].toString().trim() : '';
+                        const dueGrad = row[10] ? row[10].toString().trim() : '';
+                        const dueCoun = row[13] ? row[13].toString().trim() : '';
+                        const dueFoot = row[17] ? row[17].toString().trim() : '';
+
+                        currentDueMap.set(crewId, { dueGrad, dueCoun, dueFoot });
+
+                        if (doneGrad === presentDateStr) donePresent.grad.add(crewId);
+                        if (doneCoun === presentDateStr) donePresent.coun.add(crewId);
+                        if (doneFoot === presentDateStr) donePresent.foot.add(crewId);
+                    }
+
+                    const donePresentCounts = { grad: donePresent.grad.size, coun: donePresent.coun.size, foot: donePresent.foot.size };
+
+                    const clearedBack = {
+                        grad: [...donePresent.grad].filter(id => backOverdueSets.grad.has(id)).length,
+                        coun: [...donePresent.coun].filter(id => backOverdueSets.coun.has(id)).length,
+                        foot: [...donePresent.foot].filter(id => backOverdueSets.foot.has(id)).length
+                    };
+
+                    const clearedNew = { grad: 0, coun: 0, foot: 0 };
+                    ['grad', 'coun', 'foot'].forEach(cat => {
+                        for (let id of donePresent[cat]) {
+                            if (!backOverdueSets[cat].has(id) && currentDueMap.has(id)) {
+                                const dueStr = currentDueMap.get(id)[`due${cat.charAt(0).toUpperCase() + cat.slice(1)}`];
+                                if (dueStr === presentDateStr) {
+                                    clearedNew[cat]++;
+                                }
+                            }
+                        }
+                    });
+
+                    const doneEarly = { grad: 0, coun: 0, foot: 0 };
+                    ['grad', 'coun', 'foot'].forEach(cat => {
+                        for (let id of donePresent[cat]) {
+                            if (!backOverdueSets[cat].has(id) && !currOverdueSets[cat].has(id) && currentDueMap.has(id)) {
+                                const due = parseDate(currentDueMap.get(id)[`due${cat.charAt(0).toUpperCase() + cat.slice(1)}`]);
+                                if (due && due > presentDate) {
+                                    doneEarly[cat]++;
+                                }
+                            }
+                        }
+                    });
+
+                    const detailRows = { grad: [], coun: [], foot: [] };
+                    for (let i = 1; i < currentRows.length; i++) {
+                        const row = currentRows[i];
+                        const desig = row[5] ? row[5].toString().trim() : '';
+                        if (desig !== 'LPG' && desig !== 'LPP' && desig !== 'LPM') continue;
+
+                        const crewId = row[3] ? row[3].toString().trim() : '';
+                        if (!crewId) continue;
+
+                        const cliName = row[2] ? row[2].toString().trim() : '';
+                        const name = row[4] ? row[4].toString().trim() : '';
+                        const dueGrad = row[10] ? row[10].toString().trim() : '';
+                        const dueCoun = row[13] ? row[13].toString().trim() : '';
+                        const dueFoot = row[17] ? row[17].toString().trim() : '';
+
+                        if (currOverdueSets.grad.has(crewId)) {
+                            detailRows.grad.push({ cliName, crewId, name, desig, dueDate: dueGrad || 'Blank' });
+                        }
+                        if (currOverdueSets.coun.has(crewId)) {
+                            detailRows.coun.push({ cliName, crewId, name, desig, dueDate: dueCoun || 'Blank' });
+                        }
+                        if (currOverdueSets.foot.has(crewId)) {
+                            detailRows.foot.push({ cliName, crewId, name, desig, dueDate: dueFoot || 'Blank' });
+                        }
+                    }
+
+                    ['grad', 'coun', 'foot'].forEach(cat => {
+                        detailRows[cat].sort((a, b) => a.cliName.localeCompare(b.cliName) || a.crewId.localeCompare(b.crewId));
+                    });
+
+                    let html = `<h2>Summary Report</h2>
+                                <p><strong>Current Day Overdue:</strong> ${presentDateStr} ke hisab se</p>
+                                <p><strong>Back Day Overdue:</strong> ${backCheckDateStr} ke hisab se</p>
+                                <table id="summaryTable">
+                                    <tr><th>Metric</th><th>Grading</th><th>Counsel</th><th>Footplate</th></tr>
+                                    <tr><td>1. Overdue in Back Date</td><td class="highlight">${backCounts.grad}</td><td class="highlight">${backCounts.coun}</td><td class="highlight">${backCounts.foot}</td></tr>
+                                    <tr><td>2. Overdue in Present Date</td><td class="highlight">${currCounts.grad}</td><td class="highlight">${currCounts.coun}</td><td class="highlight">${currCounts.foot}</td></tr>
+                                    <tr><td>3. New Overdue Added from Back</td><td class="highlight">${newOverdueCounts.grad}</td><td class="highlight">${newOverdueCounts.coun}</td><td class="highlight">${newOverdueCounts.foot}</td></tr>
+                                    <tr><td>4. Done at Present Day</td><td class="highlight">${donePresentCounts.grad}</td><td class="highlight">${donePresentCounts.coun}</td><td class="highlight">${donePresentCounts.foot}</td></tr>
+                                    <tr><td>5. Cleared from Back Overdue</td><td class="highlight">${clearedBack.grad}</td><td class="highlight">${clearedBack.coun}</td><td class="highlight">${clearedBack.foot}</td></tr>
+                                    <tr><td>6. Cleared New Overdue on Present Day</td><td class="highlight">${clearedNew.grad}</td><td class="highlight">${clearedNew.coun}</td><td class="highlight">${clearedNew.foot}</td></tr>
+                                    <tr><td>7. Done Not Overdue in Both (Early)</td><td class="highlight">${doneEarly.grad}</td><td class="highlight">${doneEarly.coun}</td><td class="highlight">${doneEarly.foot}</td></tr>
+                                </table>
+
+                                <h2>Present Day Overdue Details</h2>
+                                <h3>Grading Overdue Details</h3>
+                                ${generateDetailTable('Grading', detailRows.grad)}
+
+                                <h3>Counsel Overdue Details</h3>
+                                ${generateDetailTable('Counsel', detailRows.coun)}
+
+                                <h3>Footplate Overdue Details</h3>
+                                ${generateDetailTable('Footplate', detailRows.foot)}`;
+
+                    document.getElementById('result').innerHTML = html;
+                    document.getElementById('exportSection').style.display = 'flex';
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('File read karne me error: ' + err.message);
+                });
+        }
+
+        function generateDetailTable(type, rows) {
+            if (rows.length === 0) return '<p style="color:#7f8c8d; font-style:italic;">No overdue found for this category.</p>';
+            let html = `<table class="detail-table">
+                <tr><th>CLI NAME</th><th>CREW ID</th><th>NAME</th><th>DESIG.</th><th>${type.toUpperCase()} DUE DATE</th></tr>`;
+            rows.forEach(r => {
+                html += `<tr><td>${r.cliName}</td><td>${r.crewId}</td><td>${r.name}</td><td>${r.desig}</td><td>${r.dueDate}</td></tr>`;
+            });
+            html += '</table>';
+            return html;
+        }
+
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4');
+            doc.setFontSize(18);
+            doc.text('CLI Overdue Analysis Report', 148, 15, { align: 'center' });
+            doc.setFontSize(12);
+            doc.text(`Generated on: ${new Date().toLocaleDateString('en-GB')}`, 148, 25, { align: 'center' });
+
+            doc.autoTable({ html: '#summaryTable', startY: 35, theme: 'grid', headStyles: { fillColor: [52, 73, 94] } });
+
+            const detailTables = document.querySelectorAll('.detail-table');
+            const titles = ['Grading Overdue Details', 'Counsel Overdue Details', 'Footplate Overdue Details'];
+            let startY = doc.lastAutoTable.finalY + 20;
+            detailTables.forEach((table, index) => {
+                if (startY > 180) {
+                    doc.addPage();
+                    startY = 20;
+                }
+                doc.setFontSize(14);
+                doc.text(titles[index], 148, startY, { align: 'center' });
+                doc.autoTable({ html: table, startY: startY + 10, theme: 'striped', headStyles: { fillColor: [192, 57, 43] } });
+                startY = doc.lastAutoTable.finalY + 20;
+            });
+
+            doc.save('CLI_Overdue_Report.pdf');
+        }
+
+        function exportToExcel() {
+            const wb = XLSX.utils.book_new();
+
+            const summaryWS = XLSX.utils.table_to_sheet(document.getElementById('summaryTable'));
+            XLSX.utils.book_append_sheet(wb, summaryWS, 'Summary');
+
+            const detailTables = document.querySelectorAll('.detail-table');
+            const sheetNames = ['Grading Details', 'Counsel Details', 'Footplate Details'];
+            detailTables.forEach((table, index) => {
+                const ws = XLSX.utils.table_to_sheet(table);
+                XLSX.utils.book_append_sheet(wb, ws, sheetNames[index]);
+            });
+
+            XLSX.writeFile(wb, 'CLI_Overdue_Report.xlsx');
+        }
+    </script>
+</body>
+</html>
