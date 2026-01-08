@@ -3,175 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="otherduties.css">
-     <title>Other Duties</title>
+    <title>Other Duties Form</title>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <style>
+        /* Global Reset & Font */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Form Container (Card Style) */
+        #otherDutiesForm {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-top: 5px solid #007bff; /* Top accent color */
+        }
+
+        /* Heading */
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Labels */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        /* Inputs & Selects */
+        input[type="text"],
+        input[type="date"],
+        input[type="time"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+
+        /* Input Focus Effect */
+        input:focus, select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+            outline: none;
+        }
+
+        /* Readonly Fields (Auto-filled) */
+        input[readonly] {
+            background-color: #e9ecef;
+            color: #495057;
+            cursor: not-allowed;
+            border-color: #ced4da;
+            font-weight: 600; /* Bold text for auto-filled data */
+        }
+
+        /* Error Message */
+        #id-error {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: -15px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        /* Submit Button */
+        #submitButton {
+            width: 100%;
+            padding: 14px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            text-transform: uppercase;
+        }
+
+        #submitButton:hover {
+            background-color: #0056b3;
+        }
+
+        #submitButton:active {
+            transform: scale(0.98);
+        }
+
+        /* Loading Message */
+        #loadingMessage {
+            color: #007bff;
+            font-weight: 500;
+            margin-top: 15px;
+        }
+
+        /* Responsive Tweaks */
+        @media (max-width: 480px) {
+            #otherDutiesForm {
+                padding: 20px;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
    
-    <form id="otherDutiesForm"action="https://script.google.com/macros/s/AKfycbzD319B272QFM5HK-3ejkl41n3zm1r_0F6bc9ZzJE1Z_6Tc-4wge65Ip16uQe9eDUmrUw/exec" method ="post">
+    <form id="otherDutiesForm" action="https://script.google.com/macros/s/AKfycbzD319B272QFM5HK-3ejkl41n3zm1r_0F6bc9ZzJE1Z_6Tc-4wge65Ip16uQe9eDUmrUw/exec" method ="post">
         <h2>OTHER DUTIES</h2>
-        <label for="CLI NAME">CLI NAME:</label>
-        <select id="CLI NAME" name="CLI NAME" required>
-            <option value="" disabled selected>Select your CLI NAME</option>
-           <option value="A.K.BISWAL DSL">A.K.BISWAL DSL</option>
-            <option value="A.K.PANDA">A.K.PANDA</option>
-            <option value="A.N.PANDEY">A.N.PANDEY</option>
-            <option value="ANIL KAUSHIK">ANIL KAUSHIK</option>
-            <option value="ABDUL SAMAD GHAURI">ABDUL SAMAD GHAURI</option>
-            <option value="ADESH SHUKLA">ADESH SHUKLA</option>
-            <option value="AJAY KUMAR">AJAY KUMAR</option>
-            <option value="ANIL KUMAR">ANIL KUMAR</option>
-            <option value="ANKLESHWAR KUMAR">ANKLESHWAR KUMAR</option>
-            <option value="ASHOK KUMAR">ASHOK KUMAR</option>
-            <option value="ASHOK KUMAR MISHRA">ASHOK KUMAR MISHRA</option>
-            <option value="B BHARADWAJ">B BHARADWAJ</option>
-            <option value="B G RAHULAN">B G RAHULAN</option>
-            <option value="BHASKAR SAHOO">BHASKAR SAHOO</option>
-            <option value="BHAWANAND GOPE">BHAWANAND GOPE</option>
-            <option value="BHILU RAM TUDU">BHILU RAM TUDU</option>
-            <option value="BIDHAN CHANDRA ROY">BIDHAN CHANDRA ROY</option>
-            <option value="BRIJ BHUSHAN SINGH">BRIJ BHUSHAN SINGH</option>
-            <option value="BRIJESH SHARMA">BRIJESH SHARMA</option>
-            <option value="CHAKRESH KUMAR">CHAKRESH KUMAR</option>
-            <option value="CHAMAN LAL">CHAMAN LAL</option>
-            <option value="CHANDRA PRAKASH RATHORE">CHANDRA PRAKASH RATHORE</option>
-            <option value="CHANDRA SHEKHAR SONI">CHANDRA SHEKHAR SONI</option>
-            <option value="CHANDRASHEKHAR">CHANDRASHEKHAR</option>
-            <option value="D.K.RAY">D.K.RAY</option>
-            <option value="D.S.PAIKRA">D.S.PAIKRA</option>
-            <option value="D.SANGA">D.SANGA</option>
-            <option value="DAYARAM PASWAN">DAYARAM PASWAN</option>
-            <option value="DHARAM PAL">DHARAM PAL</option>
-            <option value="DILHARAN LAL ADITYA">DILHARAN LAL ADITYA</option>
-            <option value="DINESH KUMAR RAIDAS">DINESH KUMAR RAIDAS</option>
-            <option value="DUSHYANT KUMAR YADAV">DUSHYANT KUMAR YADAV</option>
-            <option value="G L TANDON">G L TANDON</option>
-            <option value="G.GOVIND RAO">G.GOVIND RAO</option>
-            <option value="G.N.ORAM">G.N.ORAM</option>
-            <option value="G.P.KASHYAP DSL">G.P.KASHYAP DSL</option>
-            <option value="GAUKARAN KUMBHAKAR">GAUKARAN KUMBHAKAR</option>
-            <option value="GOPAL DAS DSL">GOPAL DAS DSL</option>
-            <option value="GOPI KUMAR KANWAR">GOPI KUMAR KANWAR</option>
-            <option value="H.N.NAYAK">H.N.NAYAK</option>
-            <option value="HARI SHANKAR SINGH">HARI SHANKAR SINGH</option>
-            <option value="HARISH KUMAR SHARMA">HARISH KUMAR SHARMA</option>
-            <option value="HEMANT KUMAR DEULKAR">HEMANT KUMAR DEULKAR</option>
-            <option value="HEMANT KUMAR MAHOR">HEMANT KUMAR MAHOR</option>
-            <option value="HIMMAT SINGH BHADAURIA">HIMMAT SINGH BHADAURIA</option>
-            <option value="I.A. ANSARI">I.A. ANSARI</option>
-            <option value="J.P.VERMA">J.P.VERMA</option>
-            <option value="JAGAT PAL BOUDDH">JAGAT PAL BOUDDH</option>
-            <option value="JASWANT SINGH">JASWANT SINGH</option>
-            <option value="KAMESHWAR SINGH RAJPUT">KAMESHWAR SINGH RAJPUT</option>
-            <option value="KARTA LAKRA">KARTA LAKRA</option>
-            <option value="KHELA MARDI">KHELA MARDI</option>
-            <option value="LAXMAN PRASAD">LAXMAN PRASAD</option>
-            <option value="LAXMIKANT SHARAFF">LAXMIKANT SHARAFF</option>
-            <option value="LAXMIKANT SAHU">LAXMIKANT SAHU</option>
-            <option value="LEELAMBAR SAHU">LEELAMBAR SAHU</option>
-            <option value="LOKNATH PRADHAN">LOKNATH PRADHAN</option>
-            <option value="M ANAND RAO">M ANAND RAO</option>
-            <option value="M SANYASI">M SANYASI</option>
-            <option value="M.K.PANDAB">M.K.PANDAB</option>
-            <option value="M.K.TIWARI">M.K.TIWARI</option>
-            <option value="M.NAYAK">M.NAYAK</option>
-            <option value="M.S.MARABI">M.S.MARABI</option>
-            <option value="MAHENDRA KUMAR">MAHENDRA KUMAR</option>
-            <option value="MAHESH KUMAR YADAV DSL">MAHESH KUMAR YADAV DSL</option>
-            <option value="MANOJ KUMAR CHANDRAKER">MANOJ KUMAR CHANDRAKER</option>
-            <option value="MD.TANVIR ALAM">MD.TANVIR ALAM</option>
-            <option value="N.K.BANJARE">N.K.BANJARE</option>
-            <option value="N.K.PRASAD">N.K.PRASAD</option>
-            <option value="N.R.MISHRA">N.R.MISHRA</option>
-            <option value="N.SAHU">N.SAHU</option>
-            <option value="NARAYAN PANDA">NARAYAN PANDA</option>
-            <option value="OMPRAKASH">OMPRAKASH</option>
-            <option value="OM PRAKASH PANDEY">OM PRAKASH PANDEY</option>
-            <option value="P.K.SHRIVASATAVA">P.K.SHRIVASATAVA</option>
-            <option value="P.K.RAJWADE">P.K.RAJWADE</option>
-            <option value="P.LIGARI">P.LIGARI</option>
-            <option value="P.MITRA BRJN DSL">P.MITRA BRJN DSL</option>
-            <option value="PARMANAND">PARMANAND</option>
-            <option value="PRABHAT KUMAR DAS">PRABHAT KUMAR DAS</option>
-            <option value="PRADEEP KUMAR GUPTA">PRADEEP KUMAR GUPTA</option>
-            <option value="PREM PRAKASH TIWARI DSL">PREM PRAKASH TIWARI DSL</option>
-            <option value="R.C.SAHU">R.C.SAHU</option>
-            <option value="R.K.SINGH DSL">R.K.SINGH DSL</option>
-            <option value="R.S.THAKUR">R.S.THAKUR</option>
-            <option value="RAM AWADH">RAM AWADH</option>
-            <option value="RAMAKANTA DASH">RAMAKANTA DASH</option>
-            <option value="RAKESH KUMAR GAUTAM">RAKESH KUMAR GAUTAM</option>
-            <option value="RAMESH YADAV DSL">RAMESH YADAV DSL</option>
-            <option value="RAMSAJEEWAN PATEL">RAMSAJEEWAN PATEL</option>
-            <option value="ROHIT KUMAR TIWARI">ROHIT KUMAR TIWARI</option>
-            <option value="S.C.MAURYA">S.C.MAURYA</option>
-            <option value="S.K.ACHARYA">S.K.ACHARYA</option>
-            <option value="S.K.DAS">S.K.DAS</option>
-            <option value="S.K.GOUDA">S.K.GOUDA</option>
-            <option value="S.K.HOTA">S.K.HOTA</option>
-            <option value="S.K.KUSHWAHA">S.K.KUSHWAHA</option>
-            <option value="S.K.SAHU DSL">S.K.SAHU DSL</option>
-            <option value="S.K.SUMAN">S.K.SUMAN</option>
-            <option value="S.K.TRIPATHY">S.K.TRIPATHY</option>
-            <option value="S.P.DEY">S.P.DEY</option>
-            <option value="S.P.RAMASHANKAR">S.P.RAMASHANKAR</option>
-            <option value="S.PARIDA">S.PARIDA</option>
-            <option value="S.S.KOLWADKAR DSL">S.S.KOLWADKAR DSL</option>
-            <option value="SANDEEP CHOUBEY">SANDEEP CHOUBEY</option>
-            <option value="SANDEEP KUMAR">SANDEEP KUMAR</option>
-            <option value="SANJAY GIRI">SANJAY GIRI</option>
-            <option value="SANJAY PASWAN">SANJAY PASWAN</option>
-            <option value="SARVESH KUMAR DUBEY">SARVESH KUMAR DUBEY</option>
-            <option value="SANT BHUSHAN PATLEY">SANT BHUSHAN PATLEY</option>
-            <option value="SANTOSH KUMAR">SANTOSH KUMAR</option>
-            <option value="SATYA DEV">SATYA DEV</option>
-            <option value="SHAKIL AHMED DSL">SHAKIL AHMED DSL</option>
-            <option value="SHASHI BHUSAN">SHASHI BHUSAN</option>
-            <option value="SHYAM BIHARI SINGH">SHYAM BIHARI SINGH</option>
-            <option value="SHYAMAL DAS (DSL)">SHYAMAL DAS (DSL)</option>
-            <option value="SUBHASH CHANDRA">SUBHASH CHANDRA</option>
-            <option value="SUBODH KUMAR DSL">SUBODH KUMAR DSL</option>
-            <option value="SUMANT KUMAR BAGHMAR">SUMANT KUMAR BAGHMAR</option>
-            <option value="SUNIL KUMAR GUPTA">SUNIL KUMAR GUPTA</option>
-            <option value="SURENDRA KUMAR PRETA DSL">SURENDRA KUMAR PRETA DSL</option>
-            <option value="SURESH CHANDRA">SURESH CHANDRA</option>
-            <option value="SURESH CHANDRA SDL">SURESH CHANDRA SDL</option>
-            <option value="SURESH KUMAR VERMA">SURESH KUMAR VERMA</option>
-            <option value="SURESH SINGH CHAUHAN">SURESH SINGH CHAUHAN</option>
-            <option value="T.K.VERMA">T.K.VERMA</option>
-            <option value="U.K.MADHU">U.K.MADHU</option>
-            <option value="U.P.SINHA">U.P.SINHA</option>
-            <option value="UTTAM KUMAR SAHU">UTTAM KUMAR SAHU</option>
-            <option value="VIDYAKAR RAI DSL">VIDYAKAR RAI DSL</option>
-            <option value="VIJAY KUMAR">VIJAY KUMAR</option>
-            <option value="VIKASH KUMAR DSL">VIKASH KUMAR DSL</option>
-            <option value="VINAY KUMAR SAHU">VINAY KUMAR SAHU</option>
-            <option value="VINOD KUMAR">VINOD KUMAR</option>
-            <option value="VINOD KUMAR RAI">VINOD KUMAR RAI</option>
-            <option value="VISHNU MOHAN SINGH RAJPUT">VISHNU MOHAN SINGH RAJPUT</option>
-            <option value="VIVEK KUMAR">VIVEK KUMAR</option>
-            <option value="YASHWANT KUMAR VERMA">YASHWANT KUMAR VERMA</option>
-            <option value="YOGENDRA KUMAR">YOGENDRA KUMAR</option> 
-        </select><br><br>
-  
-        <label for="CLI LOBBY">CLI LOBBY:</label>
-        <select id="CLI LOBBY" name="CLI LOBBY" required>
-            <option value="" disabled selected>Select your CLI LOBBY</option>
-            <option value="AKT">AKT</option>
-            <option value="BJRI">BJRI</option>
-            <option value="BRJN">BRJN</option>
-            <option value="BSP">BSP</option>
-            <option value="KHS">KHS</option>
-            <option value="KRBA">KRBA</option>
-            <option value="PND">PND</option>
-            <option value="RIG">RIG</option>
-            <option value="SDL">SDL</option>
-            <option value="SJQ">SJQ</option>
-            <option value="USL">USL</option>
-        </select><br><br>
+        
+        <label for="CLI_ID">CLI ID</label>
+        <input type="text" id="CLI_ID" name="CLI ID" placeholder="e.g., BSP0123" maxlength="8" required>
+        <small id="id-error" style="display: none;">Invalid Format: Max 4 Letters & 4 Numbers allowed.</small>
 
-        <label for="dutyType">DUTY TYPE:</label>
+        <label for="CLI_NAME">CLI NAME</label>
+        <input type="text" id="CLI_NAME" name="CLI NAME" placeholder="Auto-filled from CSV" readonly required>
+
+        <label for="CLI_HQ">CLI LOBBY</label>
+        <input type="text" id="CLI_HQ" name="CLI LOBBY" placeholder="Auto-filled from CSV" readonly required>
+
+        <label for="dutyType">DUTY TYPE</label>
         <select id="dutyType" name="DUTY TYPE">
             <option value="" disabled selected>Select your DUTY TYPE</option>
             <option value="LOBBY DUTY">LOBBY DUTY</option>
@@ -181,24 +160,22 @@
             <option value="AUTO CLASS">AUTO CLASS</option>
             <option value="LEAVE">LEAVE</option>
             <option value="OTHER DUTY">OTHER DUTY</option>
-        </select><br><br>
+        </select>
 
-        <input type="text" id="otherDutiesInput" name="OTHER_DUTY" placeholder="Enter other duty" style="display: none; margin-top: 10px;">
+        <input type="text" id="otherDutiesInput" name="OTHER_DUTY" placeholder="Enter other duty description" style="display: none;">
             
-        <br><br>
+        <label for="date">DATE</label>
+        <input type="date" id="date" name="DATE" required>
+
+        <label for="fromTime">FROM TIME</label>
+        <input type="time" id="fromTime" name="FROM TIME" required>
+
+        <label for="toTime">TO TIME</label>
+        <input type="time" id="toTime" name="TO TIME" required>
+
+        <button type="submit" id="submitButton">Submit Data</button>
         
-        <label for="date">DATE:</label>
-        <input type="date" id="date" name="DATE" required><br><br>
-
-        <label for="fromTime">FROM TIME:</label>
-        <input type="time" id="fromTime" name="FROM TIME" required><br><br>
-
-        <label for="toTime">TO TIME:</label>
-        <input type="time" id="toTime" name="TO TIME" required><br><br>
-
-        <button type="submit" id="submitButton">Submit</button>
-        
-        <div id="loadingMessage" style="display: none; text-align: center; margin-top: 10px;">
+        <div id="loadingMessage" style="display: none; text-align: center;">
             Submitting, please wait...
         </div>
     </form>
@@ -206,9 +183,82 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="otherduties.js"></script>
+
+    <script>
+        // Data store karne ke liye variable
+        let cliDataMap = {};
+
+        // Page load hote hi CSV fetch karega
+        $(document).ready(function() {
+            fetch('CLIMICRO.csv')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    parseCSV(data);
+                })
+                .catch(error => {
+                    console.error('Error loading CSV:', error);
+                    alert("Error: CLIMICRO.csv file not found or cannot be loaded.");
+                });
+        });
+
+        // CSV Parse karne ka function
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n');
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line) {
+                    // CSV format: CLI ID,NAME,HQ
+                    const parts = line.split(',');
+                    if (parts.length >= 3) {
+                        const id = parts[0].trim().toUpperCase(); // CLI ID
+                        const name = parts[1].trim();             // CLI NAME
+                        const hq = parts[2].trim();               // CLI HQ (Mapped to Lobby)
+
+                        cliDataMap[id] = {
+                            name: name,
+                            hq: hq
+                        };
+                    }
+                }
+            }
+        }
+
+        // Input Validation aur Auto-Fill Logic
+        document.getElementById('CLI_ID').addEventListener('input', function(e) {
+            let input = e.target;
+            let val = input.value.toUpperCase(); // Force Uppercase
+            
+            // Remove non-alphanumeric
+            val = val.replace(/[^A-Z0-9]/g, '');
+
+            let letters = val.match(/[A-Z]/g) || [];
+            let numbers = val.match(/[0-9]/g) || [];
+
+            // Update input value
+            input.value = val;
+
+            // Auto Fill Logic
+            if (cliDataMap[val]) {
+                document.getElementById('CLI_NAME').value = cliDataMap[val].name;
+                document.getElementById('CLI_HQ').value = cliDataMap[val].hq;
+                document.getElementById('id-error').style.display = 'none';
+            } else {
+                document.getElementById('CLI_NAME').value = "";
+                document.getElementById('CLI_HQ').value = "";
+            }
+
+            // Validation Warning
+            if (letters.length > 4 || numbers.length > 4) {
+                document.getElementById('id-error').style.display = 'block';
+            } else {
+                document.getElementById('id-error').style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
-
-
-
-
