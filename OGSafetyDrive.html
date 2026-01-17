@@ -80,7 +80,7 @@
         border: 1px dashed #007BFF;
         border-radius: 8px;
         background-color: rgba(0, 123, 255, 0.05);
-        display: none; /* Hidden by default */
+        display: none; 
     }
 
     .checkbox-group {
@@ -113,18 +113,49 @@
     button:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3); }
     button:disabled { background: linear-gradient(45deg, #ff9d2f, #ff6b00); cursor: not-allowed; transform: none; }
 
-    /* === TABLE STYLES === */
+    /* === TABLE STYLES (Vertical Stack with Placeholder for Empty PDF) === */
     .ongoing-drive-table {
-        display: grid; grid-template-columns: 3fr 1fr; gap: 15px; margin-top: 10px; padding: 20px;
-        background-color: rgba(255, 255, 255, 0.5); border: 1px solid #e9ecef; border-radius: 8px;
+        display: grid; 
+        grid-template-columns: 3fr 1fr; 
+        gap: 15px; 
+        margin-top: 10px; 
+        padding: 20px;
+        background-color: rgba(255, 255, 255, 0.5); 
+        border: 1px solid #e9ecef; 
+        border-radius: 8px;
     }
-    .table-header { grid-column: 1 / -1; display: grid; grid-template-columns: 3fr 1fr; gap: 15px; padding-bottom: 10px; border-bottom: 2px solid #ced4da; font-weight: bold; color: #2c3e50; }
-    .table-cell { display: flex; align-items: center; justify-content: center; }
+    .table-header { 
+        grid-column: 1 / -1; 
+        display: grid; 
+        grid-template-columns: 3fr 1fr; 
+        gap: 15px; 
+        padding-bottom: 10px; 
+        border-bottom: 2px solid #ced4da; 
+        font-weight: bold; 
+        color: #2c3e50; 
+    }
+    .table-cell { 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+    }
     .drive-link-button, .pdf-link-button {
-        width: 100%; padding: 12px; text-align: center; text-decoration: none; color: white; border-radius: 8px; font-weight: bold; display: flex; align-items: center; justify-content: center; min-height: 60px;
+        width: 100%; 
+        padding: 12px; 
+        text-align: center; 
+        text-decoration: none; 
+        color: white; 
+        border-radius: 8px; 
+        font-weight: bold; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        min-height: 60px;
     }
     .drive-link-button { background: linear-gradient(45deg, #28a745, #218838); }
     .pdf-link-button { background: linear-gradient(45deg, #fd7e14, #ffc107); }
+    .empty-pdf { background-color: transparent; border: 1px dashed #ccc; width: 100%; min-height: 60px; border-radius: 8px; }
+
     </style>
 </head>
 <body>
@@ -236,8 +267,8 @@
             
             <label class="location-label">Practical RS Application done at :</label>
             <input type="text" class="location-input" placeholder="Enter Location">
-
-            </div>
+        </div>
+        
         <br>
         <label>ONGOING SAFETY DRIVE:</label>
         <div class="ongoing-drive-table">
@@ -245,17 +276,25 @@
                 <div>Drive / Google Link</div>
                 <div>Download PDF</div>
             </div>
-              <div class="table-cell">
+
+            <div class="table-cell">
                 <a href="https://docs.google.com/spreadsheets/d/1AzJEp0--ScREpzMMvUT9lO3RkdhUoyvJT2BZWAG_WgA/edit?gid=0#gid=0" target="_blank" class="drive-link-button">(RS PRACTICE ON RUN DETAILS)</a>
             </div>
+            <div class="table-cell">
+                <div class="empty-pdf"></div> </div>
+
             <div class="table-cell">
                 <a href="https://docs.google.com/spreadsheets/d/1IqgKKpbLgGdkmC6eXgvtUFCxhLkIU0kgyVBgt0zadnM/edit?gid=0#gid=0" target="_blank" class="drive-link-button">(RS PRACTICE DATE ENTRY FOR ALPS )</a>
             </div>
             <div class="table-cell">
+                <div class="empty-pdf"></div> </div>
+
+            <div class="table-cell">
                 <a href="https://docs.google.com/spreadsheets/d/1sh45QJ75aFe07CRbHTJ-muTuw2ZCXCfcRM_jMxo_ezA/edit?usp=sharing" target="_blank" class="drive-link-button">Drive No. 22 (FY 2025-26): 30 days Intra Railway Audit inspection of Lobbies and Running room.((16-01-2026 to 14-02-2026))</a>
             </div>
             <div class="table-cell">
-                <a href="https://drive.google.com/file/d/1I8ZhWbtn2D20z2SYfseC07o3T6UaSSJS/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> </div>
+                <a href="https://drive.google.com/file/d/1I8ZhWbtn2D20z2SYfseC07o3T6UaSSJS/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> 
+            </div>
         </div>
         <br><br>
 
@@ -267,21 +306,14 @@
     let crewData = {};
     let isSubmitting = false;
 
-    // === NEW FUNCTIONS FOR ABNORMALITIES & ACTION TAKEN ===
-    
     function checkAbnormalities(inputElement) {
         const driveSection = inputElement.closest('.drive-section');
         const actionContainer = driveSection.querySelector('.action-taken-container');
-        
-        // Safety check if element exists (since some sections don't have it)
         if (!actionContainer) return;
-
-        // If value is NOT "NIL" (case insensitive), show action section
         if (inputElement.value.trim().toUpperCase() !== 'NIL') {
             actionContainer.style.display = 'block';
         } else {
             actionContainer.style.display = 'none';
-            // Reset fields if hidden
             driveSection.querySelector('.action-cms').checked = false;
             driveSection.querySelector('.action-other').checked = false;
             driveSection.querySelector('.action-other-text').style.display = 'none';
@@ -292,15 +324,9 @@
     function toggleOtherText(checkbox) {
         const driveSection = checkbox.closest('.drive-section');
         const otherTextInput = driveSection.querySelector('.action-other-text');
-        if (checkbox.checked) {
-            otherTextInput.style.display = 'block';
-        } else {
-            otherTextInput.style.display = 'none';
-            otherTextInput.value = '';
-        }
+        otherTextInput.style.display = checkbox.checked ? 'block' : 'none';
+        if (!checkbox.checked) otherTextInput.value = '';
     }
-
-    // === EXISTING FUNCTIONS ===
 
     function formatCLIID() {
         let input = document.getElementById("cli_id");
@@ -320,11 +346,9 @@
             lastIdSegment = lastIdSegment.substring(0, 8);
             ids[ids.length - 1] = lastIdSegment;
             value = ids.join(',');
-
         } else {
             const letterCount = (lastIdSegment.match(/[A-Z]/g) || []).length;
             const numberCount = (lastIdSegment.match(/[0-9]/g) || []).length;
-
             if (letterCount > 4 || numberCount > 4) {
                 message = 'Invalid combination (max 4 letters/numbers).';
                 lastIdSegment = lastIdSegment.slice(0, -1);
@@ -332,23 +356,24 @@
                 value = ids.join(',');
             }
         }
-
-        if (messageElement) {
-            messageElement.textContent = message;
-        }
+        if (messageElement) messageElement.textContent = message;
         inputElement.value = value;
     }
 
     function loadCLIData() {
-        fetch('CLIMICRO.csv')
-            .then(response => response.text())
-            .then(data => { Papa.parse(data, { header: true, skipEmptyLines: true, complete: r => { r.data.forEach(row => cliData[row["LI ID"]] = { name: row["NAME"], hq: row["HQ"] }); }}); });
+        fetch('CLIMICRO.csv').then(r => r.text()).then(data => {
+            Papa.parse(data, { header: true, skipEmptyLines: true, complete: r => {
+                r.data.forEach(row => cliData[row["LI ID"]] = { name: row["NAME"], hq: row["HQ"] });
+            }});
+        });
     }
 
     function loadCrewData() {
-        fetch('CREWM.csv')
-            .then(response => response.text())
-            .then(data => { Papa.parse(data, { header: true, skipEmptyLines: true, complete: r => { r.data.forEach(row => crewData[row["CREW ID"]] = { name: row["CREW NAME"], desg: row["DESG"], hq: row["HQ"] }); }}); });
+        fetch('CREWM.csv').then(r => r.text()).then(data => {
+            Papa.parse(data, { header: true, skipEmptyLines: true, complete: r => {
+                r.data.forEach(row => crewData[row["CREW ID"]] = { name: row["CREW NAME"], desg: row["DESG"], hq: row["HQ"] });
+            }});
+        });
     }
 
     function fetchCLIData() {
@@ -359,10 +384,7 @@
 
     document.getElementById("safetyDriveForm").addEventListener("submit", function(event) {
         event.preventDefault();
-        if (isSubmitting) {
-            alert("Form already submitted, please wait...");
-            return;
-        }
+        if (isSubmitting) return;
 
         let crewInputs = document.querySelectorAll('.crew-input');
         let totalCrewEntered = 0;
@@ -370,134 +392,75 @@
 
         crewInputs.forEach(input => {
             if (validationError) return;
-
-            const crewIDsString = input.value.trim();
-            if (crewIDsString !== "") {
+            const val = input.value.trim();
+            if (val !== "") {
                 totalCrewEntered++;
-                const driveSection = input.closest('.drive-section');
-                const driveLabel = driveSection.querySelector('label').innerText;
-                
-                // === UPDATED LOCATION CHECK (Supports Select or Input) ===
-                const locationElement = driveSection.querySelector('.location-select') || driveSection.querySelector('.location-input');
-                
-                if (!locationElement || locationElement.value.trim() === "") {
+                const section = input.closest('.drive-section');
+                const loc = section.querySelector('.location-select') || section.querySelector('.location-input');
+                if (!loc || loc.value.trim() === "") {
                     validationError = true;
-                    alert(`Please enter/select a location for the drive: "${driveLabel}"`);
-                    return;
-                }
-
-                const crewIDs = crewIDsString.split(',').map(id => id.trim()).filter(id => id !== "");
-                for (const id of crewIDs) {
-                    const hasLetter = /[A-Z]/.test(id);
-                    const hasNumber = /[0-9]/.test(id);
-                    const letterCount = (id.match(/[A-Z]/g) || []).length;
-                    const numberCount = (id.match(/[0-9]/g) || []).length;
-
-                    if (id.length > 8 || !hasLetter || !hasNumber || letterCount > 4 || numberCount > 4) {
-                        validationError = true;
-                        alert(`Invalid Crew ID "${id}" in drive "${driveLabel}".\n\n- Max 8 characters.\n- Must be a mix of letters and numbers (max 4 of each).`);
-                        return;
-                    }
+                    alert("Please enter/select a location.");
                 }
             }
         });
 
-        if (validationError) return;
-        if (totalCrewEntered === 0) {
-            alert("Please enter at least one Crew ID in any of the drive sections.");
+        if (validationError || totalCrewEntered === 0) {
+            if(totalCrewEntered === 0) alert("Please enter at least one Crew ID.");
             return;
         }
         
         isSubmitting = true;
-        let submitButton = document.querySelector("button[type='submit']");
-        submitButton.disabled = true;
-        submitButton.innerText = "Submitting...";
-        submitButton.style.backgroundColor = "#FF8C00";
+        let btn = document.querySelector("button[type='submit']");
+        btn.disabled = true; btn.innerText = "Submitting...";
 
         let commonFormData = new FormData(this);
-        let submissionPromises = [];
+        let promises = [];
         
         crewInputs.forEach(inputField => {
-            let driveName = inputField.dataset.driveName;
             let crewIDsString = inputField.value.trim();
             if (crewIDsString === "") return;
+            const section = inputField.closest('.drive-section');
+            const locVal = (section.querySelector('.location-select') || section.querySelector('.location-input')).value;
+            const remVal = section.querySelector('.remark-input') ? section.querySelector('.remark-input').value : "";
+            const abnVal = section.querySelector('.abnormality-input') ? section.querySelector('.abnormality-input').value : "NIL";
 
-            const driveSection = inputField.closest('.drive-section');
-            
-            // === UPDATED DATA RETRIEVAL (Safely handles missing fields) ===
-            const locationElement = driveSection.querySelector('.location-select') || driveSection.querySelector('.location-input');
-            const locationValue = locationElement ? locationElement.value : "";
-
-            const remarkElement = driveSection.querySelector('.remark-input');
-            const remarkValue = remarkElement ? remarkElement.value : "";
-            
-            const abnElement = driveSection.querySelector('.abnormality-input');
-            const abnormalitiesValue = abnElement ? abnElement.value : "NIL"; // Default to NIL if missing
-
-            let actionTakenString = "";
-
-            if (abnormalitiesValue.trim().toUpperCase() !== 'NIL' && abnormalitiesValue !== "NIL") {
+            let actStr = "";
+            if (abnVal.toUpperCase() !== 'NIL') {
                 let actions = [];
-                // Check if elements exist before accessing 'checked' property
-                let cmsCb = driveSection.querySelector('.action-cms');
-                if (cmsCb && cmsCb.checked) actions.push("Reported in CMS");
-                
-                let otherCb = driveSection.querySelector('.action-other');
-                if (otherCb && otherCb.checked) {
-                    let otherText = driveSection.querySelector('.action-other-text').value;
-                    actions.push("Other: " + otherText);
-                }
-                actionTakenString = actions.join(', ');
+                if (section.querySelector('.action-cms')?.checked) actions.push("Reported in CMS");
+                if (section.querySelector('.action-other')?.checked) actions.push("Other: " + section.querySelector('.action-other-text').value);
+                actStr = actions.join(', ');
             }
-            // =============================================
 
-            let crewIDs = crewIDsString.split(',').filter(id => id.trim() !== "");
-
-            crewIDs.forEach(crewID => {
+            crewIDsString.split(',').filter(id => id.trim() !== "").forEach(crewID => {
                 crewID = crewID.trim();
-                if (!crewID) return;
-                let jsonData = {};
-                
-                jsonData['date'] = commonFormData.get('date');
-                jsonData['cli_id'] = commonFormData.get('cli_id');
-                jsonData['cli_name'] = commonFormData.get('cli_name');
-                jsonData['cli_hq'] = commonFormData.get('cli_hq');
-                jsonData["drive_name"] = driveName;
-                jsonData["counselling_location"] = locationValue;
-                jsonData["remark"] = remarkValue;
-                
-                // Add new fields to JSON
-                jsonData["abnormalities"] = abnormalitiesValue;
-                jsonData["action_taken"] = actionTakenString;
+                let jsonData = {
+                    date: commonFormData.get('date'),
+                    cli_id: commonFormData.get('cli_id'),
+                    cli_name: commonFormData.get('cli_name'),
+                    cli_hq: commonFormData.get('cli_hq'),
+                    drive_name: inputField.dataset.driveName,
+                    counselling_location: locVal,
+                    remark: remVal,
+                    abnormalities: abnVal,
+                    action_taken: actStr,
+                    crew_id: crewID,
+                    crew_name: crewData[crewID] ? crewData[crewID].name : "Not Found",
+                    desg: crewData[crewID] ? crewData[crewID].desg : "N/A",
+                    hq: crewData[crewID] ? crewData[crewID].hq : "N/A",
+                    timestamp: new Date().toISOString()
+                };
 
-                jsonData["crew_id"] = crewID;
-                jsonData["crew_name"] = crewData[crewID] ? crewData[crewID].name : "Not Found";
-                jsonData["desg"] = crewData[crewID] ? crewData[crewID].desg : "N/A";
-                jsonData["hq"] = crewData[crewID] ? crewData[crewID].hq : "N/A";
-                jsonData["timestamp"] = new Date().toISOString();
-
-                let promise = fetch("https://script.google.com/macros/s/AKfycbz7VLDi96OQTKCbrveBmauU3mTJSFYyydtlx67qFoO0dPUwI5KU-60HaJGoHwmKlhx-kw/exec", {
+                promises.push(fetch("https://script.google.com/macros/s/AKfycbz7VLDi96OQTKCbrveBmauU3mTJSFYyydtlx67qFoO0dPUwI5KU-60HaJGoHwmKlhx-kw/exec", {
                     method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(jsonData)
-                });
-                submissionPromises.push(promise);
+                }));
             });
         });
 
-        Promise.all(submissionPromises).then(() => {
+        Promise.all(promises).then(() => {
              setTimeout(() => {
                  alert("Data Successfully Submitted!");
-                 document.getElementById("safetyDriveForm").reset();
-                 
-                 // Reset UI for new fields (safely)
-                 document.querySelectorAll('.action-taken-container').forEach(el => el.style.display = 'none');
-                 document.querySelectorAll('.action-other-text').forEach(el => el.style.display = 'none');
-                 document.querySelectorAll('.abnormality-input').forEach(el => el.value = 'NIL');
-                 
-                 document.querySelectorAll('.char-limit-message').forEach(el => el.textContent = '');
-                 isSubmitting = false;
-                 submitButton.disabled = false;
-                 submitButton.innerText = "Submit";
-                 submitButton.style.backgroundColor = "#007BFF";
+                 location.reload();
              }, 500);
         });
     });
