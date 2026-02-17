@@ -4,260 +4,142 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Other Duties Form</title>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
     <style>
-        /* Global Reset & Font */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #f4f7f6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        /* Form Container (Card Style) */
-        #otherDutiesForm {
-            background-color: #ffffff;
-            width: 100%;
-            max-width: 500px;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            border-top: 5px solid #007bff; /* Top accent color */
-        }
-
-        /* Heading */
-        h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 25px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        /* Labels */
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-
-        /* Inputs & Selects */
-        input[type="text"],
-        input[type="date"],
-        input[type="time"],
-        select {
-            width: 100%;
-            padding: 12px 15px;
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background-color: #fff;
-        }
-
-        /* Input Focus Effect */
-        input:focus, select:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
-            outline: none;
-        }
-
-        /* Readonly Fields (Auto-filled) */
-        input[readonly] {
-            background-color: #e9ecef;
-            color: #495057;
-            cursor: not-allowed;
-            border-color: #ced4da;
-            font-weight: 600; /* Bold text for auto-filled data */
-        }
-
-        /* Error Message */
-        #id-error {
-            color: #dc3545;
-            font-size: 0.85rem;
-            margin-top: -15px;
-            margin-bottom: 15px;
-            display: block;
-        }
-
-        /* Submit Button */
-        #submitButton {
-            width: 100%;
-            padding: 14px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.1s ease;
-            text-transform: uppercase;
-        }
-
-        #submitButton:hover {
-            background-color: #0056b3;
-        }
-
-        #submitButton:active {
-            transform: scale(0.98);
-        }
-
-        /* Loading Message */
-        #loadingMessage {
-            color: #007bff;
-            font-weight: 500;
-            margin-top: 15px;
-        }
-
-        /* Responsive Tweaks */
-        @media (max-width: 480px) {
-            #otherDutiesForm {
-                padding: 20px;
-            }
-            h2 {
-                font-size: 1.5rem;
-            }
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        #otherDutiesForm { background: #fff; width: 100%; max-width: 500px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 5px solid #007bff; }
+        h2 { text-align: center; color: #333; margin-bottom: 25px; text-transform: uppercase; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        input[readonly] { background-color: #e9ecef; font-weight: 600; }
+        #otherDutyGroup { background: #f9f9f9; padding: 15px; border: 1px dashed #007bff; border-radius: 8px; margin-bottom: 20px; display: none; }
+        #submitButton { width: 100%; padding: 14px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; text-transform: uppercase; }
+        #submitButton:disabled { background-color: #ccc; }
+        #msg { text-align: center; margin-top: 15px; font-weight: bold; display: none; }
     </style>
 </head>
 <body>
-   
-    <form id="otherDutiesForm" action="https://script.google.com/macros/s/AKfycbzD319B272QFM5HK-3ejkl41n3zm1r_0F6bc9ZzJE1Z_6Tc-4wge65Ip16uQe9eDUmrUw/exec" method ="post">
+
+    <form id="otherDutiesForm">
         <h2>OTHER DUTIES</h2>
         
-        <label for="CLI_ID">CLI ID</label>
+        <label>CLI ID</label>
         <input type="text" id="CLI_ID" name="CLI ID" placeholder="e.g., BSP0123" maxlength="8" required>
-        <small id="id-error" style="display: none;">Invalid Format: Max 4 Letters & 4 Numbers allowed.</small>
 
-        <label for="CLI_NAME">CLI NAME</label>
-        <input type="text" id="CLI_NAME" name="CLI NAME" placeholder="Auto-filled from CSV" readonly required>
+        <label>CLI NAME</label>
+        <input type="text" id="CLI_NAME" name="CLI NAME" readonly required>
 
-        <label for="CLI_HQ">CLI LOBBY</label>
-        <input type="text" id="CLI_HQ" name="CLI LOBBY" placeholder="Auto-filled from CSV" readonly required>
+        <label>CLI LOBBY</label>
+        <input type="text" id="CLI_HQ" name="CLI LOBBY" readonly required>
 
-        <label for="dutyType">DUTY TYPE</label>
-        <select id="dutyType" name="DUTY TYPE">
-            <option value="" disabled selected>Select your DUTY TYPE</option>
+        <label>DUTY TYPE</label>
+        <select id="dutyType" name="DUTY TYPE" required onchange="toggleFields()">
+            <option value="" disabled selected>Select DUTY TYPE</option>
             <option value="LOBBY DUTY">LOBBY DUTY</option>
             <option value="STALLING DUTY">STALLING DUTY</option>
             <option value="PUNCTUALITY DUTY">PUNCTUALITY DUTY</option>
             <option value="REST">REST</option>
             <option value="AUTO CLASS">AUTO CLASS</option>
             <option value="LEAVE">LEAVE</option>
+            <option value="TRAINING">TRAINING</option>
             <option value="OTHER DUTY">OTHER DUTY</option>
         </select>
 
-        <input type="text" id="otherDutiesInput" name="OTHER_DUTY" placeholder="Enter other duty description" style="display: none;">
-            
-        <label for="date">DATE</label>
+        <div id="otherDutyGroup">
+            <label>OTHER DUTY DONE</label>
+            <select id="subType">
+                <option value="AS PER TLC">AS PER TLC</option>
+                <option value="SELF PROGRAMMED">SELF PROGRAMMED</option>
+            </select>
+
+            <label>ENTER DESCRIPTION</label>
+            <input type="text" id="descRaw" placeholder="Description yahan likhen...">
+        </div>
+
+        <label>DATE</label>
         <input type="date" id="date" name="DATE" required>
 
-        <label for="fromTime">FROM TIME</label>
+        <label>FROM TIME</label>
         <input type="time" id="fromTime" name="FROM TIME" required>
 
-        <label for="toTime">TO TIME</label>
+        <label>TO TIME</label>
         <input type="time" id="toTime" name="TO TIME" required>
 
         <button type="submit" id="submitButton">Submit Data</button>
-        
-        <div id="loadingMessage" style="display: none; text-align: center;">
-            Submitting, please wait...
-        </div>
+        <div id="msg">Submitting...</div>
     </form>
 
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="otherduties.js"></script>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        // Data store karne ke liye variable
-        let cliDataMap = {};
+        let cliMap = {};
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzD319B272QFM5HK-3ejkl41n3zm1r_0F6bc9ZzJE1Z_6Tc-4wge65Ip16uQe9eDUmrUw/exec';
 
-        // Page load hote hi CSV fetch karega
         $(document).ready(function() {
-            fetch('CLIMICRO.csv')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("Network response was not ok");
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    parseCSV(data);
-                })
-                .catch(error => {
-                    console.error('Error loading CSV:', error);
-                    alert("Error: CLIMICRO.csv file not found or cannot be loaded.");
+            fetch('CLIMICRO.csv').then(res => res.text()).then(data => {
+                data.split('\n').slice(1).forEach(line => {
+                    const p = line.split(',');
+                    if(p.length >= 3) cliMap[p[0].trim().toUpperCase()] = { n: p[1], h: p[2] };
                 });
+            });
+            document.getElementById('date').valueAsDate = new Date();
         });
 
-        // CSV Parse karne ka function
-        function parseCSV(csvText) {
-            const lines = csvText.split('\n');
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (line) {
-                    // CSV format: CLI ID,NAME,HQ
-                    const parts = line.split(',');
-                    if (parts.length >= 3) {
-                        const id = parts[0].trim().toUpperCase(); // CLI ID
-                        const name = parts[1].trim();             // CLI NAME
-                        const hq = parts[2].trim();               // CLI HQ (Mapped to Lobby)
-
-                        cliDataMap[id] = {
-                            name: name,
-                            hq: hq
-                        };
-                    }
-                }
-            }
+        function toggleFields() {
+            const isOther = document.getElementById('dutyType').value === "OTHER DUTY";
+            document.getElementById('otherDutyGroup').style.display = isOther ? 'block' : 'none';
         }
 
-        // Input Validation aur Auto-Fill Logic
         document.getElementById('CLI_ID').addEventListener('input', function(e) {
-            let input = e.target;
-            let val = input.value.toUpperCase(); // Force Uppercase
+            let id = e.target.value.toUpperCase();
+            if(cliMap[id]) {
+                document.getElementById('CLI_NAME').value = cliMap[id].n;
+                document.getElementById('CLI_HQ').value = cliMap[id].h;
+            }
+        });
+
+        const form = document.getElementById('otherDutiesForm');
+        form.addEventListener('submit', e => {
+            e.preventDefault();
             
-            // Remove non-alphanumeric
-            val = val.replace(/[^A-Z0-9]/g, '');
+            const btn = document.getElementById('submitButton');
+            const msg = document.getElementById('msg');
+            const dutyDropdown = document.getElementById('dutyType');
+            
+            // Backup original value in case we need to reset
+            const originalValue = dutyDropdown.value;
 
-            let letters = val.match(/[A-Z]/g) || [];
-            let numbers = val.match(/[0-9]/g) || [];
-
-            // Update input value
-            input.value = val;
-
-            // Auto Fill Logic
-            if (cliDataMap[val]) {
-                document.getElementById('CLI_NAME').value = cliDataMap[val].name;
-                document.getElementById('CLI_HQ').value = cliDataMap[val].hq;
-                document.getElementById('id-error').style.display = 'none';
-            } else {
-                document.getElementById('CLI_NAME').value = "";
-                document.getElementById('CLI_HQ').value = "";
+            // AGAR OTHER DUTY HAI: toh dropdown ki value ko description se replace kar rahe hain
+            if(originalValue === "OTHER DUTY") {
+                const desc = document.getElementById('descRaw').value;
+                const type = document.getElementById('subType').value;
+                
+                // Naya option create karke select kar rahe hain taki Form Data mein yahi jaye
+                const newFormattedValue = `${desc} (${type})`;
+                
+                // Temp option create karke dropdown mein set kar rahe hain submit ke liye
+                const tempOpt = document.createElement('option');
+                tempOpt.value = newFormattedValue;
+                tempOpt.text = newFormattedValue;
+                dutyDropdown.add(tempOpt);
+                dutyDropdown.value = newFormattedValue;
             }
 
-            // Validation Warning
-            if (letters.length > 4 || numbers.length > 4) {
-                document.getElementById('id-error').style.display = 'block';
-            } else {
-                document.getElementById('id-error').style.display = 'none';
-            }
+            btn.disabled = true;
+            msg.style.display = "block";
+            msg.innerText = "Saving Data...";
+
+            fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+                .then(res => {
+                    msg.innerText = "✅ Success! Form Resetting...";
+                    msg.style.color = "green";
+                    setTimeout(() => {
+                        location.reload(); // Page reload sabse best reset hai
+                    }, 2000);
+                })
+                .catch(err => {
+                    msg.innerText = "❌ Error! Check Connection.";
+                    btn.disabled = false;
+                });
         });
     </script>
 </body>
