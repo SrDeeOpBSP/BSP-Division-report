@@ -1,0 +1,3087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance At A Glance Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #040c18;
+            --bg-light: #0d1b2a;
+            --neon-blue: #00f2ff;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aab8;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.15);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px),
+                radial-gradient(circle at center, var(--bg-light) 0%, var(--bg-dark) 100%);
+            background-size: 50px 50px, 50px 50px, 100% 100%;
+            color: var(--text-primary);
+            margin: 0;
+            padding: 10px;
+            /* FIT TO SCREEN LOGIC */
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1.main-title {
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 5px;
+            font-size: 1.8rem;
+            flex-shrink: 0;
+            background: linear-gradient(to right, var(--neon-blue), var(--text-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+        }
+
+        /* --- DASHBOARD HUB (RESPONSIVE SCALING) --- */
+        #dashboard-container {
+            position: relative;
+            width: 700px;
+            height: 700px;
+            margin-top: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: scaleInFade 1s ease-out forwards;
+            opacity: 0;
+            /* Auto Scale Logic */
+            transform-origin: center center;
+            transform: scale(0.9);
+        }
+
+        /* Laptop/Small Screen Adjustments */
+        @media (max-height: 800px) {
+            #dashboard-container { transform: scale(0.7); }
+        }
+        @media (max-height: 650px) {
+            #dashboard-container { transform: scale(0.6); }
+        }
+
+        @keyframes scaleInFade {
+            0% { opacity: 0; transform: scale(0.8) rotate(-5deg); }
+            100% { opacity: 1; transform: scale(var(--scale-factor, 0.9)) rotate(0deg); }
+        }
+
+        .orbit-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px dashed rgba(0, 242, 255, 0.15);
+            pointer-events: none;
+            z-index: 1;
+        }
+        .ring-inner { width: 300px; height: 300px; animation: spinSlow 60s linear infinite; }
+        .ring-outer { width: 550px; height: 550px; animation: spinSlowReverse 80s linear infinite; }
+
+        @keyframes spinSlow { 100% { transform: rotate(360deg); } }
+        @keyframes spinSlowReverse { 100% { transform: rotate(-360deg); } }
+
+        .center-hub {
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: var(--neon-blue);
+            border: 3px solid var(--neon-blue);
+            box-shadow: 0 0 50px rgba(0, 242, 255, 0.5);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+        }
+
+        .hub-icon { font-size: 3rem; margin-bottom: 10px; color: var(--text-primary); }
+
+        .orbit-item {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 50%;
+            border: var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 10px;
+            transition: all 0.4s;
+            z-index: 5;
+            top: 50%;
+            left: 50%;
+            margin-top: -70px;
+            margin-left: -70px;
+        }
+        .orbit-item i { font-size: 2rem; margin-bottom: 8px; color: var(--neon-blue); }
+        
+        .orbit-item:hover {
+            background: linear-gradient(145deg, rgba(0, 242, 255, 0.2) 0%, rgba(0, 242, 255, 0.05) 100%);
+            border-color: var(--neon-blue);
+            color: var(--text-primary);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.6);
+            z-index: 15;
+            transform: var(--pos) scale(1.15) !important; 
+        }
+
+        /* --- CONNECTOR LINES --- */
+        .connector-lines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 2;
+        }
+        
+        .line {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 275px; height: 2px;
+            background: linear-gradient(90deg, rgba(0,242,255,0) 0%, rgba(0,242,255,0.8) 50%, rgba(0,242,255,0) 100%);
+            transform-origin: 0 0;
+        }
+        
+        .line::after {
+            content: ''; position: absolute; right: 40px; top: -4px;
+            width: 0; height: 0; 
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 10px solid var(--neon-blue);
+        }
+
+        /* --- ORBIT POSITIONS --- */
+        .item-1 { --pos: rotate(-90deg) translate(275px) rotate(90deg); transform: var(--pos); }
+        .line-1 { transform: rotate(-90deg); }
+
+        .item-2 { --pos: rotate(-30deg) translate(275px) rotate(30deg); transform: var(--pos); }
+        .line-2 { transform: rotate(-30deg); }
+
+        .item-3 { --pos: rotate(30deg) translate(275px) rotate(-30deg); transform: var(--pos); }
+        .line-3 { transform: rotate(30deg); }
+
+        .item-4 { --pos: rotate(90deg) translate(275px) rotate(-90deg); transform: var(--pos); }
+        .line-4 { transform: rotate(90deg); }
+
+        .item-5 { --pos: rotate(150deg) translate(275px) rotate(-150deg); transform: var(--pos); }
+        .line-5 { transform: rotate(150deg); }
+
+        .item-6 { --pos: rotate(210deg) translate(275px) rotate(-210deg); transform: var(--pos); }
+        .line-6 { transform: rotate(210deg); }
+
+        /* --- MODULE CONTAINER (SCROLLABLE INSIDE) --- */
+        .module-section {
+            display: none;
+            width: 98%;
+            max-width: 1800px;
+            height: 85vh; /* Fixed Height to fit screen */
+            overflow-y: auto; /* Internal Scroll */
+            background: rgba(13, 27, 42, 0.95);
+            backdrop-filter: blur(25px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(0, 242, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            animation: slideUp 0.6s ease-out;
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+
+        .nav-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 30px; }
+        .nav-header h2 { margin: 0; color: var(--neon-blue); }
+        
+        .back-btn {
+            background: rgba(0, 242, 255, 0.1);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 30px;
+            font-weight: 600;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .back-btn:hover { background: var(--neon-blue); color: #000; }
+
+        .control-panel { display: flex; gap: 30px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap; }
+        .option-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+            padding: 30px 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+            width: 220px;
+            transition: 0.4s;
+        }
+        .option-card:hover { border-color: var(--neon-blue); background: rgba(0, 242, 255, 0.1); transform: translateY(-10px); }
+        .option-card i { font-size: 2.5rem; margin-bottom: 15px; color: var(--neon-blue); }
+
+        .input-group { display: flex; gap: 15px; align-items: center; margin-top: 20px; justify-content: center; flex-wrap: wrap; }
+        input, select {
+            padding: 12px 20px;
+            border-radius: 30px;
+            border: 2px solid rgba(0, 242, 255, 0.3);
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            outline: none;
+            font-family: 'Poppins', sans-serif;
+            min-width: 150px;
+        }
+        select option { background: #0d1b2a; color: #fff; }
+
+        button.action-btn {
+            background: linear-gradient(45deg, var(--neon-blue), #008cff);
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 700;
+            box-shadow: 0 5px 15px rgba(0, 242, 255, 0.4);
+            transition: 0.3s;
+        }
+        button.action-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0, 242, 255, 0.6); }
+
+        /* --- RESULTS LAYOUT --- */
+        .results-container { 
+            display: grid; 
+            grid-template-columns: 3fr 1fr; 
+            gap: 20px; 
+            margin-top: 20px; 
+            align-items: start;
+        }
+        
+        .chart-box { 
+            grid-column: 1;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px; 
+            padding: 20px; 
+            height: 500px; 
+            border: 1px solid rgba(255,255,255,0.08); 
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+        }
+        
+        .side-panel {
+            grid-column: 2;
+            background: rgba(0,0,0,0.3); 
+            border-radius: 15px; 
+            padding: 0; 
+            height: 500px; 
+            overflow-y: auto; 
+            border: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bottom-panel {
+            grid-column: 1 / -1; 
+            margin-top: 30px;
+            background: rgba(0,0,0,0.2); 
+            border-radius: 15px; 
+            padding: 20px;
+            overflow-x: auto;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* --- TABLE STYLING --- */
+        table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.95rem; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        th { background: rgba(0, 242, 255, 0.1); color: var(--neon-blue); font-weight: 600; text-transform: uppercase; font-size: 0.85rem;}
+        
+        tbody tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.03); }
+        tbody tr:hover { background-color: rgba(0, 242, 255, 0.1) !important; transition: background 0.2s ease; }
+
+        .summary-card-table { width: 100%; border-collapse: collapse; }
+        .summary-card-table thead th { 
+            position: sticky; top: 0; 
+            background: rgba(4, 12, 24, 0.95); 
+            z-index: 2;
+            padding: 15px;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+        .summary-card-table td { padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
+        .summary-card-table td:last-child { 
+            text-align: right; padding-right: 25px; 
+            font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.1rem;
+        }
+
+        @media (max-width: 1200px) {
+            .results-container { grid-template-columns: 1fr; } 
+            .chart-box, .side-panel { height: auto; min-height: 400px; }
+        }
+
+        .hidden { display: none !important; }
+
+        /* --- UPDATED HUB MATRIX STYLES (FIT TO SCREEN & WHITE BORDERS) --- */
+        .matrix-container { 
+            width: 100%;
+            overflow-x: hidden; /* Scrollbar removed */
+            border: 1px solid #ffffff; /* Solid White Border */
+            border-radius: 10px; 
+            background: rgba(0,0,0,0.2);
+        }
+
+        .matrix-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            table-layout: fixed; /* Fits to width */
+        }
+
+        .matrix-table th, .matrix-table td { 
+            border: 1px solid rgba(255, 255, 255, 0.3); /* Translucent White */
+            text-align: center; 
+            padding: 4px 1px; 
+            font-size: 0.7rem; 
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .matrix-table th { 
+            background: #040c18; 
+            color: var(--neon-blue); 
+            font-weight: 600;
+            border-bottom: 2px solid #ffffff; /* Solid White Header Border */
+        }
+
+        /* First Column (Names) */
+        .matrix-table th:first-child, 
+        .matrix-table td:first-child { 
+            width: 180px; 
+            text-align: left; 
+            padding-left: 8px; 
+            font-weight: 600; 
+            background: #0d1b2a; 
+            z-index: 4;
+            text-overflow: ellipsis;
+            border-right: 2px solid #ffffff !important; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3); 
+        }
+
+        .matrix-table tbody tr:hover td:first-child { 
+            color: var(--neon-blue); 
+            text-shadow: 0 0 5px var(--neon-blue); 
+        }
+        
+        .cli-link { cursor: pointer; color: #fff; text-decoration: none; transition: 0.3s; }
+        .cli-link:hover { color: var(--neon-blue); }
+
+        /* Badge Styling (Compact) */
+        .badge { 
+            padding: 2px 0; 
+            border-radius: 3px; 
+            font-weight: 700; 
+            font-size: 0.65rem; 
+            display: block; 
+            width: 100%;
+            text-align: center;
+            border: none;
+        }
+
+        /* Status Colors */
+        .status-bd { background: rgba(138, 43, 226, 0.3); color: #e0aaff; }
+        .status-fp { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+        .status-lv { background: rgba(255, 0, 85, 0.3); color: #ff4d79; }
+        .status-pr { background: rgba(255, 165, 0, 0.3); color: #ffb74d; }
+        .status-trg { background: rgba(255, 206, 86, 0.3); color: #ffdf7e; }
+        .status-nfp { background: rgba(0, 255, 94, 0.2); color: #69f0ae; }
+        .status-pn { background: transparent; color: #444; }
+        .status-sk { background: rgba(255, 82, 82, 0.3); color: #ff5252; border: 1px solid #ff5252; }
+
+        /* --- PERSONAL DASHBOARD OVERLAY --- */
+        .personal-dashboard {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(4, 12, 24, 0.98); z-index: 100; overflow-y: auto; padding: 20px;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .pd-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--neon-blue); padding-bottom: 15px; margin-bottom: 20px; }
+       /* --- UPDATED PERSONAL DASHBOARD STYLING --- */
+.pd-grid { 
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); /* 3 Cards per row for better view */
+    gap: 25px; 
+    padding: 20px; 
+    padding-bottom: 80px; 
+}
+
+.pd-card { 
+    background: rgba(13, 27, 42, 0.7); /* Darker, Glassy */
+    border: 1px solid rgba(0, 242, 255, 0.15); 
+    border-radius: 20px; 
+    padding: 20px; 
+    height: 380px; /* Thoda height badhaya */
+    position: relative; 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+}
+
+.pd-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--neon-blue);
+    box-shadow: 0 15px 40px rgba(0, 242, 255, 0.1);
+}
+
+.pd-card h4 { 
+    margin: 0 0 20px 0; 
+    color: var(--neon-blue); 
+    font-size: 1rem; 
+    text-transform: uppercase; 
+    border-bottom: 1px solid rgba(255,255,255,0.1); 
+    padding-bottom: 10px; 
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+/* Canvas Container */
+.chart-container-pd {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+/* Tablet/Laptop Adjustment */
+@media (max-width: 1200px) {
+    .pd-grid { grid-template-columns: repeat(2, 1fr); }
+}
+        
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        /* --- MINI TABLE STYLES --- */
+        .mini-stat-table {
+            position: absolute; top: 10px; right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 5px;
+            z-index: 20;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            font-size: 0.75rem;
+            max-width: 300px;
+        }
+        .mini-stat-table table { width: 100%; border-collapse: collapse; }
+        .mini-stat-table th {
+            text-align: left; color: var(--neon-blue);
+            padding: 4px 8px; border-bottom: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.7rem; background: transparent;
+        }
+        .mini-stat-table td {
+            padding: 4px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #fff;
+        }
+        .status-ok { color: #00ff88; font-weight: bold; }
+        .status-fail { color: #ff0055; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+    <h1 class="main-title">Performance At A Glance Dashboard</h1>
+
+    <div id="dashboard-container">
+        <div class="orbit-ring ring-outer"></div>
+        <div class="orbit-ring ring-inner"></div>
+
+        <div class="connector-lines">
+            <div class="line line-1"></div>
+            <div class="line line-2"></div>
+            <div class="line line-3"></div>
+            <div class="line line-4"></div>
+            <div class="line line-5"></div>
+            <div class="line line-6"></div>
+        </div>
+
+        <div class="center-hub" onclick="openModule('hub')" style="cursor: pointer;">
+            <i class="fas fa-atom hub-icon"></i>
+            <div>CLI DASHBOARD</div>
+        </div>
+
+        <div class="orbit-item item-1" onclick="openModule('footplate')">
+            <i class="fas fa-subway"></i>
+            <div>CLI FOOTPLATE</div>
+        </div>
+        
+        <div class="orbit-item item-2" onclick="openModule('spm')">
+            <i class="fas fa-user-secret"></i>
+            <div>CLI SPM/CVVRS</div>
+        </div>
+        
+        <div class="orbit-item item-3" onclick="openModule('other-ambush')">
+            <i class="fas fa-binoculars"></i>
+            <div>CLI OTHER AMBUSH</div>
+        </div>
+        
+        <div class="orbit-item item-4" onclick="openModule('ongoing-drives')">
+            <i class="fas fa-chalkboard-teacher"></i>
+            <div>ONGOING DRIVES</div>
+        </div>
+
+        <div class="orbit-item item-5" onclick="openModule('inspection')">
+            <i class="fas fa-clipboard-check"></i>
+            <div>CLI INSPECTION</div>
+        </div>
+
+        <div class="orbit-item item-6" onclick="openModule('counselling')">
+            <i class="fas fa-users-cog"></i>
+            <div>CREW COUNSELLING</div>
+        </div>
+    </div>
+
+    <div id="module-footplate" class="module-section">
+        <div class="nav-header">
+            <h2><i class="fas fa-subway" style="margin-right:10px"></i> CLI FOOTPLATE MANAGEMENT</h2>
+            <button class="back-btn" onclick="closeModule('footplate')"><i class="fas fa-chevron-left"></i> Back to Dashboard</button>
+        </div>
+
+        <div id="fp-selection" class="control-panel">
+            <div class="option-card" onclick="showSearchInterface('search')">
+                <i class="fas fa-search-location"></i>
+                <h3>SEARCH BY NAME</h3>
+            </div>
+            <div class="option-card" onclick="showSearchInterface('summary')">
+                <i class="fas fa-chart-pie"></i>
+                <h3>SHOW SUMMARY</h3>
+            </div>
+        </div>
+
+        <div id="fp-inputs" class="hidden" style="text-align: center; margin-bottom: 30px;">
+            <div class="input-group">
+                <div id="cli-name-wrapper">
+                    <input type="text" list="cli-names-list" id="cli-name-input" placeholder="Type CLI Name...">
+                    <datalist id="cli-names-list"></datalist>
+                </div>
+                <select id="year-select"><option value="">Select Year</option></select>
+                <select id="month-select">
+                    <option value="" disabled selected>Select Month</option>
+                    <option value="01">January</option><option value="02">February</option><option value="03">March</option>
+                    <option value="04">April</option><option value="05">May</option><option value="06">June</option>
+                    <option value="07">July</option><option value="08">August</option><option value="09">September</option>
+                    <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+                </select>
+                <button class="action-btn" onclick="fetchAndGenerateReport()">
+                    <i class="fas fa-bolt"></i> GET DATA
+                </button>
+            </div>
+        </div>
+
+        <div id="fp-results" class="results-container hidden">
+            <div class="chart-box"><canvas id="mainChart"></canvas></div>
+            <div class="side-panel">
+                <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,242,255,0.05);">
+                    <h3 style="margin:0; font-size: 1rem; color: var(--neon-blue); text-align: center;">
+                        <i class="fas fa-list-alt"></i> DETAILED METRICS
+                    </h3>
+                </div>
+                <div id="side-tabular-data" style="width:100%"></div>
+            </div>
+            <div id="bottom-detailed-box" class="bottom-panel hidden">
+                <h3 style="margin-top:0; color:var(--text-secondary); margin-bottom:15px; font-size:1rem;">
+                    <i class="fas fa-table"></i> FULL DIVISIONAL BREAKDOWN
+                </h3>
+                <div id="bottom-tabular-data"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="module-other-ambush" class="module-section">
+        <div class="nav-header">
+            <h2><i class="fas fa-binoculars" style="margin-right:10px"></i> CLI OTHER AMBUSH</h2>
+            <button class="back-btn" onclick="closeModule('other-ambush')">
+                <i class="fas fa-chevron-left"></i> Back to Dashboard
+            </button>
+        </div>
+    
+        <div id="oa-selection" class="control-panel">
+            <div class="option-card" onclick="showOASearchInterface('search')">
+                <i class="fas fa-search-location"></i>
+                <h3>SEARCH BY NAME</h3>
+            </div>
+            <div class="option-card" onclick="showOASearchInterface('summary')">
+                <i class="fas fa-chart-pie"></i>
+                <h3>SHOW SUMMARY</h3>
+            </div>
+        </div>
+    
+        <div id="oa-inputs" class="hidden" style="text-align: center; margin-bottom: 30px;">
+            <div class="input-group">
+                <div id="oa-cli-name-wrapper">
+                    <input type="text" list="oa-cli-names-list" id="oa-cli-name-input" placeholder="Type CLI Name...">
+                    <datalist id="oa-cli-names-list"></datalist>
+                </div>
+                
+                <select id="oa-year-select"><option value="">Select Year</option></select>
+                
+                <select id="oa-month-select">
+                    <option value="" disabled selected>Select Month</option>
+                    <option value="1">January</option> <option value="2">February</option>
+                    <option value="3">March</option> <option value="4">April</option>
+                    <option value="5">May</option> <option value="6">June</option>
+                    <option value="7">July</option> <option value="8">August</option>
+                    <option value="9">September</option> <option value="10">October</option>
+                    <option value="11">November</option> <option value="12">December</option>
+                </select>
+                
+                <button class="action-btn" onclick="generateOAReport()">
+                    <i class="fas fa-bolt"></i> GET DATA
+                </button>
+            </div>
+        </div>
+    
+        <div id="oa-results" class="results-container hidden">
+            <div class="chart-box">
+                <canvas id="oaChart"></canvas>
+            </div>
+    
+            <div class="side-panel">
+                <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,242,255,0.05);">
+                    <h3 style="margin:0; font-size: 1rem; color: var(--neon-blue); text-align: center;">
+                        <i class="fas fa-list-alt"></i> AMBUSH DETAILS
+                    </h3>
+                </div>
+                <div id="oa-side-data" style="width:100%"></div>
+            </div>
+    
+            <div id="oa-bottom-box" class="bottom-panel hidden">
+                <h3 style="margin-top:0; color:var(--text-secondary); margin-bottom:15px; font-size:1rem;">
+                    <i class="fas fa-table"></i> FULL AMBUSH BREAKDOWN
+                </h3>
+                <div id="oa-bottom-data"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="module-spm" class="module-section">
+        <div class="nav-header">
+            <h2><i class="fas fa-user-secret" style="margin-right:10px"></i> CLI SPM/CVVRS ANALYSIS</h2>
+            <button class="back-btn" onclick="closeModule('spm')">
+                <i class="fas fa-chevron-left"></i> Back to Dashboard
+            </button>
+        </div>
+
+        <div id="spm-selection" class="control-panel">
+            <div class="option-card" onclick="showSPMSearchInterface('search')">
+                <i class="fas fa-search-location"></i>
+                <h3>SEARCH BY NAME</h3>
+            </div>
+            <div class="option-card" onclick="showSPMSearchInterface('summary')">
+                <i class="fas fa-chart-pie"></i>
+                <h3>SHOW SUMMARY</h3>
+            </div>
+        </div>
+
+        <div id="spm-inputs" class="hidden" style="text-align: center; margin-bottom: 30px;">
+            <div class="input-group">
+                <div id="spm-cli-name-wrapper">
+                    <input type="text" list="spm-cli-names-list" id="spm-cli-name-input" placeholder="Type CLI Name...">
+                    <datalist id="spm-cli-names-list"></datalist>
+                </div>
+                
+                <select id="spm-year-select"><option value="">Select Year</option></select>
+                
+                <select id="spm-month-select">
+                    <option value="" disabled selected>Select Month</option>
+                    <option value="1">January</option> <option value="2">February</option>
+                    <option value="3">March</option> <option value="4">April</option>
+                    <option value="5">May</option> <option value="6">June</option>
+                    <option value="7">July</option> <option value="8">August</option>
+                    <option value="9">September</option> <option value="10">October</option>
+                    <option value="11">November</option> <option value="12">December</option>
+                </select>
+                
+                <button class="action-btn" onclick="generateSPMReport()">
+                    <i class="fas fa-bolt"></i> GET DATA
+                </button>
+            </div>
+        </div>
+
+        <div id="spm-results" class="results-container hidden">
+            <div class="chart-box">
+                <canvas id="spmChart"></canvas>
+            </div>
+            <div class="side-panel">
+                <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,242,255,0.05);">
+                    <h3 style="margin:0; font-size: 1rem; color: var(--neon-blue); text-align: center;">
+                        <i class="fas fa-list-alt"></i> ANALYSIS DETAILS
+                    </h3>
+                </div>
+                <div id="spm-side-data" style="width:100%"></div>
+            </div>
+            
+            <div id="spm-bottom-box" class="bottom-panel hidden">
+                <h3 style="margin-top:0; color:var(--text-secondary); margin-bottom:15px; font-size:1rem;">
+                    <i class="fas fa-table"></i> FULL CLI WISE SPM/CVVRS BREAKDOWN
+                </h3>
+                <div id="spm-bottom-data"></div>
+            </div>
+        </div>
+    </div>
+    <div id="module-inspection" class="module-section">
+        <div class="nav-header">
+            <h2><i class="fas fa-clipboard-check" style="margin-right:10px"></i> CLI INSPECTION MANAGEMENT</h2>
+            <button class="back-btn" onclick="closeModule('inspection')">
+                <i class="fas fa-chevron-left"></i> Back to Dashboard
+            </button>
+        </div>
+
+        <div id="insp-selection" class="control-panel">
+            <div class="option-card" onclick="showInspectionSearchInterface('search')">
+                <i class="fas fa-search-location"></i>
+                <h3>SEARCH BY NAME</h3>
+            </div>
+            <div class="option-card" onclick="showInspectionSearchInterface('summary')">
+                <i class="fas fa-chart-pie"></i>
+                <h3>SHOW SUMMARY</h3>
+            </div>
+        </div>
+
+        <div id="insp-inputs" class="hidden" style="text-align: center; margin-bottom: 30px;">
+            <div class="input-group">
+                <div id="insp-cli-name-wrapper">
+                    <input type="text" list="insp-cli-names-list" id="insp-cli-name-input" placeholder="Type CLI Name...">
+                    <datalist id="insp-cli-names-list"></datalist>
+                </div>
+                
+                <select id="insp-year-select"><option value="">Select Year</option></select>
+                
+                <select id="insp-month-select">
+                    <option value="" disabled selected>Select Month</option>
+                    <option value="01">January</option><option value="02">February</option><option value="03">March</option>
+                    <option value="04">April</option><option value="05">May</option><option value="06">June</option>
+                    <option value="07">July</option><option value="08">August</option><option value="09">September</option>
+                    <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+                </select>
+                
+                <button class="action-btn" onclick="generateInspectionReport()">
+                    <i class="fas fa-bolt"></i> GET DATA
+                </button>
+            </div>
+        </div>
+
+        <div id="insp-results" class="results-container hidden">
+            <div class="chart-box">
+                <canvas id="inspChart"></canvas>
+            </div>
+            <div class="side-panel">
+                <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,242,255,0.05);">
+                    <h3 style="margin:0; font-size: 1rem; color: var(--neon-blue); text-align: center;">
+                        <i class="fas fa-list-alt"></i> INSPECTION DETAILS
+                    </h3>
+                </div>
+                <div id="insp-side-data" style="width:100%"></div>
+            </div>
+            
+            <div id="insp-bottom-box" class="bottom-panel hidden">
+                <h3 style="margin-top:0; color:var(--text-secondary); margin-bottom:15px; font-size:1rem;">
+                    <i class="fas fa-table"></i> FULL INSPECTION BREAKDOWN
+                </h3>
+                <div id="insp-bottom-data"></div>
+            </div>
+        </div>
+    </div>
+    <div id="module-hub" class="module-section">
+        <div class="nav-header">
+            <h2><i class="fas fa-atom" style="margin-right:10px"></i> CENTRAL CLI MONITORING HUB</h2>
+            <button class="back-btn" onclick="closeModule('hub')"><i class="fas fa-chevron-left"></i> Back to Home</button>
+        </div>
+
+        <div class="input-group" style="margin-bottom: 20px;">
+            <select id="hub-year-select"><option value="">Select Year</option></select>
+            <select id="hub-month-select">
+                <option value="" disabled selected>Select Month</option>
+                <option value="01">January</option><option value="02">February</option><option value="03">March</option>
+                <option value="04">April</option><option value="05">May</option><option value="06">June</option>
+                <option value="07">July</option><option value="08">August</option><option value="09">September</option>
+                <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+            </select>
+            <button class="action-btn" onclick="generateHubMatrix()"><i class="fas fa-th"></i> LOAD MATRIX</button>
+        </div>
+
+        <div id="hub-matrix-container" class="matrix-container hidden">
+            </div>
+    </div>
+
+    <div id="personal-dashboard" class="personal-dashboard">
+        <div class="pd-header">
+            <div>
+                <h1 id="pd-cli-name" style="margin:0; color: #fff;">CLI NAME</h1>
+                <span id="pd-subtitle" style="color: var(--text-secondary); font-size: 0.9rem;">PERFORMANCE REPORT</span>
+            </div>
+            <button class="action-btn" onclick="closePersonalDashboard()" style="background: rgba(255,0,0,0.2); border: 1px solid red;">
+                <i class="fas fa-times"></i> CLOSE
+            </button>
+        </div>
+        
+      <div class="pd-grid">
+    <div class="pd-card">
+        <h4><i class="fas fa-subway"></i> Footplate Statistics</h4>
+        <div class="chart-container-pd"><canvas id="pd-chart-fp"></canvas></div>
+    </div>
+    <div class="pd-card">
+        <h4><i class="fas fa-binoculars"></i> Ambush & Drives</h4>
+        <div class="chart-container-pd"><canvas id="pd-chart-ambush"></canvas></div>
+    </div>
+    <div class="pd-card">
+        <h4><i class="fas fa-user-secret"></i> SPM & CVVRS Analysis</h4>
+        <div class="chart-container-pd"><canvas id="pd-chart-spm"></canvas></div>
+    </div>
+    <div class="pd-card">
+        <h4><i class="fas fa-clipboard-check"></i> Inspection Breakdown</h4>
+        <div class="chart-container-pd"><canvas id="pd-chart-insp"></canvas></div>
+    </div>
+    <div class="pd-card">
+        <h4><i class="fas fa-bullhorn"></i> Ongoing Drives Status</h4>
+        <div class="chart-container-pd"><canvas id="pd-chart-drives"></canvas></div>
+    </div>
+    <div class="pd-card">
+        <h4><i class="fas fa-users-cog"></i> Crew Counselling</h4>
+        <div class="chart-container-pd"><canvas id="pd-chart-couns"></canvas></div>
+    </div>
+</div>
+    </div>
+    <div id="module-counselling" class="module-section">
+    <div class="nav-header">
+        <h2><i class="fas fa-users-cog" style="margin-right:10px"></i> CLI CREW COUNSELLING</h2>
+        <button class="back-btn" onclick="closeModule('counselling')">
+            <i class="fas fa-chevron-left"></i> Back to Dashboard
+        </button>
+    </div>
+
+    <div id="couns-selection" class="control-panel">
+        <div class="option-card" onclick="showCounsellingSearchInterface('search')">
+            <i class="fas fa-search-location"></i>
+            <h3>SEARCH BY NAME</h3>
+        </div>
+        <div class="option-card" onclick="showCounsellingSearchInterface('summary')">
+            <i class="fas fa-chart-pie"></i>
+            <h3>SHOW SUMMARY</h3>
+        </div>
+    </div>
+
+    <div id="couns-inputs" class="hidden" style="text-align: center; margin-bottom: 30px;">
+        <div class="input-group">
+            <div id="couns-cli-name-wrapper">
+                <input type="text" list="couns-cli-names-list" id="couns-cli-name-input" placeholder="Type CLI Name...">
+                <datalist id="couns-cli-names-list"></datalist>
+            </div>
+            
+            <select id="couns-year-select"><option value="">Select Year</option></select>
+            
+            <select id="couns-month-select">
+                <option value="" disabled selected>Select Month</option>
+                <option value="01">January</option><option value="02">February</option><option value="03">March</option>
+                <option value="04">April</option><option value="05">May</option><option value="06">June</option>
+                <option value="07">July</option><option value="08">August</option><option value="09">September</option>
+                <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+            </select>
+            
+            <button class="action-btn" onclick="generateCounsellingReport()">
+                <i class="fas fa-bolt"></i> GET DATA
+            </button>
+        </div>
+    </div>
+
+    <div id="couns-results" class="results-container hidden">
+        <div class="chart-box">
+            <canvas id="counsChart"></canvas>
+        </div>
+        <div class="side-panel">
+            <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,242,255,0.05);">
+                <h3 style="margin:0; font-size: 1rem; color: var(--neon-blue); text-align: center;">
+                    <i class="fas fa-list-alt"></i> COUNSELLING DETAILS
+                </h3>
+            </div>
+            <div id="couns-side-data" style="width:100%"></div>
+        </div>
+        
+        <div id="couns-bottom-box" class="bottom-panel hidden">
+            <h3 style="margin-top:0; color:var(--text-secondary); margin-bottom:15px; font-size:1rem;">
+                <i class="fas fa-table"></i> FULL COUNSELLING BREAKDOWN
+            </h3>
+            <div id="couns-bottom-data"></div>
+        </div>
+    </div>
+</div>
+<div id="module-ongoing-drives" class="module-section">
+    <div class="nav-header">
+        <h2><i class="fas fa-bullhorn" style="margin-right:10px"></i> CLI ONGOING DRIVES</h2>
+        <button class="back-btn" onclick="closeModule('ongoing-drives')"><i class="fas fa-chevron-left"></i> Back to Dashboard</button>
+    </div>
+
+    <div id="drive-selection" class="control-panel">
+        <div class="option-card" onclick="showDriveInterface('search')">
+            <i class="fas fa-search-user"></i>
+            <h3>SEARCH BY NAME</h3>
+        </div>
+        <div class="option-card" onclick="showDriveInterface('summary')">
+            <i class="fas fa-globe-asia"></i>
+            <h3>SHOW SUMMARY</h3>
+        </div>
+    </div>
+
+    <div id="drive-inputs" class="hidden" style="text-align: center; margin-bottom: 30px;">
+        <div class="input-group">
+            <div id="drive-cli-wrapper">
+                <input type="text" list="drive-cli-list" id="drive-cli-input" placeholder="Type CLI Name...">
+                <datalist id="drive-cli-list"></datalist>
+            </div>
+            <button class="action-btn" onclick="generateDriveReport()">
+                <i class="fas fa-sync"></i> ANALYZE DRIVES
+            </button>
+        </div>
+    </div>
+
+    <div id="drive-results" class="results-container hidden">
+        <div class="chart-box"><canvas id="driveChart"></canvas></div>
+        <div class="side-panel">
+            <div style="padding: 15px; border-bottom: 1px solid rgba(0,242,255,0.2); background: rgba(0,242,255,0.05);">
+                <h3 style="margin:0; font-size: 1rem; color: var(--neon-blue); text-align: center;">DRIVE PROGRESS</h3>
+            </div>
+            <div id="drive-side-data"></div>
+        </div>
+        <div id="drive-bottom-box" class="bottom-panel hidden">
+            <div id="drive-bottom-data"></div>
+        </div>
+    </div>
+</div>
+    <script>
+        let currentDriveMode = ''
+        let glpData = [];
+        // CONFIGURATION
+        const API_KEY = 'AIzaSyAw23pJz0K9fZb2rRRAe2C2cJDilRc0Kac'; // *** ENTER YOUR API KEY HERE ***
+        
+        const INSP_EXTRA_SHEET_ID = '144Ti1qTsi3bGtOtej5bcWu1VJlxznc6goUVIZmAtcVc';
+        const INSP_EXTRA_SHEET_NAME = 'Sheet1';
+        let extraInspData = [];
+
+        // Footplate Sheets
+        const SHEET_ID = '1Pn0sosMuxX2XZYRe9qIvkGM06GcyIWdEeaD0gfPeRZU';
+        const SHEET_NAME = 'DAILY REPORT';
+        
+        // *** NEW: END TO END SHEET CONFIG ***
+        const E2E_SHEET_ID = '1fHSnNcPxryFY1JP2or3ZzqC4tO2qe6E1-VJ2-UX_nrQ';
+        const E2E_SHEET_NAME = 'END TO END FOOTPLATE';
+
+        // Other Ambush Sheets
+        const MOBILE_SHEET_ID = '1-QRB09VQJYy1SZU7cPC8cxh3xRIVSJv5VQKEG8EK7iM';
+        const MOBILE_SHEET_NAME = 'Sheet1';
+
+        // SPM Sheets
+        const SANKET_ID = '1XcmhgkXH0fQlUQG3oLmEUrVnUVk3p_gyYqBMPyXfGv0';
+        const MANUAL_ID = '1GbWplsBRpKY0OqNGImdS_OBTWsVdVBMIIqCCfqpYT-g';
+        const CVVRS_ID = '1BEVUi7CPmrbGYdoom30vr94tGHkSsGeWGLfYLZJX76Q';
+
+        // Other Duty Sheet
+        const OTHER_DUTY_ID = '1mtFaqe5gLIRYeC7wv6sj7DOv42mQvgDYd9EmV33P5yI';
+        const OTHER_DUTY_NAME = 'OTHER DUTY';
+
+        // Add these constants
+          const DRIVE_SHEET_ID = '1oklGv3imlcw5IbMbDnVlv800fSqk0D_x3EazHb3UYqk';
+          const DRIVE_SHEET_NAME = 'Sheet1';
+
+          // Ongoing Drives Config
+            const DRIVE_ONGOING_SHEET_ID = '1zCQeixFv7KQMSBjl5_-NqwyF5PPsDR6Hr0yeCOpVmtY';
+            const ROLLDOWN_SHEET_NAME = 'ROLLDOWN';
+            const CRB_DRIVE_SHEET_NAME = 'CRB DRIVE';
+
+            // Global Data Vars
+            let rolldownData = [];
+            let crbDriveData = [];
+            let driveChartInstance = null;
+
+         // Add to Global Vars
+          let driveData = [];
+          let currentCounsMode = '';
+          let counsChartInstance = null;
+          const COLS_COUNS = { SAFETY: 18, SPAD_PREV: 24 }; // Col S=18, Col Y=24 (0-based)
+
+        // GLOBAL VARS
+        let allData = [];
+        let endToEndData = [];
+        let mobileAmbushData = [];
+        
+        // SPM Data Vars
+        let spmSanketData = [];
+        let spmManualData = [];
+        let spmCvvrsData = [];
+
+        let uniqueCLIs = new Set();
+        let currentMode = ''; 
+        let currentOAMode = '';
+        let currentSPMMode = '';
+
+        let chartInstance = null;
+        let oaChartInstance = null;
+        let spmChartInstance = null;
+        let currentInspMode = '';
+        let inspChartInstance = null;
+        let otherDutyData = [];
+        let pdChartFP = null, pdChartAmbush = null, pdChartSPM = null, pdChartInsp = null;
+        const COLS_OD = { NAME: 0, LOBBY: 1, TYPE: 2, DATE: 3 };
+        let isDataLoaded = false; // Flag to track status
+
+        // Start fetching as soon as the page loads
+        window.onload = function() {
+            console.log("🚀 Background Data Fetch Initiated...");
+            preloadAllData();
+        };
+
+       async function preloadAllData() {
+    try {
+        await Promise.all([
+            fetchData(),         
+            fetchOtherDutyData(), 
+            fetchOtherAmbushData(), 
+            fetchSPMData(),
+            fetchDriveData(),
+            fetchOngoingDriveData(), // <--- YE LINE ADD KAREIN
+            fetchExtraInspectionData()
+        ]);
+        isDataLoaded = true;
+        console.log("✅ All Data Loaded in Background!");
+    } catch (error) {
+        console.error("❌ Background fetch failed:", error);
+    }
+}
+        // COLUMN MAPS
+        const COLS = { NAME: 0, LOBBY: 1, DATE: 2, WEE: 3, NO_WEE: 5, GRP_LP: 32, GRP_ALP: 33, COACHING: 52, MEMU: 55, GOODS: 58, ANY_FP_TLC: 62 };
+        const COLS_OA = { AUTO_IB: 8, LC_AMBUSH: 10, CD_ZONES: 12, BA_AMBUSH: 14, SPEED_AUTO: 16, SPEED_YELLOW: 45 };
+        const COLS_INSP = { FAMILY: 26, RUNNING: 27, LOBBY: 29 }; // AA=26, AB=27, AD=29
+        // --- NAVIGATION ---
+      // REPLACE YOUR EXISTING openModule FUNCTION WITH THIS:
+
+// --- UPDATED OPEN MODULE FUNCTION (INCLUDES COUNSELLING) ---
+function openModule(moduleName) {
+    // 1. Hide Dashboard & All Modules
+    document.getElementById('dashboard-container').style.display = 'none';
+    document.querySelectorAll('.module-section').forEach(el => el.style.display = 'none');
+
+    // 2. Handle Specific Modules
+    if(moduleName === 'footplate') {
+        document.getElementById('module-footplate').style.display = 'block';
+        // Check if data is loaded, if not fetch (fail-safe)
+        if(!isDataLoaded && allData.length === 0) fetchData(); 
+    } 
+    else if (moduleName === 'other-ambush') {
+        document.getElementById('module-other-ambush').style.display = 'block';
+        if(!isDataLoaded && mobileAmbushData.length === 0) fetchOtherAmbushData();
+    } 
+    else if (moduleName === 'spm') {
+        document.getElementById('module-spm').style.display = 'block';
+        if(!isDataLoaded && spmSanketData.length === 0) fetchSPMData();
+    } 
+    else if (moduleName === 'inspection') {
+        document.getElementById('module-inspection').style.display = 'block';
+        if(!isDataLoaded && allData.length === 0) fetchData();
+    } 
+    // *** NEW: COUNSELLING MODULE ***
+    else if (moduleName === 'counselling') {
+        document.getElementById('module-counselling').style.display = 'block';
+        populateCounsDropdowns(); // Populate dropdowns immediately
+        // Check if drive data is loaded
+        if(!isDataLoaded && driveData.length === 0) fetchDriveData();
+    }
+    else if (moduleName === 'ongoing-drives') {
+        document.getElementById('module-ongoing-drives').style.display = 'block';
+        // Agar data pehle load nahi hua toh fetch karein
+        if(rolldownData.length === 0) fetchOngoingDriveData();
+    }
+    // *** HUB (DASHBOARD) WITH INSTANT LOAD ***
+    else if (moduleName === 'hub') {
+        document.getElementById('module-hub').style.display = 'block';
+        
+        if (isDataLoaded) {
+            // Data is ready, load immediately
+            loadHubImmediately();
+        } else {
+            // Data not ready yet (clicked too fast), show spinner
+            const container = document.getElementById('hub-matrix-container');
+            container.classList.remove('hidden');
+            container.innerHTML = '<div style="color:var(--neon-blue); text-align:center; padding:20px; font-size:1.2rem;"><i class="fas fa-spinner fa-spin"></i> Loading Data... Please Wait...</div>';
+            
+            // Check every 500ms
+            let checkInterval = setInterval(() => {
+                if (isDataLoaded) {
+                    clearInterval(checkInterval);
+                    loadHubImmediately();
+                }
+            }, 500);
+        }
+    }
+    
+}
+function resetDriveInterface() {
+    document.getElementById('drive-selection').classList.remove('hidden');
+    document.getElementById('drive-inputs').classList.add('hidden');
+    document.getElementById('drive-results').classList.add('hidden');
+    document.getElementById('drive-cli-input').value = '';
+    document.getElementById('drive-bottom-box').classList.add('hidden');
+}
+// *** ADD THIS NEW HELPER FUNCTION RIGHT AFTER openModule ***
+function loadHubImmediately() {
+    // 1. Calculate Previous Month
+    const date = new Date();
+    date.setMonth(date.getMonth() - 1); // Go back 1 month
+    const prevYear = date.getFullYear();
+    const prevMonth = (date.getMonth() + 1).toString().padStart(2, '0');
+
+    // 2. Set Dropdown Values
+    const ySelect = document.getElementById('hub-year-select');
+    const mSelect = document.getElementById('hub-month-select');
+
+    // Ensure year dropdown is populated if empty
+    if (ySelect.options.length <= 1) populateHubYear();
+
+    let yearOption = Array.from(ySelect.options).find(opt => opt.value == prevYear);
+    
+    if (yearOption) {
+        ySelect.value = prevYear;
+        mSelect.value = prevMonth;
+        
+        // 3. Generate Matrix
+        generateHubMatrix();
+    } else {
+        // Fallback if previous year not found (e.g. Jan 2026 -> Dec 2025 not in list)
+        console.warn("Previous year not found in dropdown, waiting for populate or manual selection.");
+    }
+}
+
+function closeModule(moduleName) {
+    document.getElementById('module-' + moduleName).style.display = 'none';
+    document.getElementById('dashboard-container').style.display = 'flex';
+    
+    if(moduleName === 'footplate') resetInterface();
+    if(moduleName === 'other-ambush') resetOAInterface();
+    if(moduleName === 'spm') resetSPMInterface();
+    if(moduleName === 'inspection') resetInspInterface();
+    
+    // *** YE LINE ADD KARNA HAI ***
+    if(moduleName === 'counselling') resetCounsInterface(); 
+    if(moduleName === 'ongoing-drives') resetDriveInterface();
+    
+    if(moduleName === 'hub') { document.getElementById('hub-matrix-container').innerHTML = ''; }
+}
+
+        // --- FOOTPLATE LOGIC ---
+       function resetCounsInterface() {
+    document.getElementById('couns-selection').classList.remove('hidden');
+    document.getElementById('couns-inputs').classList.add('hidden');
+    document.getElementById('couns-results').classList.add('hidden');
+    document.getElementById('couns-cli-name-input').value = '';
+    document.getElementById('couns-bottom-box').classList.add('hidden');
+    document.getElementById('couns-year-select').value = "";
+    document.getElementById('couns-month-select').selectedIndex = 0;
+}
+
+        function showSearchInterface(mode) {
+            currentMode = mode;
+            document.getElementById('fp-selection').classList.add('hidden');
+            document.getElementById('fp-inputs').classList.remove('hidden');
+            document.getElementById('cli-name-wrapper').style.display = (mode === 'summary') ? 'none' : 'block';
+        }
+       async function fetchExtraInspectionData() {
+    // Fetch Cols A to G (Timestamp to Type)
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${INSP_EXTRA_SHEET_ID}/values/${INSP_EXTRA_SHEET_NAME}!A2:G?key=${API_KEY}`;
+    try {
+        const res = await fetch(url);
+        const json = await res.json();
+        if (json.values) extraInspData = json.values;
+    } catch (e) { console.error("Err Extra Insp", e); }
+}
+       async function fetchData() {
+    const urlMain = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A2:BK?key=${API_KEY}`;
+    const urlE2E = `https://sheets.googleapis.com/v4/spreadsheets/${E2E_SHEET_ID}/values/${E2E_SHEET_NAME}!A2:G?key=${API_KEY}`; // Fetching up to Col G
+
+    try {
+        const [resMain, resE2E] = await Promise.all([
+            fetch(urlMain),
+            fetch(urlE2E)
+        ]);
+
+        const dataMain = await resMain.json();
+        const dataE2E = await resE2E.json();
+
+        if (dataMain.values) {
+            allData = dataMain.values;
+        }
+        if (dataE2E.values) {
+            endToEndData = dataE2E.values; // Store E2E data
+        }
+
+        populateCLIDropdown();
+        populateYearDropdown();
+
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Error fetching data.");
+    }
+}
+
+        function populateCLIDropdown() {
+    const list = document.getElementById('cli-names-list');
+    const inspList = document.getElementById('insp-cli-names-list'); // NEW
+    
+    list.innerHTML = ''; 
+    if(inspList) inspList.innerHTML = ''; // NEW
+
+    uniqueCLIs.clear();
+    allData.forEach(row => { if (row[COLS.NAME]) uniqueCLIs.add(row[COLS.NAME].trim()); });
+    
+    Array.from(uniqueCLIs).sort().forEach(name => {
+        const option = document.createElement('option'); option.value = name;
+        list.appendChild(option);
+        
+        // Clone for Inspection
+        if(inspList) {
+            const opt2 = document.createElement('option'); opt2.value = name;
+            inspList.appendChild(opt2);
+        }
+    });
+}
+
+        function populateYearDropdown() {
+    const yearSelect = document.getElementById('year-select');
+    const inspYearSelect = document.getElementById('insp-year-select'); // NEW
+    
+    yearSelect.innerHTML = '<option value="">Select Year</option>';
+    if(inspYearSelect) inspYearSelect.innerHTML = '<option value="">Select Year</option>'; // NEW
+
+    const uniqueYears = new Set();
+    allData.forEach(row => {
+        const d = row[COLS.DATE];
+        if (d && d.includes('-')) { const y = d.split('-')[0]; if (y.length === 4) uniqueYears.add(y); }
+    });
+    
+    Array.from(uniqueYears).sort().reverse().forEach(y => {
+        const opt = document.createElement('option'); opt.value = y; opt.innerText = y;
+        yearSelect.appendChild(opt);
+        
+        // Clone for Inspection
+        if(inspYearSelect) {
+            const opt2 = document.createElement('option'); opt2.value = y; opt2.innerText = y;
+            inspYearSelect.appendChild(opt2);
+        }
+    });
+}
+        function fetchAndGenerateReport() {
+            const year = document.getElementById('year-select').value;
+            const month = document.getElementById('month-select').value;
+            if (!year || !month) { alert("Select Year and Month"); return; }
+            document.getElementById('fp-results').classList.remove('hidden');
+            
+            if (currentMode === 'search') {
+                const name = document.getElementById('cli-name-input').value;
+                if (!name) { alert("Enter CLI Name"); return; }
+                generateIndividualReport(name, year, month);
+            } else {
+                generateSummaryReport(year, month);
+            }
+        }
+
+       function generateIndividualReport(name, year, month) {
+    let stats = { wee: 0, noWee: 0, grpLP: 0, grpALP: 0, coaching: 0, memu: 0, goods: 0, e2e: 0 }; // Added e2e: 0
+
+    // 1. Process Main Footplate Data
+    allData.forEach(row => {
+        if (row[COLS.NAME] && row[COLS.NAME].trim() === name && isDateInMonth(row[COLS.DATE], year, month)) {
+            stats.wee += safeInt(row[COLS.WEE]);
+            stats.noWee += safeInt(row[COLS.NO_WEE]);
+            stats.grpLP += safeInt(row[COLS.GRP_LP]);
+            stats.grpALP += safeInt(row[COLS.GRP_ALP]);
+            stats.coaching += safeInt(row[COLS.COACHING]);
+            stats.memu += safeInt(row[COLS.MEMU]);
+            stats.goods += safeInt(row[COLS.GOODS]);
+        }
+    });
+
+    // 2. Process End to End Data (Col A=Name, Col G=Date)
+    if (endToEndData) {
+        endToEndData.forEach(row => {
+            // Col A is index 0, Col G is index 6
+            const eName = row[0] ? row[0].trim() : "";
+            const eDate = row[6]; 
+            if (eName === name && isDateInMonth(eDate, year, month)) {
+                stats.e2e += 1; // Count rows
+            }
+        });
+    }
+
+    // Update Chart and Table
+    renderChart(
+        [stats.wee, stats.noWee, stats.grpLP, stats.grpALP, stats.coaching, stats.memu, stats.goods, stats.e2e], 
+        `${name} - ${month}/${year}`
+    );
+    document.getElementById('side-tabular-data').innerHTML = getSideTableHTML(stats);
+    document.getElementById('bottom-detailed-box').classList.add('hidden');
+}
+
+        function generateSummaryReport(year, month) {
+    let cliMap = {};
+    let grand = { wee: 0, noWee: 0, grpLP: 0, grpALP: 0, coaching: 0, memu: 0, goods: 0, e2e: 0 };
+
+    // 1. Main Data Aggregation
+    allData.forEach(row => {
+        const name = row[COLS.NAME] ? row[COLS.NAME].trim() : null;
+        if (name && isDateInMonth(row[COLS.DATE], year, month)) {
+            if (!cliMap[name]) cliMap[name] = { lobby: row[COLS.LOBBY] || '-', wee: 0, noWee: 0, grpLP: 0, grpALP: 0, coaching: 0, memu: 0, goods: 0, e2e: 0 };
+            
+            const w = safeInt(row[COLS.WEE]); const nw = safeInt(row[COLS.NO_WEE]);
+            const glp = safeInt(row[COLS.GRP_LP]); const galp = safeInt(row[COLS.GRP_ALP]);
+            const c = safeInt(row[COLS.COACHING]); const m = safeInt(row[COLS.MEMU]); const g = safeInt(row[COLS.GOODS]);
+            
+            cliMap[name].wee += w; cliMap[name].noWee += nw; 
+            cliMap[name].grpLP += glp; cliMap[name].grpALP += galp;
+            cliMap[name].coaching += c; cliMap[name].memu += m; cliMap[name].goods += g;
+            
+            grand.wee += w; grand.noWee += nw; grand.grpLP += glp; grand.grpALP += galp;
+            grand.coaching += c; grand.memu += m; grand.goods += g;
+        }
+    });
+
+    // 2. End to End Data Aggregation
+    if (endToEndData) {
+        endToEndData.forEach(row => {
+            const name = row[0] ? row[0].trim() : null;
+            const date = row[6];
+            if (name && isDateInMonth(date, year, month)) {
+                // Ensure CLI exists in map (if they only did E2E but no regular footplate)
+                if (!cliMap[name]) cliMap[name] = { lobby: 'Unknown', wee: 0, noWee: 0, grpLP: 0, grpALP: 0, coaching: 0, memu: 0, goods: 0, e2e: 0 };
+                
+                cliMap[name].e2e += 1;
+                grand.e2e += 1;
+            }
+        });
+    }
+
+    renderChart(
+        [grand.wee, grand.noWee, grand.grpLP, grand.grpALP, grand.coaching, grand.memu, grand.goods, grand.e2e], 
+        `Summary - ${month}/${year}`
+    );
+    document.getElementById('side-tabular-data').innerHTML = getSideTableHTML(grand);
+    document.getElementById('bottom-detailed-box').classList.remove('hidden');
+    
+    // Generate Bottom Table HTML with E2E Column
+    let rowsHTML = '';
+    Object.entries(cliMap).sort((a,b) => a[0].localeCompare(b[0])).forEach(([name, d]) => {
+        const total = d.wee + d.noWee; // Total usually counts footplate hours/types, E2E is separate count, keeping as is or add if needed
+        rowsHTML += `<tr>
+            <td>${name}</td><td>${d.lobby}</td>
+            <td>${d.wee}</td><td>${d.noWee}</td>
+            <td>${d.grpLP}</td><td>${d.grpALP}</td>
+            <td>${d.coaching}</td><td>${d.memu}</td><td>${d.goods}</td>
+            <td style="background: rgba(255, 255, 255, 0.1); font-weight:bold;">${d.e2e}</td>
+            <td style="font-weight:bold; color:var(--neon-blue)">${total}</td>
+        </tr>`;
+    });
+    
+    document.getElementById('bottom-tabular-data').innerHTML = `
+        <table class="summary-card-table">
+            <thead>
+                <tr>
+                    <th>CLI NAME</th><th>LOBBY</th>
+                    <th>WEE HOURS</th><th>EXCL WEE</th>
+                    <th>GRP LP</th><th>GRP ALP</th>
+                    <th>COACHING</th><th>MEMU</th><th>GOODS</th>
+                    <th>END TO END</th> <th>TOTAL (Reg)</th>
+                </tr>
+            </thead>
+            <tbody>${rowsHTML}</tbody>
+        </table>`;
+}
+        // --- OTHER AMBUSH LOGIC ---
+        function resetOAInterface() {
+            document.getElementById('oa-selection').classList.remove('hidden');
+            document.getElementById('oa-inputs').classList.add('hidden');
+            document.getElementById('oa-results').classList.add('hidden');
+            document.getElementById('oa-cli-name-input').value = '';
+            document.getElementById('oa-bottom-box').classList.add('hidden');
+        }
+
+        function showOASearchInterface(mode) {
+            currentOAMode = mode;
+            document.getElementById('oa-selection').classList.add('hidden');
+            document.getElementById('oa-inputs').classList.remove('hidden');
+            document.getElementById('oa-cli-name-wrapper').style.display = (mode === 'summary') ? 'none' : 'block';
+        }
+
+        async function fetchOtherAmbushData() {
+            const urlMain = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A2:AT?key=${API_KEY}`;
+            const urlMobile = `https://sheets.googleapis.com/v4/spreadsheets/${MOBILE_SHEET_ID}/values/${MOBILE_SHEET_NAME}!A2:P?key=${API_KEY}`;
+            try {
+                const [resMain, resMobile] = await Promise.all([ fetch(urlMain), fetch(urlMobile) ]);
+                const dataMain = await resMain.json();
+                const dataMobile = await resMobile.json();
+                if (dataMain.values) allData = dataMain.values;
+                if (dataMobile.values) mobileAmbushData = dataMobile.values;
+                populateOACLIDropdown(); populateOAYearDropdown();
+            } catch (error) { console.error(error); alert("Error fetching Ambush data."); }
+        }
+
+        function populateOACLIDropdown() {
+            const list = document.getElementById('oa-cli-names-list');
+            list.innerHTML = '';
+            let names = new Set();
+            allData.forEach(row => { if(row[COLS.NAME]) names.add(row[COLS.NAME].trim()); });
+            mobileAmbushData.forEach(row => { if(row[15]) names.add(row[15].trim()); });
+            Array.from(names).sort().forEach(name => {
+                let opt = document.createElement('option'); opt.value = name; list.appendChild(opt);
+            });
+        }
+
+        function populateOAYearDropdown() {
+            const yearSelect = document.getElementById('oa-year-select');
+            yearSelect.innerHTML = '<option value="">Select Year</option>';
+            let years = new Set();
+            allData.forEach(row => { if(row[COLS.DATE]) { let y = row[COLS.DATE].split('-')[0]; if(y.length===4) years.add(y); }});
+            mobileAmbushData.forEach(row => { if(row[0]) { let y = row[0].split(' ')[0].split('/')[2]; if(y) years.add(y); }});
+            Array.from(years).sort().reverse().forEach(y => {
+                let opt = document.createElement('option'); opt.value = y; opt.innerText = y; yearSelect.appendChild(opt);
+            });
+        }
+
+        function generateOAReport() {
+            const year = document.getElementById('oa-year-select').value;
+            const month = document.getElementById('oa-month-select').value;
+            const name = document.getElementById('oa-cli-name-input').value;
+
+            if(!year || !month) { alert("Select Year and Month"); return; }
+            if(currentOAMode === 'search' && !name) { alert("Enter CLI Name"); return; }
+            document.getElementById('oa-results').classList.remove('hidden');
+
+            const padMonth = m => m.toString().padStart(2, '0');
+            const mainPrefix = `${year}-${padMonth(month)}`;
+            let cliStats = {};
+
+            // Main Sheet
+            allData.forEach(row => {
+                const rowName = row[COLS.NAME] ? row[COLS.NAME].trim() : null;
+                if (rowName && row[COLS.DATE] && row[COLS.DATE].startsWith(mainPrefix)) {
+                    if (!cliStats[rowName]) cliStats[rowName] = { lobby: row[COLS.LOBBY]||'-', auto:0, lc:0, cd:0, ba:0, speedOn:0, speedYellow:0, mobile:0 };
+                    cliStats[rowName].auto += safeInt(row[COLS_OA.AUTO_IB]);
+                    cliStats[rowName].lc += safeInt(row[COLS_OA.LC_AMBUSH]);
+                    cliStats[rowName].cd += safeInt(row[COLS_OA.CD_ZONES]);
+                    cliStats[rowName].ba += safeInt(row[COLS_OA.BA_AMBUSH]);
+                    cliStats[rowName].speedOn += safeInt(row[COLS_OA.SPEED_AUTO]);
+                    cliStats[rowName].speedYellow += safeInt(row[COLS_OA.SPEED_YELLOW]);
+                }
+            });
+
+            // Mobile Sheet
+            mobileAmbushData.forEach(row => {
+                const ts = row[0]; const rowName = row[15] ? row[15].trim() : null;
+                if (rowName && ts) {
+                    const [m, d, y] = ts.split(' ')[0].split('/');
+                    if (y === year && parseInt(m) === parseInt(month)) {
+                        if (!cliStats[rowName]) cliStats[rowName] = { lobby:'Unknown', auto:0, lc:0, cd:0, ba:0, speedOn:0, speedYellow:0, mobile:0 };
+                        cliStats[rowName].mobile += 1;
+                    }
+                }
+            });
+
+            if (currentOAMode === 'search') {
+                const data = cliStats[name] || { auto:0, lc:0, cd:0, ba:0, speedOn:0, speedYellow:0, mobile:0 };
+                renderOAChartAndTable(data, `${name} - ${month}/${year}`);
+                document.getElementById('oa-bottom-box').classList.add('hidden');
+            } else {
+                let grand = { auto:0, lc:0, cd:0, ba:0, speedOn:0, speedYellow:0, mobile:0 };
+                Object.values(cliStats).forEach(s => {
+                    grand.auto += s.auto; grand.lc += s.lc; grand.cd += s.cd; grand.ba += s.ba; grand.speedOn += s.speedOn; grand.speedYellow += s.speedYellow; grand.mobile += s.mobile;
+                });
+                renderOAChartAndTable(grand, `Division Ambush Summary - ${month}/${year}`);
+                renderOADetailedTable(cliStats);
+            }
+        }
+
+        // --- SPM / CVVRS LOGIC ---
+        function resetSPMInterface() {
+            document.getElementById('spm-selection').classList.remove('hidden');
+            document.getElementById('spm-inputs').classList.add('hidden');
+            document.getElementById('spm-results').classList.add('hidden');
+            document.getElementById('spm-cli-name-input').value = '';
+            document.getElementById('spm-bottom-box').classList.add('hidden');
+        }
+
+        function showSPMSearchInterface(mode) {
+            currentSPMMode = mode;
+            document.getElementById('spm-selection').classList.add('hidden');
+            document.getElementById('spm-inputs').classList.remove('hidden');
+            document.getElementById('spm-cli-name-wrapper').style.display = (mode === 'summary') ? 'none' : 'block';
+        }
+
+        async function fetchSPMData() {
+            const u1 = `https://sheets.googleapis.com/v4/spreadsheets/${SANKET_ID}/values/Sheet1!A2:AZ?key=${API_KEY}`;
+            const u2 = `https://sheets.googleapis.com/v4/spreadsheets/${MANUAL_ID}/values/Sheet1!A2:Z?key=${API_KEY}`;
+            const u3 = `https://sheets.googleapis.com/v4/spreadsheets/${CVVRS_ID}/values/Sheet1!A2:Z?key=${API_KEY}`;
+
+            try {
+                const [r1, r2, r3] = await Promise.all([fetch(u1), fetch(u2), fetch(u3)]);
+                const d1 = await r1.json();
+                const d2 = await r2.json();
+                const d3 = await r3.json();
+
+                if(d1.values) spmSanketData = d1.values;
+                if(d2.values) spmManualData = d2.values;
+                if(d3.values) spmCvvrsData = d3.values;
+
+                populateSPMCLIDropdown();
+                populateSPMYearDropdown();
+
+            } catch(e) { console.error(e); alert("Error fetching SPM data"); }
+        }
+
+        function cleanDate(str) {
+            if(!str) return "";
+            // Remove comma if present and trim
+            return str.replace(',', '').trim().split(' ')[0];
+        }
+
+        function populateSPMCLIDropdown() {
+            const list = document.getElementById('spm-cli-names-list');
+            list.innerHTML = '';
+            let names = new Set();
+            spmSanketData.forEach(r => { if(r[19]) names.add(r[19].trim()); });
+            spmManualData.forEach(r => { if(r[3]) names.add(r[3].trim()); });
+            spmCvvrsData.forEach(r => { if(r[3]) names.add(r[3].trim()); });
+
+            Array.from(names).sort().forEach(n => {
+                let opt = document.createElement('option'); opt.value = n; list.appendChild(opt);
+            });
+        }
+
+        function populateSPMYearDropdown() {
+            const s = document.getElementById('spm-year-select');
+            s.innerHTML = '<option value="">Select Year</option>';
+            let years = new Set();
+            
+            const getYear = (str, type) => {
+                let d = cleanDate(str);
+                if(!d) return;
+                let parts = d.split('/');
+                if(parts.length === 3) {
+                    if(parts[2].length === 4) years.add(parts[2]);
+                }
+            };
+
+            spmSanketData.forEach(r => getYear(r[0], 'MDY'));
+            spmManualData.forEach(r => getYear(r[0], 'DMY'));
+            spmCvvrsData.forEach(r => getYear(r[0], 'DMY'));
+
+            Array.from(years).sort().reverse().forEach(y => {
+                let opt = document.createElement('option'); opt.value = y; opt.innerText = y; s.appendChild(opt);
+            });
+        }
+
+        function generateSPMReport() {
+            const year = document.getElementById('spm-year-select').value;
+            const month = document.getElementById('spm-month-select').value;
+            const name = document.getElementById('spm-cli-name-input').value;
+
+            if(!year || !month) { alert("Select Year and Month"); return; }
+            if(currentSPMMode === 'search' && !name) { alert("Enter CLI Name"); return; }
+
+            document.getElementById('spm-results').classList.remove('hidden');
+
+            let report = {
+                sanket: { count: 0, abn: 0 },
+                manual: { count: 0, abn: 0 },
+                cvvrs: { count: 0, abn: 0 }
+            };
+
+            // CLI Wise Map for Summary Table
+            let cliMap = {};
+
+            const checkDate = (dateStr, type) => {
+                let d = cleanDate(dateStr);
+                if(!d) return false;
+                let p = d.split('/');
+                if(p.length !== 3) return false;
+                let m, y;
+                if(type === 'MDY') { m = parseInt(p[0]); y = p[2]; } 
+                else { m = parseInt(p[1]); y = p[2]; }
+                return (y === year && m === parseInt(month));
+            };
+
+            const updateCliMap = (cName, key, countVal, abnVal) => {
+                if(!cliMap[cName]) cliMap[cName] = { sC:0, sA:0, mC:0, mA:0, cC:0, cA:0 };
+                if(key === 'sanket') { cliMap[cName].sC += 1; cliMap[cName].sA += countVal; }
+                if(key === 'manual') { cliMap[cName].mC += 1; cliMap[cName].mA += countVal; }
+                if(key === 'cvvrs')  { cliMap[cName].cC += 1; cliMap[cName].cA += countVal; }
+            };
+
+            // 1. Sanket Data (MDY)
+            spmSanketData.forEach(row => {
+                let rName = row[19] ? row[19].trim() : "";
+                if (checkDate(row[0], 'MDY')) {
+                    const abn = safeInt(row[40]);
+                    // Update Map for Summary
+                    if(rName) updateCliMap(rName, 'sanket', abn, 0);
+
+                    if (currentSPMMode === 'summary' || rName === name) {
+                        report.sanket.count++;
+                        report.sanket.abn += abn;
+                    }
+                }
+            });
+
+            // 2. Manual Data (DMY)
+            spmManualData.forEach(row => {
+                let rName = row[3] ? row[3].trim() : "";
+                if (checkDate(row[0], 'DMY')) {
+                    const abn = safeInt(row[19]);
+                    if(rName) updateCliMap(rName, 'manual', abn, 0);
+
+                    if (currentSPMMode === 'summary' || rName === name) {
+                        report.manual.count++;
+                        report.manual.abn += abn;
+                    }
+                }
+            });
+
+            // 3. CVVRS Data (DMY)
+            spmCvvrsData.forEach(row => {
+                let rName = row[3] ? row[3].trim() : "";
+                if (checkDate(row[0], 'DMY')) {
+                    const abn = safeInt(row[19]);
+                    if(rName) updateCliMap(rName, 'cvvrs', abn, 0);
+
+                    if (currentSPMMode === 'summary' || rName === name) {
+                        report.cvvrs.count++;
+                        report.cvvrs.abn += abn;
+                    }
+                }
+            });
+
+            renderSPMOutput(report, currentSPMMode === 'search' ? `${name} - ${month}/${year}` : `Division Summary - ${month}/${year}`);
+
+            // Handle Bottom Table Visibility
+            if (currentSPMMode === 'summary') {
+                document.getElementById('spm-bottom-box').classList.remove('hidden');
+                renderSPMDetailedTable(cliMap);
+            } else {
+                document.getElementById('spm-bottom-box').classList.add('hidden');
+            }
+        }
+
+        function renderSPMOutput(data, title) {
+            const ctx = document.getElementById('spmChart').getContext('2d');
+            if (spmChartInstance) spmChartInstance.destroy();
+
+            spmChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['SANKET SPM', 'MANUAL SPM', 'CVVRS'],
+                    datasets: [
+                        {
+                            label: 'Total Rows (Count)',
+                            data: [data.sanket.count, data.manual.count, data.cvvrs.count],
+                            backgroundColor: 'rgba(0, 242, 255, 0.7)',
+                            borderColor: '#fff', borderWidth: 1
+                        },
+                        {
+                            label: 'Abnormality Count',
+                            data: [data.sanket.abn, data.manual.abn, data.cvvrs.abn],
+                            backgroundColor: 'rgba(255, 0, 128, 0.7)',
+                            borderColor: '#fff', borderWidth: 1
+                        }
+                    ]
+                },
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { labels:{color:'#fff'} }, 
+                        title: { display: true, text: title, color: '#fff', font: { size: 18 } } 
+                    },
+                    scales: { y: { beginAtZero: true, ticks: { color: '#a0aab8' }, grid: { color: 'rgba(255,255,255,0.1)' } }, x: { ticks: { color: '#a0aab8' } } }
+                }
+            });
+
+            const html = `
+                <table class="summary-card-table">
+                    <thead><tr><th>ANALYSIS NAME</th><th>COUNT</th><th>ABNORMALITY COUNT</th></tr></thead>
+                    <tbody>
+                        <tr><td>SANKET SPM ANALYSIS</td><td>${data.sanket.count}</td><td>${data.sanket.abn}</td></tr>
+                        <tr><td>MANUAL SPM ANALYSIS</td><td>${data.manual.count}</td><td>${data.manual.abn}</td></tr>
+                        <tr><td>CVVRS ANALYSIS</td><td>${data.cvvrs.count}</td><td>${data.cvvrs.abn}</td></tr>
+                        <tr style="font-weight:bold; color:var(--neon-blue)">
+                            <td>TOTAL</td>
+                            <td>${data.sanket.count + data.manual.count + data.cvvrs.count}</td>
+                            <td>${data.sanket.abn + data.manual.abn + data.cvvrs.abn}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('spm-side-data').innerHTML = html;
+        }
+
+        function renderSPMDetailedTable(cliMap) {
+            let rows = '';
+            Object.entries(cliMap).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([name, d]) => {
+                const totalAbn = d.sA + d.mA + d.cA;
+                rows += `
+                <tr>
+                    <td>${name}</td>
+                    <td>${d.sC} / ${d.sA}</td>
+                    <td>${d.mC} / ${d.mA}</td>
+                    <td>${d.cC} / ${d.cA}</td>
+                    <td style="font-weight:bold; color:var(--neon-blue)">${totalAbn}</td>
+                </tr>`;
+            });
+
+            const tableHtml = `
+            <table class="summary-card-table">
+                <thead>
+                    <tr>
+                        <th>CLI NAME</th>
+                        <th>SANKET (Ct/Abn)</th>
+                        <th>MANUAL (Ct/Abn)</th>
+                        <th>CVVRS (Ct/Abn)</th>
+                        <th>TOTAL ABN</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+            
+            document.getElementById('spm-bottom-data').innerHTML = tableHtml;
+        }
+
+        // --- HELPERS ---
+        function safeInt(val) { if (!val) return 0; const parsed = parseInt(val); return isNaN(parsed) ? 0 : parsed; }
+        function isDateInMonth(dateStr, year, month) { if (!dateStr) return false; return dateStr.startsWith(`${year}-${month}`); }
+
+       function getSideTableHTML(stats) {
+    const total = stats.wee + stats.noWee;
+    return `<table class="summary-card-table">
+        <thead><tr><th>PARAMETERS</th><th style="text-align:center">COUNT</th></tr></thead>
+        <tbody>
+            <tr><td>FOOTPLATE DURING WEE HOURS</td><td>${stats.wee}</td></tr>
+            <tr><td>FOOTPLATE EXCLUDING WEE HOURS</td><td>${stats.noWee}</td></tr>
+            <tr><td>FOOTPLATE DONE WITH GROUP LP</td><td>${stats.grpLP}</td></tr>
+            <tr><td>FOOTPLATE DONE WITH GROUP ALP</td><td>${stats.grpALP}</td></tr>
+            <tr><td>FOOT PLATE DONE IN COACHING</td><td>${stats.coaching}</td></tr>
+            <tr><td>FOOT PLATE DONE IN MEMU</td><td>${stats.memu}</td></tr>
+            <tr><td>FOOT PLATE DONE IN GOODS TRAIN</td><td>${stats.goods}</td></tr>
+            <tr><td style="color: #e0aaff; font-weight:bold;">END TO END FOOTPLATE</td><td style="color: #e0aaff; font-weight:bold;">${stats.e2e}</td></tr>
+            <tr><td>TOTAL (Regular)</td><td>${total}</td></tr>
+        </tbody>
+    </table>`;
+}
+
+function renderChart(dataValues, title) {
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    if (chartInstance) chartInstance.destroy();
+    
+    // Added 'End to End' label and color
+    chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Wee Hours', 'Excl Wee', 'Grp LP', 'Grp ALP', 'Coaching', 'MEMU', 'Goods', 'End to End'],
+            datasets: [{ 
+                label: 'Count', 
+                data: dataValues, 
+                backgroundColor: [
+                    'rgba(0, 242, 255, 0.7)', 
+                    'rgba(188, 19, 254, 0.7)', 
+                    'rgba(255, 0, 128, 0.7)', 
+                    'rgba(255, 255, 0, 0.7)', 
+                    'rgba(0, 255, 136, 0.7)', 
+                    'rgba(255, 136, 0, 0.7)',
+                    'rgba(136, 136, 136, 0.7)',
+                    'rgba(224, 170, 255, 0.9)' // New Color for E2E
+                ], 
+                borderColor: '#fff', 
+                borderWidth: 1, 
+                borderRadius: 5 
+            }]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { 
+                legend: { display: false }, 
+                title: { display: true, text: title, color: '#fff', font: { size: 18 } } 
+            }, 
+            scales: { 
+                y: { beginAtZero: true, ticks: { color: '#a0aab8' }, grid: { color: 'rgba(255,255,255,0.1)' } }, 
+                x: { ticks: { color: '#a0aab8' }, grid: { display: false } } 
+            } 
+        }
+    });
+}
+        function renderOAChartAndTable(data, title) {
+            const ctx = document.getElementById('oaChart').getContext('2d');
+            if (oaChartInstance) oaChartInstance.destroy();
+            const values = [data.auto, data.lc, data.cd, data.ba, data.speedOn, data.speedYellow, data.mobile];
+            const total = values.reduce((a,b)=>a+b, 0);
+
+            oaChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Auto/IB', 'L-Crossing', 'CD Zones', 'BA Ambush', 'Speed(ON)', 'Speed(Yel)', 'Mobile'],
+                    datasets: [{ label: 'Count', data: values, backgroundColor: ['rgba(0, 242, 255, 0.7)', 'rgba(188, 19, 254, 0.7)', 'rgba(255, 0, 128, 0.7)', 'rgba(255, 255, 0, 0.7)', 'rgba(0, 255, 136, 0.7)', 'rgba(255, 136, 0, 0.7)','rgba(255, 255, 255, 0.7)'], borderColor: '#fff', borderWidth: 1, borderRadius: 5 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: title, color: '#fff', font: { size: 18 } } }, scales: { y: { beginAtZero: true, ticks: { color: '#a0aab8' }, grid: { color: 'rgba(255,255,255,0.1)' } }, x: { ticks: { color: '#a0aab8' }, grid: { display: false } } } }
+            });
+
+            const html = `<table class="summary-card-table"><thead><tr><th>AMBUSH DETAILS</th><th>Count</th></tr></thead><tbody>
+                <tr><td>AUTO AND IB AMBUSH</td><td>${data.auto}</td></tr><tr><td>LEVEL CROSSING AMBUSH</td><td>${data.lc}</td></tr>
+                <tr><td>CD ZONES AMBUSH</td><td>${data.cd}</td></tr><tr><td>BA AMBUSH</td><td>${data.ba}</td></tr>
+                <tr><td>SPEED GUN CHECKING (ON)</td><td>${data.speedOn}</td></tr><tr><td>SPEED GUN CHECKING (YELLOW)</td><td>${data.speedYellow}</td></tr>
+                <tr><td>MOBILE AMBUSH</td><td>${data.mobile}</td></tr><tr><td>TOTAL</td><td>${total}</td></tr></tbody></table>`;
+            document.getElementById('oa-side-data').innerHTML = html;
+        }
+
+        function renderOADetailedTable(cliStats) {
+            document.getElementById('oa-bottom-box').classList.remove('hidden');
+            let rows = '';
+            Object.entries(cliStats).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([name, d]) => {
+                const total = d.auto + d.lc + d.cd + d.ba + d.speedOn + d.speedYellow + d.mobile;
+                rows += `<tr><td>${name}</td><td>${d.lobby}</td><td>${d.auto}</td><td>${d.lc}</td><td>${d.cd}</td><td>${d.ba}</td><td>${d.speedOn}</td><td>${d.speedYellow}</td><td>${d.mobile}</td><td style="font-weight:bold; color:var(--neon-blue)">${total}</td></tr>`;
+            });
+            document.getElementById('oa-bottom-data').innerHTML = `<table class="summary-card-table"><thead><tr><th>CLI NAME</th><th>LOBBY</th><th>AUTO/IB</th><th>LC</th><th>CD ZONES</th><th>BA</th><th>SPD(ON)</th><th>SPD(YEL)</th><th>MOBILE</th><th>TOTAL</th></tr></thead><tbody>${rows}</tbody></table>`;
+        }
+        // --- INSPECTION LOGIC ---
+function resetInspInterface() {
+    document.getElementById('insp-selection').classList.remove('hidden');
+    document.getElementById('insp-inputs').classList.add('hidden');
+    document.getElementById('insp-results').classList.add('hidden');
+    document.getElementById('insp-cli-name-input').value = '';
+    document.getElementById('insp-bottom-box').classList.add('hidden');
+}
+
+function showInspectionSearchInterface(mode) {
+    currentInspMode = mode;
+    document.getElementById('insp-selection').classList.add('hidden');
+    document.getElementById('insp-inputs').classList.remove('hidden');
+    // Hide name input if Summary mode
+    document.getElementById('insp-cli-name-wrapper').style.display = (mode === 'summary') ? 'none' : 'block';
+}
+
+function generateInspectionReport() {
+    const year = document.getElementById('insp-year-select').value;
+    const month = document.getElementById('insp-month-select').value;
+    const nameInput = document.getElementById('insp-cli-name-input').value;
+
+    if (!year || !month) { alert("Select Year and Month"); return; }
+    if (currentInspMode === 'search' && !nameInput) { alert("Enter CLI Name"); return; }
+
+    document.getElementById('insp-results').classList.remove('hidden');
+
+    // Helper: Normalize strings for comparison
+    const norm = (str) => str ? str.trim().toLowerCase() : "";
+    const targetName = norm(nameInput);
+
+    // Stats Object (Holds counts for ALL types)
+    let stats = {
+        family: 0, running: 0, lobby: 0,
+        station: 0, coachClean: 0, stable: 0, sand: 0, crewCab: 0
+    };
+
+    let cliMap = {}; // For Summary Table
+
+    // --- 1. PROCESS OLD SHEET (Family, Running Room, Lobby) ---
+    allData.forEach(row => {
+        const rowName = row[COLS.NAME] ? row[COLS.NAME].trim() : "";
+        if (!rowName) return;
+
+        if (isDateInMonth(row[COLS.DATE], year, month)) {
+            let isMatch = (currentInspMode === 'summary') ? true : (norm(rowName) === targetName);
+            
+            if (isMatch) {
+                // Initialize Map if needed
+                if (!cliMap[rowName]) cliMap[rowName] = { 
+                    lobbyName: row[COLS.LOBBY] || '-', 
+                    fam:0, run:0, lob:0, stn:0, cln:0, stb:0, snd:0, crw:0 
+                };
+
+                const f = (safeInt(row[COLS_INSP.FAMILY]) > 0) ? 1 : 0;
+                const r = safeInt(row[COLS_INSP.RUNNING]);
+                const l = safeInt(row[COLS_INSP.LOBBY]);
+
+                // Update Stats
+                stats.family += f; stats.running += r; stats.lobby += l;
+                
+                // Update Map
+                cliMap[rowName].fam += f; cliMap[rowName].run += r; cliMap[rowName].lob += l;
+            }
+        }
+    });
+
+    // --- 2. PROCESS NEW SHEET (Station, Coaching, Stable, Sand, Crew) ---
+    // Col A (0) = Timestamp, Col B (1) = CLI Name, Col G (6) = Type
+    if (extraInspData && extraInspData.length > 0) {
+        extraInspData.forEach(row => {
+            const rowName = row[1] ? row[1].trim() : "";
+            const ts = row[0];
+            const type = row[6] ? row[6].toLowerCase() : "";
+
+            if (!rowName || !ts) return;
+
+            // Parse Date: "18/2/2026, 12:46:36 pm" -> need 2/2026
+            const datePart = ts.split(',')[0].trim(); // "18/2/2026"
+            const dParts = datePart.split('/'); // [18, 2, 2026]
+            
+            if (dParts.length === 3) {
+                const m = parseInt(dParts[1]);
+                const y = dParts[2];
+
+                if (y === year && m === parseInt(month)) {
+                    let isMatch = (currentInspMode === 'summary') ? true : (norm(rowName) === targetName);
+
+                    if (isMatch) {
+                        // Ensure CLI is in map (might be only in new sheet)
+                        if (!cliMap[rowName]) cliMap[rowName] = { 
+                            lobbyName: 'Unknown', 
+                            fam:0, run:0, lob:0, stn:0, cln:0, stb:0, snd:0, crw:0 
+                        };
+
+                        // Check Types and Increment
+                        if (type.includes('station inspection')) { 
+                            stats.station++; cliMap[rowName].stn++; 
+                        }
+                        else if (type.includes('coaching cleanliness')) { 
+                            stats.coachClean++; cliMap[rowName].cln++; 
+                        }
+                        else if (type.includes('stable load')) { 
+                            stats.stable++; cliMap[rowName].stb++; 
+                        }
+                        else if (type.includes('sand goomty')) { 
+                            stats.sand++; cliMap[rowName].snd++; 
+                        }
+                        else if (type.includes('surprise crew cabin')) { 
+                            stats.crewCab++; cliMap[rowName].crw++; 
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // --- RENDER OUTPUTS ---
+    const chartTitle = (currentInspMode === 'search') ? `${nameInput} - ${month}/${year}` : `Inspection Summary - ${month}/${year}`;
+    
+    renderInspectionChart(stats, chartTitle);
+
+    // Render Side Table (Updated with new types)
+    const total = stats.family + stats.running + stats.lobby + stats.station + stats.coachClean + stats.stable + stats.sand + stats.crewCab;
+    
+    document.getElementById('insp-side-data').innerHTML = `
+        <table class="summary-card-table">
+            <thead><tr><th>INSPECTION TYPE</th><th>COUNT</th></tr></thead>
+            <tbody>
+                <tr><td>FAMILY/SAFETY SEMINAR</td><td>${stats.family}</td></tr>
+                <tr><td>RUNNING ROOM INSP</td><td>${stats.running}</td></tr>
+                <tr><td>LOBBY INSPECTION</td><td>${stats.lobby}</td></tr>
+                
+                <tr><td>STATION INSPECTION</td><td>${stats.station}</td></tr>
+                <tr><td>COACHING CLEANLINESS</td><td>${stats.coachClean}</td></tr>
+                <tr><td>STABLE LOAD INSP</td><td>${stats.stable}</td></tr>
+                <tr><td>SAND GOOMTY INSP</td><td>${stats.sand}</td></tr>
+                <tr><td>SURPRISE CREW CABIN</td><td>${stats.crewCab}</td></tr>
+                
+                <tr style="font-weight:bold; color:var(--neon-blue); border-top:2px solid #555"><td>TOTAL</td><td>${total}</td></tr>
+            </tbody>
+        </table>
+    `;
+
+    // Render Bottom Table (Summary Mode)
+    if (currentInspMode === 'summary') {
+        document.getElementById('insp-bottom-box').classList.remove('hidden');
+        let rows = '';
+        Object.entries(cliMap).sort((a,b) => a[0].localeCompare(b[0])).forEach(([cName, d]) => {
+            const rowTotal = d.fam + d.run + d.lob + d.stn + d.cln + d.stb + d.snd + d.crw;
+            rows += `<tr>
+                <td>${cName}</td>
+                <td>${d.fam}</td><td>${d.run}</td><td>${d.lob}</td>
+                <td>${d.stn}</td><td>${d.cln}</td><td>${d.stb}</td><td>${d.snd}</td><td>${d.crw}</td>
+                <td style="font-weight:bold; color:var(--neon-blue)">${rowTotal}</td>
+            </tr>`;
+        });
+
+        document.getElementById('insp-bottom-data').innerHTML = `
+            <table class="summary-card-table">
+                <thead>
+                    <tr>
+                        <th>CLI NAME</th>
+                        <th title="Family/Safety">FAM/SAF</th><th title="Running Room">RR</th><th title="Lobby">LOB</th>
+                        <th title="Station">STN</th><th title="Coaching Cleanliness">COACHING</th><th title="Stable Load">STABLE</th><th title="Sand Goomty">SAND</th><th title="Crew Cabin">CREW CAB</th>
+                        <th>TOT</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        `;
+    } else {
+        document.getElementById('insp-bottom-box').classList.add('hidden');
+    }
+}
+
+function renderInspectionChart(data, title) {
+    const ctx = document.getElementById('inspChart').getContext('2d');
+    if (inspChartInstance) inspChartInstance.destroy();
+
+    inspChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            // Updated Labels
+            labels: [
+                'Family/Safety', 'Running Room', 'Lobby', 
+                'Station', 'Coach Clean', 'Stable Load', 'Sand Goomty', 'Crew Cabin'
+            ],
+            datasets: [{
+                label: 'Count',
+                data: [
+                    data.family, data.running, data.lobby,
+                    data.station, data.coachClean, data.stable, data.sand, data.crewCab
+                ],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',  // Red
+                    'rgba(54, 162, 235, 0.7)',  // Blue
+                    'rgba(255, 206, 86, 0.7)',  // Yellow
+                    'rgba(75, 192, 192, 0.7)',  // Teal (New)
+                    'rgba(153, 102, 255, 0.7)', // Purple (New)
+                    'rgba(255, 159, 64, 0.7)',  // Orange (New)
+                    'rgba(231, 233, 237, 0.7)', // Grey (New)
+                    'rgba(255, 0, 255, 0.7)'    // Magenta (New)
+                ],
+                borderColor: '#fff',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                title: { display: true, text: title, color: '#fff', font: { size: 18 } }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { color: '#a0aab8' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                x: { ticks: { color: '#a0aab8', font: { size: 10 } }, grid: { display: false } }
+            }
+        }
+    });
+}
+// --- HUB & PERSONAL DASHBOARD LOGIC ---
+
+async function fetchOtherDutyData() {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${OTHER_DUTY_ID}/values/${OTHER_DUTY_NAME}!A2:D?key=${API_KEY}`;
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if(data.values) otherDutyData = data.values;
+        populateHubYear(); // Populate year after data load
+    } catch(e) { console.error("Err Other Duty", e); }
+}
+
+function populateHubYear() {
+    const s = document.getElementById('hub-year-select');
+    s.innerHTML = '<option value="">Select Year</option>';
+    let years = new Set();
+    // Get years from Main Data and Other Duty
+    allData.forEach(r => { if(r[COLS.DATE]) years.add(r[COLS.DATE].split('-')[0]); });
+    otherDutyData.forEach(r => { if(r[COLS_OD.DATE]) years.add(r[COLS_OD.DATE].split('-')[0]); });
+    
+    Array.from(years).sort().reverse().forEach(y => {
+        if(y && y.length===4) {
+            let opt = document.createElement('option'); opt.value = y; opt.innerText = y; s.appendChild(opt);
+        }
+    });
+}
+// --- HELPER TO SHORTEN NAMES (e.g. CHANDRA PRAKASH RATHORE -> C P RATHORE) ---
+function getShortName(fullName) {
+    if (!fullName) return "";
+    
+    // Naam ko spaces se todo
+    const parts = fullName.trim().split(/\s+/); 
+    
+    // Agar naam me 3 ya usse zyada shabd hain (e.g. First Middle Last)
+    if (parts.length >= 3) {
+        let short = "";
+        // Last wale ko chhod kar sabka pehla letter lo
+        for (let i = 0; i < parts.length - 1; i++) {
+            short += parts[i][0] + " "; 
+        }
+        // Aakhri naam pura jod do
+        short += parts[parts.length - 1]; 
+        return short.toUpperCase();
+    } 
+    // Agar naam me 2 shabd hain lekin bahut lamba hai (> 15 chars)
+    else if (parts.length === 2 && fullName.length > 15) {
+        return (parts[0][0] + " " + parts[1]).toUpperCase();
+    }
+    
+    // Agar naam chhota hai toh waisa hi return karo
+    return fullName.toUpperCase();
+}
+function generateHubMatrix() {
+    const year = document.getElementById('hub-year-select').value;
+    const month = document.getElementById('hub-month-select').value;
+    if(!year || !month) { alert("Select Year and Month"); return; }
+
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const matrixDiv = document.getElementById('hub-matrix-container');
+    matrixDiv.classList.remove('hidden');
+
+    // Get Unique CLIs
+    let clis = new Set();
+    // *** NEW: Create a Map for Name -> Lobby ***
+    let lobbyMap = {};
+
+    // Helper to add to map
+    const addToMap = (name, lobby) => {
+        if(name && lobby) lobbyMap[name.trim()] = lobby.trim();
+    };
+
+    allData.forEach(r => { 
+        if(r[COLS.NAME]) {
+            const n = r[COLS.NAME].trim();
+            clis.add(n);
+            addToMap(n, r[COLS.LOBBY]);
+        }
+    });
+    
+    otherDutyData.forEach(r => { 
+        if(r[COLS_OD.NAME]) {
+            const n = r[COLS_OD.NAME].trim();
+            clis.add(n);
+            // If lobby missing from main data, try getting it from here
+            if(!lobbyMap[n]) addToMap(n, r[COLS_OD.LOBBY]); 
+        }
+    });
+    
+    const sortedCLIs = Array.from(clis).sort();
+
+    // Build Table Header
+    let html = `<table class="matrix-table"><thead><tr><th>CLI NAME / LOBBY</th>`; // Changed Header Text
+    for(let i=1; i<=daysInMonth; i++) { 
+        // Single digit dates (1-9) ke aage 0 lagaya taaki alignment sahi rahe
+        let dateHeader = i.toString().padStart(2, '0');
+        html += `<th>${dateHeader}</th>`; 
+    }
+    html += `</tr></thead><tbody>`;
+
+    // Build Rows
+    sortedCLIs.forEach(name => {
+        // *** NEW: Format Name/Lobby ***
+        const shortName = getShortName(name); // Naam chhota kiya
+        const lobby = lobbyMap[name] ? lobbyMap[name] : '??';
+        const displayName = `${shortName}/${lobby}`;
+
+        html += `<tr><td><a class="cli-link" onclick="openPersonalDashboard('${name}', '${year}', '${month}')">${displayName}</a></td>`;
+        
+       // generateHubMatrix function ke andar loop ke beech mein:
+
+// generateHubMatrix function ke andar ka loop yahan se replace karein:
+
+    for(let d=1; d<=daysInMonth; d++) {
+        const dayStr = d.toString().padStart(2, '0');
+        const dateStr = `${year}-${month}-${dayStr}`;
+        
+        let status = 'PN'; 
+        let isBD = false;
+        let tooltipText = ''; // Ye variable tooltip text hold karega
+
+        // Rows fetch karein
+        const fpRow = allData.find(r => r[COLS.NAME]?.trim() === name && r[COLS.DATE] === dateStr);
+        const odRow = otherDutyData.find(r => r[COLS_OD.NAME]?.trim() === name && r[COLS_OD.DATE] === dateStr);
+
+        // --- PRIORITY 1: CHECK BD IN DAILY REPORT (Col BK) ---
+        if(fpRow) {
+            // Column BK (ANY_FP_TLC) check karein
+            const tlcVal = fpRow[COLS.ANY_FP_TLC] ? fpRow[COLS.ANY_FP_TLC].trim().toUpperCase() : '';
+            
+            if(tlcVal === 'YES') {
+                status = 'BD';
+                isBD = true;
+                // Condition 1: Agar Daily Report se aaya toh ye text dikhega
+                tooltipText = "FOOTPLATE done as per TLC order no.";
+            }
+        }
+
+        // --- PRIORITY 2: CHECK BD IN OTHER DUTY SHEET ---
+        if(!isBD && odRow) {
+            const dutyRaw = odRow[COLS_OD.TYPE] ? odRow[COLS_OD.TYPE].trim() : ''; 
+            const dutyCheck = dutyRaw.toLowerCase(); // Lowercase for logic check
+            
+            // Keywords match logic (Updated: ab 'includes' use kar rahe hain TLC ke liye bhi)
+            if(dutyCheck.includes('tlc') ||  // <--- YAHAN CHANGE HUA HAI (Ab 'Attend loco tlc 24' pakad lega)
+               dutyCheck.includes('lobby duty') || 
+               dutyCheck.includes('stalling duty') || 
+               dutyCheck.includes('auto class') || 
+               dutyCheck.includes('punctuality duty')) {
+                
+                status = 'BD';
+                isBD = true;
+                // Agar Other Duty se aaya toh Sheet ka text (Jaise "Attend loco tlc 24") dikhega
+                tooltipText = dutyRaw; 
+            }
+        }
+
+        // --- PRIORITY 3: CHECK FOOTPLATE (FP) ---
+        if(!isBD && fpRow) {
+            const wee = safeInt(fpRow[COLS.WEE]);
+            const noWee = safeInt(fpRow[COLS.NO_WEE]);
+            if(wee > 0 || noWee > 0) {
+                status = 'FP';
+                tooltipText = `FP: Wee(${wee}) + Excl(${noWee})`; // Optional: FP ka detail bhi dikha sakte hain
+            }
+        }
+
+        // --- PRIORITY 4: CHECK SICK, REST, LEAVE, OTHERS ---
+        if(!isBD && status !== 'FP' && odRow) {
+            const dutyRaw = odRow[COLS_OD.TYPE] ? odRow[COLS_OD.TYPE].trim() : '';
+            const dutyCheck = dutyRaw.toLowerCase();
+
+            // *** 1. CHECK SICK / RMC / PMC (Highest Priority in Other Duty) ***
+            if(dutyCheck.includes('sick') || dutyCheck.includes('rmc') || dutyCheck.includes('pmc')) {
+                status = 'SK';
+                tooltipText = dutyRaw; // Asli text (e.g. "Sick since 2 days") tooltip me dikhega
+            }
+            // *** 2. CHECK LEAVE ***
+            else if(dutyCheck.includes('leave') || dutyCheck.includes('cl') || dutyCheck.includes('lap')) {
+                status = 'LV';
+                tooltipText = dutyRaw;
+            } 
+            // *** 3. CHECK REST ***
+            else if(dutyCheck.includes('rest')) {
+                status = 'PR';
+                tooltipText = dutyRaw;
+            }
+            // *** 4. CHECK TRAINING ***
+            else if(dutyCheck.includes('training') || dutyCheck.includes('trg')) {
+                status = 'TRG';
+                tooltipText = dutyRaw;
+            }
+            // *** 5. OTHERS (NFP) ***
+            else {
+                status = 'NFP'; 
+                tooltipText = dutyRaw;
+            }
+        }
+
+        // --- RENDER CELL WITH TOOLTIP ---
+        // title attribute add kiya gaya hai
+        let badgeClass = `status-${status.toLowerCase()}`;
+        html += `<td title="${tooltipText}" style="cursor: help;"><span class="badge ${badgeClass}">${status}</span></td>`;
+    }
+        html += `</tr>`;
+    });
+    html += `</tbody></table>`;
+    matrixDiv.innerHTML = html;
+}
+// --- CUSTOM PLUGIN TO DRAW NUMBERS ON CHARTS ---
+const drawDataValues = {
+    id: 'drawDataValues',
+    afterDatasetsDraw: (chart, args, options) => {
+        const { ctx } = chart;
+        ctx.save();
+        
+        chart.data.datasets.forEach((dataset, i) => {
+            const meta = chart.getDatasetMeta(i);
+            if (!meta.hidden) {
+                meta.data.forEach((element, index) => {
+                    const dataVal = dataset.data[index];
+                    if (dataVal > 0) { // Sirf 0 se bade numbers dikhayein
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 11px Poppins';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        
+                        // Position logic
+                        let x = element.x;
+                        let y = element.y;
+
+                        // Bar Chart: Top of bar
+                        if (chart.config.type === 'bar') {
+                            y = element.y - 10; // Thoda upar
+                        } 
+                        // Pie/Doughnut/Polar: Center of slice (thoda adjust karke)
+                        else {
+                            // Centering logic for arcs is handled by Chart.js element properties
+                            const model = element;
+                            const midAngle = model.startAngle + (model.endAngle - model.startAngle) / 2;
+                            // Thoda bahar ki taraf push karein radius ke hisaab se
+                            const r = (model.outerRadius + model.innerRadius) / 2; 
+                            x = model.x + Math.cos(midAngle) * r;
+                            y = model.y + Math.sin(midAngle) * r;
+                        }
+                        ctx.fillText(dataVal, x, y);
+                    }
+                });
+            }
+        });
+        ctx.restore();
+    }
+};
+
+// Update Open Personal Dashboard Function
+function openPersonalDashboard(name, year, month) {
+    document.getElementById('personal-dashboard').style.display = 'block';
+    document.getElementById('pd-cli-name').innerText = name;
+    document.getElementById('pd-subtitle').innerText = `PERFORMANCE DASHBOARD - ${month}/${year}`;
+
+    const normalize = (str) => str ? str.toString().toLowerCase().replace(/[^a-z0-9]/g, '') : "";
+    const targetName = normalize(name);
+    const datePrefix = `${year}-${month}`;
+
+    // 1. FOOTPLATE
+    let fpStats = { wee: 0, noWee: 0, grpLP: 0, grpALP: 0, coaching: 0, memu: 0, goods: 0, e2e: 0 };
+    allData.forEach(r => {
+        if (normalize(r[COLS.NAME]) === targetName && r[COLS.DATE]?.startsWith(datePrefix)) {
+            fpStats.wee += safeInt(r[COLS.WEE]); fpStats.noWee += safeInt(r[COLS.NO_WEE]);
+            fpStats.grpLP += safeInt(r[COLS.GRP_LP]); fpStats.grpALP += safeInt(r[COLS.GRP_ALP]);
+            fpStats.coaching += safeInt(r[COLS.COACHING]); fpStats.memu += safeInt(r[COLS.MEMU]);
+            fpStats.goods += safeInt(r[COLS.GOODS]);
+        }
+    });
+    if(endToEndData) endToEndData.forEach(r => { if(r[0] && normalize(r[0])===targetName && r[6]?.startsWith(datePrefix)) fpStats.e2e++; });
+
+    // 2. AMBUSH
+    let ambStats = { auto: 0, lc: 0, cd: 0, ba: 0, speedOn: 0, speedYellow: 0, mobile: 0 };
+    allData.forEach(r => {
+        if (normalize(r[COLS.NAME]) === targetName && r[COLS.DATE]?.startsWith(datePrefix)) {
+            ambStats.auto += safeInt(r[COLS_OA.AUTO_IB]); ambStats.lc += safeInt(r[COLS_OA.LC_AMBUSH]);
+            ambStats.cd += safeInt(r[COLS_OA.CD_ZONES]); ambStats.ba += safeInt(r[COLS_OA.BA_AMBUSH]);
+            ambStats.speedOn += safeInt(r[COLS_OA.SPEED_AUTO]); ambStats.speedYellow += safeInt(r[COLS_OA.SPEED_YELLOW]);
+        }
+    });
+    if(mobileAmbushData) mobileAmbushData.forEach(r => {
+        let sName = normalize(r[15]);
+        if(sName && (sName.includes(targetName) || targetName.includes(sName))) {
+            const ts = r[0]; 
+            if(ts) {
+                let parts = ts.split(' ')[0].trim().split(/[\/\-]/);
+                let d, m, y;
+                if(parts.length===3) {
+                    if(parts[0].length===4) { y=parseInt(parts[0]); m=parseInt(parts[1]); }
+                    else { m=parseInt(parts[0]); y=parseInt(parts[2]); } // MM/DD/YYYY
+                    if(y===parseInt(year) && m===parseInt(month)) ambStats.mobile++;
+                }
+            }
+        }
+    });
+
+    // 3. SPM
+    let spmStats = { sanket: 0, manual: 0, cvvrs: 0 };
+    const procSPM = (row, type, dIdx, nIdx, fmt) => {
+        if(!row[dIdx]) return;
+        let cDate = row[dIdx].toString().replace(',','').trim().split(' ')[0];
+        let p = cDate.split(/[\/\-]/);
+        if(p.length!==3) return;
+        let d,m,y;
+        if(fmt==='MDY') { m=parseInt(p[0]); y=parseInt(p[2]); } else { m=parseInt(p[1]); y=parseInt(p[2]); }
+        if(y<100) y+=2000;
+        let sName = normalize(row[nIdx]);
+        if(y===parseInt(year) && m===parseInt(month) && sName && (targetName.includes(sName) || sName.includes(targetName))) {
+            if(type==='S') spmStats.sanket++; if(type==='M') spmStats.manual++; if(type==='C') spmStats.cvvrs++;
+        }
+    };
+    if(spmSanketData) spmSanketData.forEach(r => procSPM(r,'S',0,19,'MDY'));
+    if(spmManualData) spmManualData.forEach(r => procSPM(r,'M',0,3,'DMY'));
+    if(spmCvvrsData) spmCvvrsData.forEach(r => procSPM(r,'C',0,3,'DMY'));
+
+    // 4. INSPECTION
+    let inspStats = { fam:0, run:0, lob:0, stn:0, cln:0, stb:0, snd:0, crw:0 };
+    allData.forEach(r => {
+        if (normalize(r[COLS.NAME]) === targetName && r[COLS.DATE]?.startsWith(datePrefix)) {
+            if(safeInt(r[COLS_INSP.FAMILY])>0) inspStats.fam++;
+            inspStats.run += safeInt(r[COLS_INSP.RUNNING]);
+            inspStats.lob += safeInt(r[COLS_INSP.LOBBY]);
+        }
+    });
+    if(extraInspData) extraInspData.forEach(r => {
+        const rn = r[1]?normalize(r[1]):"", ts=r[0], ty=r[6]?r[6].toLowerCase():"";
+        if(rn===targetName && ts) {
+            let parts = ts.split(',')[0].trim().split('/');
+            if(parts.length===3 && parts[2]==year && parseInt(parts[1])==month) {
+                if(ty.includes('station')) inspStats.stn++;
+                else if(ty.includes('coaching')) inspStats.cln++;
+                else if(ty.includes('stable')) inspStats.stb++;
+                else if(ty.includes('sand')) inspStats.snd++;
+                else if(ty.includes('surprise')) inspStats.crw++;
+            }
+        }
+    });
+
+    // 5. ONGOING DRIVES (UPDATED LOGIC: GLP PENDING)
+    let dStats = { 
+        roll: { t:0, c1:0, c2:0 }, 
+        crb: { t:0, c1:0, c2:0 }, 
+        glp: { t:0, d:0, p:0 } 
+    };
+    const cName = (n) => n ? n.toString().toUpperCase().replace(/\+/g, '').trim() : "";
+    const sName = cName(name);
+
+    if(rolldownData) rolldownData.forEach(r => {
+        if(r[1] && cName(r[1])===sName) {
+            dStats.roll.t++;
+            if(r[6] && r[6].trim()) dStats.roll.c1++;
+            if(r[7] && r[7].trim()) dStats.roll.c2++;
+        }
+    });
+    if(crbDriveData) crbDriveData.forEach(r => {
+        if(r[1] && cName(r[1])===sName) {
+            dStats.crb.t++;
+            if(r[4] && r[4].trim()) dStats.crb.c1++;
+            if(r[5] && r[5].trim()) dStats.crb.c2++;
+        }
+    });
+    if(glpData) glpData.forEach(r => {
+        if(r[1] && cName(r[1])===sName) {
+            dStats.glp.t++;
+            if(r[20] && parseInt(r[20])===1) dStats.glp.d++;
+            else dStats.glp.p++; // Calculating Pending
+        }
+    });
+
+    // 6. COUNSELLING
+    let cStats = { saf:0, spad:0, d1:0, d2:0, d3:0, d4:0 };
+    allData.forEach(r => {
+        if(normalize(r[COLS.NAME])===targetName && r[COLS.DATE]?.startsWith(datePrefix)) {
+            cStats.saf += safeInt(r[COLS_COUNS.SAFETY]);
+            cStats.spad += safeInt(r[COLS_COUNS.SPAD_PREV]);
+        }
+    });
+    const K1="maximum speed for yy", K2="practical rs application", K3="winter and fog", K4="railway board safety";
+    if(driveData) driveData.forEach(r => {
+        if(r[3] && normalize(r[3])===targetName && r[0]) {
+            let p = r[0].split(' ')[0].split('-');
+            if(p.length===3 && p[2]==year && p[1]==month) {
+                let dn = r[5]?r[5].toLowerCase():"";
+                if(dn.includes(K1)) cStats.d1++; else if(dn.includes(K2)) cStats.d2++;
+                else if(dn.includes(K3)) cStats.d3++; else if(dn.includes(K4)) cStats.d4++;
+            }
+        }
+    });
+
+    renderPersonalCharts(fpStats, ambStats, spmStats, inspStats, dStats, cStats);
+    
+    // Target Table Inject
+    const spmC = document.getElementById('pd-chart-spm');
+    const spmCard = spmC.closest('.pd-card');
+    const existing = spmCard.querySelector('.mini-stat-table'); if(existing) existing.remove();
+    
+    const actSPM = spmStats.sanket + spmStats.manual;
+    const stSPM = actSPM>=5 ? '<span class="status-ok">✔</span>' : '<span class="status-fail">✘</span>';
+    const stCVVRS = spmStats.cvvrs>=2 ? '<span class="status-ok">✔</span>' : '<span class="status-fail">✘</span>';
+    
+    const div = document.createElement('div');
+    div.className = 'mini-stat-table';
+    div.innerHTML = `<table><thead><tr><th>TYPE</th><th>TGT</th><th>ACT</th><th>STS</th></tr></thead><tbody><tr><td>SPM</td><td>5</td><td>${actSPM}</td><td>${stSPM}</td></tr><tr><td>CVVRS</td><td>2</td><td>${spmStats.cvvrs}</td><td>${stCVVRS}</td></tr></tbody></table>`;
+    spmCard.appendChild(div);
+}
+function closePersonalDashboard() {
+    document.getElementById('personal-dashboard').style.display = 'none';
+}
+
+// Render Charts with Numerical Figures
+function renderPersonalCharts(fp, amb, spm, insp, drv, couns) {
+    const commonOpt = {
+        responsive: true, 
+        maintainAspectRatio: false, 
+        plugins: { legend: { display: false } },
+        scales: { 
+            y: { beginAtZero: true, grid: { color:'rgba(255,255,255,0.1)' }, ticks: { color: '#a0aab8' } },
+            x: { grid: { display: false }, ticks: { color: '#fff', font:{size:10} } }
+        }
+    };
+    
+    const plugins = [drawDataValues]; // Register Custom Plugin
+
+    // 1. FOOTPLATE
+    if(pdChartFP) pdChartFP.destroy();
+    pdChartFP = new Chart(document.getElementById('pd-chart-fp'), {
+        type: 'bar', plugins: plugins,
+        data: {
+            labels: ['Wee', 'Excl Wee', 'Grp LP', 'Grp ALP', 'Coach', 'MEMU', 'Goods', 'E2E'],
+            datasets: [{ data: [fp.wee, fp.noWee, fp.grpLP, fp.grpALP, fp.coaching, fp.memu, fp.goods, fp.e2e], backgroundColor: ['#00f2ff', '#bc13fe', '#ff0080', '#e0ff00', '#00ff88', '#ff8800', '#888888', '#e0aaff'], borderWidth: 0 }]
+        }, options: commonOpt
+    });
+
+    // 2. AMBUSH
+    if(pdChartAmbush) pdChartAmbush.destroy();
+    pdChartAmbush = new Chart(document.getElementById('pd-chart-ambush'), {
+        type: 'doughnut', plugins: plugins,
+        data: {
+            labels: ['Auto', 'LC', 'CD', 'BA', 'Spd(ON)', 'Spd(Y)', 'Mobile'],
+            datasets: [{ data: [amb.auto, amb.lc, amb.cd, amb.ba, amb.speedOn, amb.speedYellow, amb.mobile], backgroundColor: ['#00f2ff', '#bc13fe', '#ff0080', '#e0ff00', '#00ff88', '#ff8800', '#fff'], borderWidth: 0, borderColor: '#040c18' }]
+        }, options: { ...commonOpt, scales: {}, plugins: { legend: { position:'right', labels:{color:'#fff', boxWidth:10} } } }
+    });
+
+    // 3. SPM
+    if(pdChartSPM) pdChartSPM.destroy();
+    pdChartSPM = new Chart(document.getElementById('pd-chart-spm'), {
+        type: 'bar', plugins: plugins,
+        data: { labels: ['Sanket', 'Manual', 'CVVRS'], datasets: [{ data: [spm.sanket, spm.manual, spm.cvvrs], backgroundColor: ['#ff0055', '#ffce56', '#00f2ff'], borderWidth: 0 }] },
+        options: commonOpt
+    });
+
+    // 4. INSPECTION
+    if(pdChartInsp) pdChartInsp.destroy();
+    pdChartInsp = new Chart(document.getElementById('pd-chart-insp'), {
+        type: 'polarArea', plugins: plugins,
+        data: {
+            labels: ['Fam', 'RR', 'Lob', 'Stn', 'Cln', 'Stb', 'Snd', 'Crew'],
+            datasets: [{ data: [insp.fam, insp.run, insp.lob, insp.stn, insp.cln, insp.stb, insp.snd, insp.crw], backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40', '#c9cbcf', '#ff00ff'], borderWidth: 0 }]
+        }, options: { ...commonOpt, scales: { r: { grid: { color:'rgba(255,255,255,0.1)' }, ticks: { display: false } } }, plugins: { legend: { position:'right', labels:{color:'#fff', boxWidth:10} } } }
+    });
+
+    // 5. ONGOING DRIVES (3 Bars per Category - Updated Names)
+    if(window.pdChartDrives instanceof Chart) window.pdChartDrives.destroy();
+    window.pdChartDrives = new Chart(document.getElementById('pd-chart-drives'), {
+        type: 'bar', plugins: plugins,
+        data: {
+            labels: ['Roll Down Counselling', 'CRB Drive YY/Y Speed', 'GLP SPM Analysis'],
+            datasets: [
+                { 
+                    label: 'Total', 
+                    data: [drv.roll.t, drv.crb.t, drv.glp.t], 
+                    backgroundColor: 'rgba(128, 128, 128, 0.5)', borderColor: '#fff', borderWidth: 1 
+                },
+                { 
+                    label: '1st / Completed', 
+                    data: [drv.roll.c1, drv.crb.c1, drv.glp.d], 
+                    backgroundColor: '#00f2ff', borderWidth: 0 
+                },
+                { 
+                    label: '2nd / Pending', 
+                    data: [drv.roll.c2, drv.crb.c2, drv.glp.p], 
+                    backgroundColor: '#bc13fe', borderWidth: 0 
+                }
+            ]
+        },
+        options: {
+            ...commonOpt,
+            plugins: { legend: { display: true, position: 'top', labels: { color: '#fff', font: {size: 10} } } },
+            categoryPercentage: 0.6,
+            barPercentage: 0.8
+        }
+    });
+
+    // 6. CREW COUNSELLING (Pie)
+    if(window.pdChartCouns instanceof Chart) window.pdChartCouns.destroy();
+    window.pdChartCouns = new Chart(document.getElementById('pd-chart-couns'), {
+        type: 'pie', plugins: plugins,
+        data: {
+            labels: ['Safety', 'SPAD', 'Max Spd', 'Prac RS', 'Winter', 'RB SPAD'],
+            datasets: [{ data: [couns.saf, couns.spad, couns.d1, couns.d2, couns.d3, couns.d4], backgroundColor: ['#00ff88', '#ff0055', '#008cff', '#ffce56', '#bc13fe', '#fff'], borderWidth: 0 }]
+        }, options: { ...commonOpt, scales: {}, plugins: { legend: { position:'right', labels:{color:'#fff', boxWidth:10} } } }
+    });
+}
+// --- COUNSELLING MODULE LOGIC ---
+
+async function fetchDriveData() {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${DRIVE_SHEET_ID}/values/${DRIVE_SHEET_NAME}!A2:G?key=${API_KEY}`;
+    try {
+        const res = await fetch(url);
+        const json = await res.json();
+        if (json.values) driveData = json.values;
+    } catch (e) { console.error("Err Drive Data", e); }
+}
+
+function showCounsellingSearchInterface(mode) {
+    currentCounsMode = mode;
+    document.getElementById('couns-selection').classList.add('hidden');
+    document.getElementById('couns-inputs').classList.remove('hidden');
+    document.getElementById('couns-cli-name-wrapper').style.display = (mode === 'summary') ? 'none' : 'block';
+}
+
+function populateCounsDropdowns() {
+    // Populate Names
+    const list = document.getElementById('couns-cli-names-list');
+    list.innerHTML = '';
+    const names = new Set();
+    allData.forEach(r => { if(r[COLS.NAME]) names.add(r[COLS.NAME].trim()); });
+    Array.from(names).sort().forEach(n => {
+        let opt = document.createElement('option'); opt.value = n; list.appendChild(opt);
+    });
+
+    // Populate Years
+    const ySelect = document.getElementById('couns-year-select');
+    ySelect.innerHTML = '<option value="">Select Year</option>';
+    const years = new Set();
+    // From Daily Report
+    allData.forEach(r => { if(r[COLS.DATE]) years.add(r[COLS.DATE].split('-')[0]); });
+    // From Drive Data (Format: 17-02-2026)
+    driveData.forEach(r => { 
+        if(r[0]) {
+            let parts = r[0].split(' ')[0].split('-'); 
+            if(parts.length===3) years.add(parts[2]); 
+        } 
+    });
+    
+    Array.from(years).sort().reverse().forEach(y => {
+        if(y.length===4) {
+            let opt = document.createElement('option'); opt.value = y; opt.innerText = y; ySelect.appendChild(opt);
+        }
+    });
+}
+
+function generateCounsellingReport() {
+    const year = document.getElementById('couns-year-select').value;
+    const month = document.getElementById('couns-month-select').value;
+    const nameInput = document.getElementById('couns-cli-name-input').value;
+
+    if (!year || !month) { alert("Select Year and Month"); return; }
+    if (currentCounsMode === 'search' && !nameInput) { alert("Enter CLI Name"); return; }
+
+    document.getElementById('couns-results').classList.remove('hidden');
+
+    // Stats Object
+    // 1=Safety(S), 2=SPAD Prev(Y), 3=Max Speed, 4=Prac RS App, 5=Winter, 6=RB SPAD
+    let stats = { safety:0, spadPrev:0, drive1:0, drive2:0, drive3:0, drive4:0 };
+    let cliMap = {}; // For Summary
+
+    // 1. Process Daily Report (Col S & Y)
+    const datePrefix = `${year}-${month}`;
+    const normalize = (str) => str ? str.toString().toLowerCase().replace(/[^a-z0-9]/g, '') : "";
+    const targetName = normalize(nameInput);
+
+    allData.forEach(row => {
+        const rName = row[COLS.NAME] ? row[COLS.NAME].trim() : "Unknown";
+        const rDate = row[COLS.DATE];
+        
+        if (rDate && rDate.startsWith(datePrefix)) {
+            let isMatch = (currentCounsMode === 'summary') ? true : (normalize(rName) === targetName);
+            
+            if (isMatch) {
+                const valSafety = safeInt(row[COLS_COUNS.SAFETY]);
+                const valSpad = safeInt(row[COLS_COUNS.SPAD_PREV]);
+
+                if(currentCounsMode === 'search') {
+                    stats.safety += valSafety;
+                    stats.spadPrev += valSpad;
+                } else {
+                    if(!cliMap[rName]) initCliMap(cliMap, rName, row[COLS.LOBBY]);
+                    cliMap[rName].safety += valSafety;
+                    cliMap[rName].spadPrev += valSpad;
+                    stats.safety += valSafety;
+                    stats.spadPrev += valSpad;
+                }
+            }
+        }
+    });
+
+    // 2. Process Drive Data (Sheet 2)
+    // Drive Name Keywords Updated
+    const D1_KEY = "maximum speed for yy";
+    const D2_KEY = "practical rs application"; // *** CHANGE HERE ***
+    const D3_KEY = "winter and fog";
+    const D4_KEY = "railway board safety drive counselling on spad";
+
+    driveData.forEach(row => {
+        const ts = row[0];
+        const rName = row[3] ? row[3].trim() : "Unknown";
+        const driveName = row[5] ? row[5].toLowerCase() : "";
+
+        if (ts) {
+            let datePart = ts.split(' ')[0];
+            let parts = datePart.split('-');
+            if (parts.length === 3) {
+                let d = parts[0], m = parts[1], y = parts[2];
+                
+                if (y === year && m === month) {
+                    let isMatch = (currentCounsMode === 'summary') ? true : (normalize(rName) === targetName);
+
+                    if (isMatch) {
+                        let d1=0, d2=0, d3=0, d4=0;
+
+                        if (driveName.includes(D1_KEY)) d1 = 1;
+                        else if (driveName.includes(D2_KEY)) d2 = 1; // Count for Practical RS App
+                        else if (driveName.includes(D3_KEY)) d3 = 1;
+                        else if (driveName.includes(D4_KEY)) d4 = 1;
+
+                        if (currentCounsMode === 'search') {
+                            stats.drive1 += d1; stats.drive2 += d2; stats.drive3 += d3; stats.drive4 += d4;
+                        } else {
+                            if (!cliMap[rName]) initCliMap(cliMap, rName, "Unknown");
+                            cliMap[rName].drive1 += d1;
+                            cliMap[rName].drive2 += d2;
+                            cliMap[rName].drive3 += d3;
+                            cliMap[rName].drive4 += d4;
+                            
+                            stats.drive1 += d1; stats.drive2 += d2; stats.drive3 += d3; stats.drive4 += d4;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Render Outputs
+    const title = (currentCounsMode === 'search') ? `${nameInput} (${month}/${year})` : `Counselling Summary (${month}/${year})`;
+    renderCounsChart(stats, title);
+    renderCounsSideTable(stats);
+
+    if (currentCounsMode === 'summary') {
+        renderCounsBottomTable(cliMap);
+    } else {
+        document.getElementById('couns-bottom-box').classList.add('hidden');
+    }
+}
+
+// Helper to init map
+function initCliMap(map, name, lobby) {
+    map[name] = { lobby: lobby || '-', safety:0, spadPrev:0, drive1:0, drive2:0, drive3:0, drive4:0 };
+}
+
+function renderCounsChart(s, title) {
+    const ctx = document.getElementById('counsChart').getContext('2d');
+    if (counsChartInstance) counsChartInstance.destroy();
+
+    counsChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            // *** LABEL CHANGED HERE ***
+            labels: ['Safety (Lobby)', 'SPAD Prev (Daily)', 'Max Speed (YY/Y)', 'Prac RS App', 'Winter/Fog', 'RB SPAD Drive'],
+            datasets: [{
+                label: 'Count/Sum',
+                data: [s.safety, s.spadPrev, s.drive1, s.drive2, s.drive3, s.drive4],
+                backgroundColor: [
+                    'rgba(0, 255, 136, 0.7)',
+                    'rgba(255, 0, 85, 0.7)',
+                    'rgba(0, 140, 255, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(188, 19, 254, 0.7)',
+                    'rgba(255, 136, 0, 0.7)'
+                ],
+                borderColor: '#fff', borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, title: { display: true, text: title, color: '#fff', font: { size: 16 } } },
+            scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' } } }
+        }
+    });
+}
+
+function renderCounsSideTable(s) {
+    const total = s.safety + s.spadPrev + s.drive1 + s.drive2 + s.drive3 + s.drive4;
+    const html = `
+        <table class="summary-card-table">
+            <thead><tr><th>COUNSELLING TYPE</th><th>COUNT</th></tr></thead>
+            <tbody>
+                <tr><td>Safety (Lobby) (Sum)</td><td>${s.safety}</td></tr>
+                <tr><td>SPAD Prevention (Sum)</td><td>${s.spadPrev}</td></tr>
+                <tr><td>Max Speed YY/Y (Count)</td><td>${s.drive1}</td></tr>
+                <tr><td>Practical RS App (Count)</td><td>${s.drive2}</td></tr> <tr><td>Winter & Fog (Count)</td><td>${s.drive3}</td></tr>
+                <tr><td>RB SPAD Drive (Count)</td><td>${s.drive4}</td></tr>
+                <tr style="font-weight:bold; color:var(--neon-blue)"><td>TOTAL</td><td>${total}</td></tr>
+            </tbody>
+        </table>`;
+    document.getElementById('couns-side-data').innerHTML = html;
+}
+
+function renderCounsBottomTable(map) {
+    document.getElementById('couns-bottom-box').classList.remove('hidden');
+    let rows = '';
+    Object.entries(map).sort((a,b) => a[0].localeCompare(b[0])).forEach(([name, d]) => {
+        const t = d.safety + d.spadPrev + d.drive1 + d.drive2 + d.drive3 + d.drive4;
+        rows += `
+            <tr>
+                <td>${name}</td><td>${d.lobby}</td>
+                <td>${d.safety}</td><td>${d.spadPrev}</td>
+                <td>${d.drive1}</td><td>${d.drive2}</td><td>${d.drive3}</td><td>${d.drive4}</td>
+                <td style="font-weight:bold; color:var(--neon-blue)">${t}</td>
+            </tr>`;
+    });
+    
+    document.getElementById('couns-bottom-data').innerHTML = `
+        <table class="summary-card-table">
+            <thead>
+                <tr>
+                    <th>CLI NAME</th><th>LOBBY</th>
+                    <th>SAFETY</th><th>SPAD PREV</th>
+                    <th>MAX SPD</th><th>PRAC RS</th><th>WINTER</th><th>RB SPAD</th> <th>TOTAL</th>
+                </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+        </table>`;
+}
+// --- ONGOING DRIVES LOGIC ---
+
+async function fetchOngoingDriveData() {
+    // 1. ROLLDOWN (Data from Row 3)
+    const urlRoll = `https://sheets.googleapis.com/v4/spreadsheets/${DRIVE_ONGOING_SHEET_ID}/values/${ROLLDOWN_SHEET_NAME}!A3:P3981?key=${API_KEY}`;
+    
+    // 2. CRB DRIVE (Data from Row 4)
+    const urlCRB = `https://sheets.googleapis.com/v4/spreadsheets/${DRIVE_ONGOING_SHEET_ID}/values/'${CRB_DRIVE_SHEET_NAME}'!A4:N1705?key=${API_KEY}`;
+
+    // 3. GLP SPM Analysis (NEW - Fetching up to Column U)
+    // Sheet Name: 'GLP SPM Analysis', Range: A3 se U tak
+    const urlGLP = `https://sheets.googleapis.com/v4/spreadsheets/${DRIVE_ONGOING_SHEET_ID}/values/'GLP SPM Analysis'!A3:U?key=${API_KEY}`;
+
+    try {
+        const [resRoll, resCRB, resGLP] = await Promise.all([
+            fetch(urlRoll), fetch(urlCRB), fetch(urlGLP)
+        ]);
+
+        const dRoll = await resRoll.json();
+        const dCRB = await resCRB.json();
+        const dGLP = await resGLP.json();
+
+        if (dRoll.values) rolldownData = dRoll.values;
+        if (dCRB.values) crbDriveData = dCRB.values;
+        if (dGLP.values) glpData = dGLP.values; // Store GLP Data
+
+        populateDriveCLIDropdown();
+        console.log("✅ Drives Loaded. GLP Rows:", glpData ? glpData.length : 0);
+    } catch (e) { console.error("Drive Fetch Error:", e); }
+}
+
+// Helper: Name cleaning as per your requirement (+ removal and case-insensitive)
+function cleanDriveName(name) {
+    if (!name) return "";
+    return name.toString().toUpperCase().replace(/\+/g, '').trim();
+}
+
+function populateDriveCLIDropdown() {
+    const list = document.getElementById('drive-cli-list');
+    list.innerHTML = '';
+    let names = new Set();
+    rolldownData.forEach(r => { if(r[1]) names.add(cleanDriveName(r[1])); });
+    crbDriveData.forEach(r => { if(r[1]) names.add(cleanDriveName(r[1])); });
+    
+    Array.from(names).sort().forEach(n => {
+        let opt = document.createElement('option'); opt.value = n; list.appendChild(opt);
+    });
+}
+
+function showDriveInterface(mode) {
+    currentDriveMode = mode;
+    document.getElementById('drive-selection').classList.add('hidden');
+    document.getElementById('drive-inputs').classList.remove('hidden');
+    document.getElementById('drive-cli-wrapper').style.display = (mode === 'summary') ? 'none' : 'block';
+}
+function generateDriveReport() {
+    const targetCLI = cleanDriveName(document.getElementById('drive-cli-input').value);
+    if (currentDriveMode === 'search' && !targetCLI) { alert("Please select CLI"); return; }
+
+    document.getElementById('drive-results').classList.remove('hidden');
+    
+    let stats = {
+        roll: { total: 0, c1: 0, c2: 0 },
+        crb: { total: 0, c1: 0, c2: 0 },
+        glp: { total: 0, done: 0, pending: 0 } // GLP Stats Added
+    };
+
+    let summaryMap = {}; 
+
+    const hasDate = (row, idx) => (row[idx] && row[idx].trim().length > 0);
+
+    // --- 1. ROLLDOWN ---
+    if (rolldownData) {
+        rolldownData.forEach(r => {
+            if (!r[1]) return;
+            const cli = cleanDriveName(r[1]);
+            if (currentDriveMode === 'summary' || cli === targetCLI) {
+                if (!summaryMap[cli]) summaryMap[cli] = { rT:0, rC1:0, rC2:0, cT:0, cC1:0, cC2:0, gT:0, gD:0, gP:0 };
+                stats.roll.total++;
+                summaryMap[cli].rT++;
+                if(hasDate(r, 6)) { stats.roll.c1++; summaryMap[cli].rC1++; }
+                if(hasDate(r, 7)) { stats.roll.c2++; summaryMap[cli].rC2++; }
+            }
+        });
+    }
+
+    // --- 2. CRB DRIVE ---
+    if (crbDriveData) {
+        crbDriveData.forEach(r => {
+            if (!r[1]) return;
+            const cli = cleanDriveName(r[1]);
+            if (currentDriveMode === 'summary' || cli === targetCLI) {
+                if (!summaryMap[cli]) summaryMap[cli] = { rT:0, rC1:0, rC2:0, cT:0, cC1:0, cC2:0, gT:0, gD:0, gP:0 };
+                stats.crb.total++;
+                summaryMap[cli].cT++;
+                if(hasDate(r, 4)) { stats.crb.c1++; summaryMap[cli].cC1++; }
+                if(hasDate(r, 5)) { stats.crb.c2++; summaryMap[cli].cC2++; }
+            }
+        });
+    }
+
+    // --- 3. GLP SPM ANALYSIS (New Logic using Col U) ---
+    // Col B (Index 1) = CLI Name
+    // Col U (Index 20) = Helper Value (1 or 0)
+    if (glpData) {
+        glpData.forEach(r => {
+            if (!r[1]) return;
+            const cli = cleanDriveName(r[1]);
+            
+            if (currentDriveMode === 'summary' || cli === targetCLI) {
+                if (!summaryMap[cli]) summaryMap[cli] = { rT:0, rC1:0, rC2:0, cT:0, cC1:0, cC2:0, gT:0, gD:0, gP:0 };
+                
+                // Increment Total
+                stats.glp.total++;
+                summaryMap[cli].gT++;
+
+                // Check Column U (Index 20)
+                const statusVal = r[20] ? parseInt(r[20]) : 0; // Default to 0 if empty
+
+                if (statusVal === 1) { 
+                    stats.glp.done++; 
+                    summaryMap[cli].gD++;
+                } else {
+                    stats.glp.pending++;
+                    summaryMap[cli].gP++;
+                }
+            }
+        });
+    }
+
+    renderDriveUI(stats, summaryMap, targetCLI);
+}
+function renderDriveUI(stats, summaryMap, targetCLI) {
+    const ctx = document.getElementById('driveChart').getContext('2d');
+    if (driveChartInstance) driveChartInstance.destroy();
+
+    driveChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['1st Counselling', '2nd Counselling'],
+            datasets: [
+                { label: 'ROLL-DOWN', data: [stats.roll.c1, stats.roll.c2], backgroundColor: 'rgba(0, 242, 255, 0.7)' },
+                { label: 'CRB DRIVE', data: [stats.crb.c1, stats.crb.c2], backgroundColor: 'rgba(255, 0, 128, 0.7)' }
+            ]
+        },
+        options: { 
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#fff' } }, title: { display: true, text: 'Counselling Status', color: '#fff' } },
+            scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a0aab8' } }, x: { ticks: { color: '#fff' }, grid: { display: false } } }
+        }
+    });
+
+    const rollPerc = stats.roll.total > 0 ? ((stats.roll.c1 / stats.roll.total) * 100).toFixed(1) : 0;
+    const crbPerc = stats.crb.total > 0 ? ((stats.crb.c1 / stats.crb.total) * 100).toFixed(1) : 0;
+    
+    // --- SIDE PANEL UPDATE ---
+    document.getElementById('drive-side-data').innerHTML = `
+        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:10px; margin-bottom:20px; border:1px solid rgba(255,255,255,0.2);">
+            <h4 style="margin:0 0 10px 0; color:#ffdf7e; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">
+                GLP SPM ANALYSIS (90 Days)
+            </h4>
+            <div style="display:flex; justify-content:space-between; text-align:center;">
+                <div><h2 style="margin:0; color:#fff">${stats.glp.total}</h2><small style="color:#aaa">Total GLP</small></div>
+                <div><h2 style="margin:0; color:#00ff88">${stats.glp.done}</h2><small style="color:#aaa">Done</small></div>
+                <div><h2 style="margin:0; color:#ff5252">${stats.glp.pending}</h2><small style="color:#aaa">Pending</small></div>
+            </div>
+        </div>
+
+        <table class="summary-card-table">
+            <thead><tr><th colspan="2" style="text-align:center; color:#00f2ff">ROLL-DOWN STATS</th></tr></thead>
+            <tbody>
+                <tr><td>Total Crew</td><td style="font-weight:bold">${stats.roll.total}</td></tr>
+                <tr><td>1st Couns.</td><td>${stats.roll.c1} (${rollPerc}%)</td></tr>
+                <tr><td>2nd Couns.</td><td>${stats.roll.c2}</td></tr>
+            </tbody>
+        </table>
+        <br>
+        <table class="summary-card-table">
+            <thead><tr><th colspan="2" style="text-align:center; color:#ff0080">CRB DRIVE STATS</th></tr></thead>
+            <tbody>
+                <tr><td>Total Crew</td><td style="font-weight:bold">${stats.crb.total}</td></tr>
+                <tr><td>1st Couns.</td><td>${stats.crb.c1} (${crbPerc}%)</td></tr>
+                <tr><td>2nd Couns.</td><td>${stats.crb.c2}</td></tr>
+            </tbody>
+        </table>
+    `;
+
+    // --- BOTTOM TABLE UPDATE (Fixed CRB Columns) ---
+    if (currentDriveMode === 'summary') {
+        document.getElementById('drive-bottom-box').classList.remove('hidden');
+        let rows = '';
+        Object.entries(summaryMap).sort().forEach(([name, d]) => {
+            rows += `<tr>
+                <td>${name}</td>
+                
+                <td style="font-weight:bold; color:#fff">${d.rT}</td>
+                <td style="color:#00f2ff">${d.rC1}</td>
+                <td>${d.rC2}</td>
+                
+                <td style="border-left:1px solid #555; font-weight:bold; color:#fff">${d.cT}</td>
+                <td style="color:#ff0080">${d.cC1}</td>
+                <td>${d.cC2}</td>
+                
+                <td style="border-left:1px solid #555; font-weight:bold">${d.gT}</td>
+                <td style="color:#00ff88">${d.gD}</td>
+                <td style="color:#ff5252; font-weight:bold">${d.gP}</td>
+            </tr>`;
+        });
+        
+        document.getElementById('drive-bottom-data').innerHTML = `
+            <table class="summary-card-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2">CLI NAME</th>
+                        <th colspan="3" style="text-align:center; border-bottom:1px solid #555">ROLL-DOWN</th>
+                        <th colspan="3" style="text-align:center; border-bottom:1px solid #555; border-left:1px solid #555">CRB DRIVE</th>
+                        <th colspan="3" style="text-align:center; border-bottom:1px solid #555; border-left:1px solid #555; color:#ffdf7e">GLP SPM</th>
+                    </tr>
+                    <tr>
+                        <th>Total</th><th>1st</th><th>2nd</th>
+                        <th style="border-left:1px solid #555">Total</th><th>1st</th><th>2nd</th>
+                        <th style="border-left:1px solid #555">Total</th><th>Done</th><th>Pend</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+    } else {
+        document.getElementById('drive-bottom-box').classList.add('hidden');
+    }
+}
+// Add to openModule function
+// (Existing openModule mein switch case mein ye add karein)
+/*
+else if (moduleName === 'ongoing-drives') {
+    document.getElementById('module-ongoing-drives').style.display = 'block';
+    fetchOngoingDriveData();
+}
+*/
+// --- FOOTPLATE RESET LOGIC ---
+function resetInterface() {
+    // 1. Selection Screen (Search/Summary) ko wapis dikhayein
+    document.getElementById('fp-selection').classList.remove('hidden');
+
+    // 2. Input aur Result sections ko hide karein
+    document.getElementById('fp-inputs').classList.add('hidden');
+    document.getElementById('fp-results').classList.add('hidden');
+    
+    // 3. Bottom detail box ko hide karein
+    document.getElementById('bottom-detailed-box').classList.add('hidden');
+
+    // 4. Inputs ko clear karein (Fresh start ke liye)
+    document.getElementById('cli-name-input').value = '';
+    document.getElementById('year-select').value = "";
+    document.getElementById('month-select').selectedIndex = 0;
+}
+    </script>
+</body>
+</html>
