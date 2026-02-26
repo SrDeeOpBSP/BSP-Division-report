@@ -571,22 +571,16 @@
 <body>
 
     <h1 class="main-title">Performance At A Glance Dashboard</h1>
-    <div class="safety-sidebar">
+   <div id="safety-links-sidebar" class="safety-sidebar">
     <div class="sidebar-title"><i class="fas fa-external-link-alt"></i> USEFUL LINKS</div>
-    
     <a href="https://safetysecrbsp.com/" target="_blank" class="s-link portal">
-        <i class="fas fa-shield-alt"></i>
-        <span>SAFETY PORTAL</span>
+        <i class="fas fa-shield-alt"></i><span>SAFETY PORTAL</span>
     </a>
-    
     <a href="https://drive.google.com/drive/folders/1Py-3KnyBre1_kMX1zzabN6aENEE9LtgE" target="_blank" class="s-link slips">
-        <i class="fas fa-file-signature"></i>
-        <span>CORRECTION SLIPS</span>
+        <i class="fas fa-file-signature"></i><span>CORRECTION SLIPS</span>
     </a>
-    
     <a href="https://drive.google.com/drive/folders/1Fb1tMPyrsXlQr-z6GdukJ9vVS_Xj-jeo" target="_blank" class="s-link circulars">
-        <i class="fas fa-exclamation-triangle"></i>
-        <span>SAFETY CIRCULARS</span>
+        <i class="fas fa-exclamation-triangle"></i><span>SAFETY CIRCULARS</span>
     </a>
 </div>
     <div id="dashboard-container">
@@ -1185,6 +1179,7 @@
 
 // --- UPDATED OPEN MODULE FUNCTION (INCLUDES COUNSELLING) ---
 function openModule(moduleName) {
+    document.getElementById('safety-links-sidebar').style.display = 'none';
     // 1. Hide Dashboard & All Modules
     document.getElementById('dashboard-container').style.display = 'none';
     document.querySelectorAll('.module-section').forEach(el => el.style.display = 'none');
@@ -1280,6 +1275,7 @@ function loadHubImmediately() {
 }
 
 function closeModule(moduleName) {
+    document.getElementById('safety-links-sidebar').style.display = 'flex';
     document.getElementById('module-' + moduleName).style.display = 'none';
     document.getElementById('dashboard-container').style.display = 'flex';
     
