@@ -378,7 +378,7 @@
         /* First Column (Names) */
         .matrix-table th:first-child, 
         .matrix-table td:first-child { 
-            width: 180px; 
+            width: 210px; 
             text-align: left; 
             padding-left: 8px; 
             font-weight: 600; 
@@ -500,13 +500,95 @@
         }
         .status-ok { color: #00ff88; font-weight: bold; }
         .status-fail { color: #ff0055; font-weight: bold; }
+      /* Sidebar Container */
+.safety-sidebar {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 171, 0, 0.3);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
 
+.sidebar-title {
+    font-size: 0.65rem;
+    color: #ffab00;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+}
+
+/* Individual Link Style */
+.s-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    min-width: 180px;
+    border-left: 4px solid transparent;
+}
+
+.s-link span {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.s-link i {
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+}
+
+/* Colors for visibility */
+.portal { background: rgba(255, 171, 0, 0.15); border-color: #ffab00; } /* Gold */
+.slips { background: rgba(255, 82, 82, 0.15); border-color: #ff5252; }  /* Red */
+.circulars { background: rgba(76, 175, 80, 0.15); border-color: #4caf50; } /* Green */
+
+/* Hover Effects */
+.s-link:hover {
+    transform: translateX(-5px);
+    background: #ffab00;
+}
+.s-link:hover span, .s-link:hover i {
+    color: #000;
+}
+.slips:hover { background: #ff5252; }
+.circulars:hover { background: #4caf50; }
     </style>
 </head>
 <body>
 
     <h1 class="main-title">Performance At A Glance Dashboard</h1>
-
+    <div class="safety-sidebar">
+    <div class="sidebar-title"><i class="fas fa-external-link-alt"></i> USEFUL LINKS</div>
+    
+    <a href="https://safetysecrbsp.com/" target="_blank" class="s-link portal">
+        <i class="fas fa-shield-alt"></i>
+        <span>SAFETY PORTAL</span>
+    </a>
+    
+    <a href="https://drive.google.com/drive/folders/1Py-3KnyBre1_kMX1zzabN6aENEE9LtgE" target="_blank" class="s-link slips">
+        <i class="fas fa-file-signature"></i>
+        <span>CORRECTION SLIPS</span>
+    </a>
+    
+    <a href="https://drive.google.com/drive/folders/1Fb1tMPyrsXlQr-z6GdukJ9vVS_Xj-jeo" target="_blank" class="s-link circulars">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>SAFETY CIRCULARS</span>
+    </a>
+</div>
     <div id="dashboard-container">
         <div class="orbit-ring ring-outer"></div>
         <div class="orbit-ring ring-inner"></div>
@@ -823,6 +905,9 @@
                 <option value="10">October</option><option value="11">November</option><option value="12">December</option>
             </select>
             <button class="action-btn" onclick="generateHubMatrix()"><i class="fas fa-th"></i> LOAD MATRIX</button>
+            <button class="action-btn" onclick="openTargetAnalysis()" style="background: linear-gradient(45deg, #ff0055, #ff8800);">
+                <i class="fas fa-bullseye"></i> TARGET ANALYSIS
+            </button>
         </div>
 
         <div id="hub-matrix-container" class="matrix-container hidden">
@@ -972,6 +1057,26 @@
         </div>
     </div>
 </div>
+<div id="target-analysis-modal" class="personal-dashboard">
+        <div class="pd-header">
+            <div>
+                <h1 style="margin:0; color: #fff;">CLI TARGET ANALYSIS</h1>
+                <span id="target-subtitle" style="color: var(--text-secondary); font-size: 0.9rem;"></span>
+            </div>
+            <button class="action-btn" onclick="closeTargetAnalysis()" style="background: rgba(255,0,0,0.2); border: 1px solid red;">
+                <i class="fas fa-times"></i> CLOSE
+            </button>
+        </div>
+        
+        <div style="padding: 20px;">
+            <div id="target-table-container"></div>
+            
+            <div id="not-achieved-list-box" class="hidden" style="margin-top: 30px; background: rgba(0,0,0,0.5); padding: 20px; border: 1px solid var(--neon-blue); border-radius: 10px;">
+                <h3 id="not-achieved-title" style="color: #ff5252; margin-top: 0;"></h3>
+                <div id="not-achieved-names" style="color: #fff; display: flex; flex-wrap: wrap; gap: 10px;"></div>
+            </div>
+        </div>
+    </div>
     <script>
         let currentDriveMode = ''
         let glpData = [];
@@ -1343,43 +1448,60 @@ function closeModule(moduleName) {
     document.getElementById('bottom-detailed-box').classList.add('hidden');
 }
 
-        function generateSummaryReport(year, month) {
-    let cliMap = {};
-    let grand = { wee: 0, noWee: 0, grpLP: 0, grpALP: 0, coaching: 0, memu: 0, goods: 0, e2e: 0 };
+   function generateSummaryReport(year, month) {
+            let cliMap = {};
+            let grand = { wee: 0, noWee: 0, grpLP: 0, grpALP: 0, coaching: 0, memu: 0, goods: 0, e2e: 0 };
 
-    // 1. Main Data Aggregation
-    allData.forEach(row => {
-        const name = row[COLS.NAME] ? row[COLS.NAME].trim() : null;
-        if (name && isDateInMonth(row[COLS.DATE], year, month)) {
-            if (!cliMap[name]) cliMap[name] = { lobby: row[COLS.LOBBY] || '-', wee: 0, noWee: 0, grpLP: 0, grpALP: 0, coaching: 0, memu: 0, goods: 0, e2e: 0 };
-            
-            const w = safeInt(row[COLS.WEE]); const nw = safeInt(row[COLS.NO_WEE]);
-            const glp = safeInt(row[COLS.GRP_LP]); const galp = safeInt(row[COLS.GRP_ALP]);
-            const c = safeInt(row[COLS.COACHING]); const m = safeInt(row[COLS.MEMU]); const g = safeInt(row[COLS.GOODS]);
-            
-            cliMap[name].wee += w; cliMap[name].noWee += nw; 
-            cliMap[name].grpLP += glp; cliMap[name].grpALP += galp;
-            cliMap[name].coaching += c; cliMap[name].memu += m; cliMap[name].goods += g;
-            
-            grand.wee += w; grand.noWee += nw; grand.grpLP += glp; grand.grpALP += galp;
-            grand.coaching += c; grand.memu += m; grand.goods += g;
-        }
-    });
+            // === NAYA CODE: Yahan Lobby Map Banayein ===
+            let lobbyMap = {};
+            // Main data se lobby map karein
+            allData.forEach(r => {
+                if (r[COLS.NAME] && r[COLS.LOBBY] && r[COLS.LOBBY].trim() !== '') {
+                    lobbyMap[r[COLS.NAME].trim()] = r[COLS.LOBBY].trim();
+                }
+            });
+            // Other duty data se bhi backup lobby lein
+            otherDutyData.forEach(r => {
+                if (r[COLS_OD.NAME] && r[COLS_OD.LOBBY] && r[COLS_OD.LOBBY].trim() !== '') {
+                    lobbyMap[r[COLS_OD.NAME].trim()] = r[COLS_OD.LOBBY].trim();
+                }
+            });
+            // ==========================================
 
-    // 2. End to End Data Aggregation
-    if (endToEndData) {
-        endToEndData.forEach(row => {
-            const name = row[0] ? row[0].trim() : null;
-            const date = row[6];
-            if (name && isDateInMonth(date, year, month)) {
-                // Ensure CLI exists in map (if they only did E2E but no regular footplate)
-                if (!cliMap[name]) cliMap[name] = { lobby: 'Unknown', wee: 0, noWee: 0, grpLP: 0, grpALP: 0, coaching: 0, memu: 0, goods: 0, e2e: 0 };
-                
-                cliMap[name].e2e += 1;
-                grand.e2e += 1;
+            // 1. Main Data Aggregation
+            allData.forEach(row => {
+                const name = row[COLS.NAME] ? row[COLS.NAME].trim() : null;
+                if (name && isDateInMonth(row[COLS.DATE], year, month)) {
+                    // === CHANGE: Yahan row[COLS.LOBBY] ki jagah lobbyMap use kiya hai ===
+                    if (!cliMap[name]) cliMap[name] = { lobby: lobbyMap[name] || 'Unknown', wee: 0, noWee: 0, grpLP: 0, grpALP: 0, coaching: 0, memu: 0, goods: 0, e2e: 0 };
+                    
+                    const w = safeInt(row[COLS.WEE]); const nw = safeInt(row[COLS.NO_WEE]);
+                    const glp = safeInt(row[COLS.GRP_LP]); const galp = safeInt(row[COLS.GRP_ALP]);
+                    const c = safeInt(row[COLS.COACHING]); const m = safeInt(row[COLS.MEMU]); const g = safeInt(row[COLS.GOODS]);
+                    
+                    cliMap[name].wee += w; cliMap[name].noWee += nw; 
+                    cliMap[name].grpLP += glp; cliMap[name].grpALP += galp;
+                    cliMap[name].coaching += c; cliMap[name].memu += m; cliMap[name].goods += g;
+                    
+                    grand.wee += w; grand.noWee += nw; grand.grpLP += glp; grand.grpALP += galp;
+                    grand.coaching += c; grand.memu += m; grand.goods += g;
+                }
+            });
+
+            // 2. End to End Data Aggregation
+            if (endToEndData) {
+                endToEndData.forEach(row => {
+                    const name = row[0] ? row[0].trim() : null;
+                    const date = row[6];
+                    if (name && isDateInMonth(date, year, month)) {
+                        // === CHANGE: E2E walon ko hardcoded 'Unknown' ki jagah map se assign hoga ===
+                        if (!cliMap[name]) cliMap[name] = { lobby: lobbyMap[name] || 'Unknown', wee: 0, noWee: 0, grpLP: 0, grpALP: 0, coaching: 0, memu: 0, goods: 0, e2e: 0 };
+                        
+                        cliMap[name].e2e += 1;
+                        grand.e2e += 1;
+                    }
+                });
             }
-        });
-    }
 
     renderChart(
         [grand.wee, grand.noWee, grand.grpLP, grand.grpALP, grand.coaching, grand.memu, grand.goods, grand.e2e], 
@@ -1467,7 +1589,7 @@ function closeModule(moduleName) {
             });
         }
 
-        function generateOAReport() {
+       function generateOAReport() {
             const year = document.getElementById('oa-year-select').value;
             const month = document.getElementById('oa-month-select').value;
             const name = document.getElementById('oa-cli-name-input').value;
@@ -1480,17 +1602,26 @@ function closeModule(moduleName) {
             const mainPrefix = `${year}-${padMonth(month)}`;
             let cliStats = {};
 
+            // Naya Helper: Initialize objects easily
+            const initOAStats = (lobby) => ({ 
+                lobby: lobby||'-', 
+                auto:0, aCt:0, lc:0, lCt:0, cd:0, cCt:0, ba:0, bCt:0, 
+                speedOn:0, sOnCt:0, speedYellow:0, sYelCt:0, mobile:0, mCt:0 
+            });
+
             // Main Sheet
             allData.forEach(row => {
                 const rowName = row[COLS.NAME] ? row[COLS.NAME].trim() : null;
                 if (rowName && row[COLS.DATE] && row[COLS.DATE].startsWith(mainPrefix)) {
-                    if (!cliStats[rowName]) cliStats[rowName] = { lobby: row[COLS.LOBBY]||'-', auto:0, lc:0, cd:0, ba:0, speedOn:0, speedYellow:0, mobile:0 };
-                    cliStats[rowName].auto += safeInt(row[COLS_OA.AUTO_IB]);
-                    cliStats[rowName].lc += safeInt(row[COLS_OA.LC_AMBUSH]);
-                    cliStats[rowName].cd += safeInt(row[COLS_OA.CD_ZONES]);
-                    cliStats[rowName].ba += safeInt(row[COLS_OA.BA_AMBUSH]);
-                    cliStats[rowName].speedOn += safeInt(row[COLS_OA.SPEED_AUTO]);
-                    cliStats[rowName].speedYellow += safeInt(row[COLS_OA.SPEED_YELLOW]);
+                    if (!cliStats[rowName]) cliStats[rowName] = initOAStats(row[COLS.LOBBY]);
+                    
+                    // Value > 0 hogi tabhi count (Ct) badhega
+                    const aVal = safeInt(row[COLS_OA.AUTO_IB]); if(aVal > 0) { cliStats[rowName].auto += aVal; cliStats[rowName].aCt++; }
+                    const lVal = safeInt(row[COLS_OA.LC_AMBUSH]); if(lVal > 0) { cliStats[rowName].lc += lVal; cliStats[rowName].lCt++; }
+                    const cVal = safeInt(row[COLS_OA.CD_ZONES]); if(cVal > 0) { cliStats[rowName].cd += cVal; cliStats[rowName].cCt++; }
+                    const bVal = safeInt(row[COLS_OA.BA_AMBUSH]); if(bVal > 0) { cliStats[rowName].ba += bVal; cliStats[rowName].bCt++; }
+                    const sOnVal = safeInt(row[COLS_OA.SPEED_AUTO]); if(sOnVal > 0) { cliStats[rowName].speedOn += sOnVal; cliStats[rowName].sOnCt++; }
+                    const sYelVal = safeInt(row[COLS_OA.SPEED_YELLOW]); if(sYelVal > 0) { cliStats[rowName].speedYellow += sYelVal; cliStats[rowName].sYelCt++; }
                 }
             });
 
@@ -1500,20 +1631,27 @@ function closeModule(moduleName) {
                 if (rowName && ts) {
                     const [m, d, y] = ts.split(' ')[0].split('/');
                     if (y === year && parseInt(m) === parseInt(month)) {
-                        if (!cliStats[rowName]) cliStats[rowName] = { lobby:'Unknown', auto:0, lc:0, cd:0, ba:0, speedOn:0, speedYellow:0, mobile:0 };
+                        if (!cliStats[rowName]) cliStats[rowName] = initOAStats('Unknown');
                         cliStats[rowName].mobile += 1;
+                        cliStats[rowName].mCt += 1;
                     }
                 }
             });
 
             if (currentOAMode === 'search') {
-                const data = cliStats[name] || { auto:0, lc:0, cd:0, ba:0, speedOn:0, speedYellow:0, mobile:0 };
+                const data = cliStats[name] || initOAStats('-');
                 renderOAChartAndTable(data, `${name} - ${month}/${year}`);
                 document.getElementById('oa-bottom-box').classList.add('hidden');
             } else {
-                let grand = { auto:0, lc:0, cd:0, ba:0, speedOn:0, speedYellow:0, mobile:0 };
+                let grand = initOAStats('-');
                 Object.values(cliStats).forEach(s => {
-                    grand.auto += s.auto; grand.lc += s.lc; grand.cd += s.cd; grand.ba += s.ba; grand.speedOn += s.speedOn; grand.speedYellow += s.speedYellow; grand.mobile += s.mobile;
+                    grand.auto += s.auto; grand.aCt += s.aCt;
+                    grand.lc += s.lc; grand.lCt += s.lCt;
+                    grand.cd += s.cd; grand.cCt += s.cCt;
+                    grand.ba += s.ba; grand.bCt += s.bCt;
+                    grand.speedOn += s.speedOn; grand.sOnCt += s.sOnCt;
+                    grand.speedYellow += s.speedYellow; grand.sYelCt += s.sYelCt;
+                    grand.mobile += s.mobile; grand.mCt += s.mCt;
                 });
                 renderOAChartAndTable(grand, `Division Ambush Summary - ${month}/${year}`);
                 renderOADetailedTable(cliStats);
@@ -1835,37 +1973,85 @@ function renderChart(dataValues, title) {
         }
     });
 }
-        function renderOAChartAndTable(data, title) {
+       function renderOAChartAndTable(data, title) {
             const ctx = document.getElementById('oaChart').getContext('2d');
             if (oaChartInstance) oaChartInstance.destroy();
             const values = [data.auto, data.lc, data.cd, data.ba, data.speedOn, data.speedYellow, data.mobile];
-            const total = values.reduce((a,b)=>a+b, 0);
+            
+            const totalSum = values.reduce((a,b)=>a+b, 0);
+            const totalCount = data.aCt + data.lCt + data.cCt + data.bCt + data.sOnCt + data.sYelCt + data.mCt;
 
             oaChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: ['Auto/IB', 'L-Crossing', 'CD Zones', 'BA Ambush', 'Speed(ON)', 'Speed(Yel)', 'Mobile'],
-                    datasets: [{ label: 'Count', data: values, backgroundColor: ['rgba(0, 242, 255, 0.7)', 'rgba(188, 19, 254, 0.7)', 'rgba(255, 0, 128, 0.7)', 'rgba(255, 255, 0, 0.7)', 'rgba(0, 255, 136, 0.7)', 'rgba(255, 136, 0, 0.7)','rgba(255, 255, 255, 0.7)'], borderColor: '#fff', borderWidth: 1, borderRadius: 5 }]
+                    datasets: [{ label: 'Sum (Total)', data: values, backgroundColor: ['rgba(0, 242, 255, 0.7)', 'rgba(188, 19, 254, 0.7)', 'rgba(255, 0, 128, 0.7)', 'rgba(255, 255, 0, 0.7)', 'rgba(0, 255, 136, 0.7)', 'rgba(255, 136, 0, 0.7)','rgba(255, 255, 255, 0.7)'], borderColor: '#fff', borderWidth: 1, borderRadius: 5 }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: title, color: '#fff', font: { size: 18 } } }, scales: { y: { beginAtZero: true, ticks: { color: '#a0aab8' }, grid: { color: 'rgba(255,255,255,0.1)' } }, x: { ticks: { color: '#a0aab8' }, grid: { display: false } } } }
             });
 
-            const html = `<table class="summary-card-table"><thead><tr><th>AMBUSH DETAILS</th><th>Count</th></tr></thead><tbody>
-                <tr><td>AUTO AND IB AMBUSH</td><td>${data.auto}</td></tr><tr><td>LEVEL CROSSING AMBUSH</td><td>${data.lc}</td></tr>
-                <tr><td>CD ZONES AMBUSH</td><td>${data.cd}</td></tr><tr><td>BA AMBUSH</td><td>${data.ba}</td></tr>
-                <tr><td>SPEED GUN CHECKING (ON)</td><td>${data.speedOn}</td></tr><tr><td>SPEED GUN CHECKING (YELLOW)</td><td>${data.speedYellow}</td></tr>
-                <tr><td>MOBILE AMBUSH</td><td>${data.mobile}</td></tr><tr><td>TOTAL</td><td>${total}</td></tr></tbody></table>`;
+            // Table UI me column add kiya 'TIMES'
+            const html = `
+            <table class="summary-card-table">
+                <thead>
+                    <tr>
+                        <th>AMBUSH DETAILS</th>
+                        <th title="Kitni baar ambush hua">TIMES</th>
+                        <th title="Total items checked">SUM</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>AUTO AND IB AMBUSH</td><td>${data.aCt}</td><td>${data.auto}</td></tr>
+                    <tr><td>LEVEL CROSSING AMBUSH</td><td>${data.lCt}</td><td>${data.lc}</td></tr>
+                    <tr><td>CD ZONES AMBUSH</td><td>${data.cCt}</td><td>${data.cd}</td></tr>
+                    <tr><td>BA AMBUSH</td><td>${data.bCt}</td><td>${data.ba}</td></tr>
+                    <tr><td>SPEED GUN CHECKING (ON)</td><td>${data.sOnCt}</td><td>${data.speedOn}</td></tr>
+                    <tr><td>SPEED GUN CHECKING (YELLOW)</td><td>${data.sYelCt}</td><td>${data.speedYellow}</td></tr>
+                    <tr><td>MOBILE AMBUSH</td><td>${data.mCt}</td><td>${data.mobile}</td></tr>
+                    <tr style="font-weight:bold; color:var(--neon-blue); border-top:2px solid #555">
+                        <td>TOTAL</td><td>${totalCount}</td><td>${totalSum}</td>
+                    </tr>
+                </tbody>
+            </table>`;
             document.getElementById('oa-side-data').innerHTML = html;
         }
-
         function renderOADetailedTable(cliStats) {
             document.getElementById('oa-bottom-box').classList.remove('hidden');
             let rows = '';
             Object.entries(cliStats).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([name, d]) => {
-                const total = d.auto + d.lc + d.cd + d.ba + d.speedOn + d.speedYellow + d.mobile;
-                rows += `<tr><td>${name}</td><td>${d.lobby}</td><td>${d.auto}</td><td>${d.lc}</td><td>${d.cd}</td><td>${d.ba}</td><td>${d.speedOn}</td><td>${d.speedYellow}</td><td>${d.mobile}</td><td style="font-weight:bold; color:var(--neon-blue)">${total}</td></tr>`;
+                const totalSum = d.auto + d.lc + d.cd + d.ba + d.speedOn + d.speedYellow + d.mobile;
+                const totalTimes = d.aCt + d.lCt + d.cCt + d.bCt + d.sOnCt + d.sYelCt + d.mCt;
+                
+                rows += `<tr>
+                    <td>${name}</td><td>${d.lobby}</td>
+                    <td title="${d.aCt} times, ${d.auto} sum">${d.aCt} / ${d.auto}</td>
+                    <td title="${d.lCt} times, ${d.lc} sum">${d.lCt} / ${d.lc}</td>
+                    <td title="${d.cCt} times, ${d.cd} sum">${d.cCt} / ${d.cd}</td>
+                    <td title="${d.bCt} times, ${d.ba} sum">${d.bCt} / ${d.ba}</td>
+                    <td title="${d.sOnCt} times, ${d.speedOn} sum">${d.sOnCt} / ${d.speedOn}</td>
+                    <td title="${d.sYelCt} times, ${d.speedYellow} sum">${d.sYelCt} / ${d.speedYellow}</td>
+                    <td title="${d.mCt} times, ${d.mobile} sum">${d.mCt} / ${d.mobile}</td>
+                    <td style="font-weight:bold; color:var(--neon-blue)">${totalTimes} / ${totalSum}</td>
+                </tr>`;
             });
-            document.getElementById('oa-bottom-data').innerHTML = `<table class="summary-card-table"><thead><tr><th>CLI NAME</th><th>LOBBY</th><th>AUTO/IB</th><th>LC</th><th>CD ZONES</th><th>BA</th><th>SPD(ON)</th><th>SPD(YEL)</th><th>MOBILE</th><th>TOTAL</th></tr></thead><tbody>${rows}</tbody></table>`;
+            
+            document.getElementById('oa-bottom-data').innerHTML = `
+            <table class="summary-card-table">
+                <thead>
+                    <tr>
+                        <th>CLI NAME</th><th>LOBBY</th>
+                        <th>AUTO/IB<br><span style="font-size:0.7em; color:#a0aab8">(Times/Sum)</span></th>
+                        <th>LC<br><span style="font-size:0.7em; color:#a0aab8">(Times/Sum)</span></th>
+                        <th>CD ZONES<br><span style="font-size:0.7em; color:#a0aab8">(Times/Sum)</span></th>
+                        <th>BA<br><span style="font-size:0.7em; color:#a0aab8">(Times/Sum)</span></th>
+                        <th>SPD(ON)<br><span style="font-size:0.7em; color:#a0aab8">(Times/Sum)</span></th>
+                        <th>SPD(YEL)<br><span style="font-size:0.7em; color:#a0aab8">(Times/Sum)</span></th>
+                        <th>MOBILE<br><span style="font-size:0.7em; color:#a0aab8">(Times/Sum)</span></th>
+                        <th>TOTAL<br><span style="font-size:0.7em; color:#a0aab8">(Times/Sum)</span></th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>`;
         }
         // --- INSPECTION LOGIC ---
 function resetInspInterface() {
@@ -2115,32 +2301,6 @@ function populateHubYear() {
         }
     });
 }
-// --- HELPER TO SHORTEN NAMES (e.g. CHANDRA PRAKASH RATHORE -> C P RATHORE) ---
-function getShortName(fullName) {
-    if (!fullName) return "";
-    
-    // Naam ko spaces se todo
-    const parts = fullName.trim().split(/\s+/); 
-    
-    // Agar naam me 3 ya usse zyada shabd hain (e.g. First Middle Last)
-    if (parts.length >= 3) {
-        let short = "";
-        // Last wale ko chhod kar sabka pehla letter lo
-        for (let i = 0; i < parts.length - 1; i++) {
-            short += parts[i][0] + " "; 
-        }
-        // Aakhri naam pura jod do
-        short += parts[parts.length - 1]; 
-        return short.toUpperCase();
-    } 
-    // Agar naam me 2 shabd hain lekin bahut lamba hai (> 15 chars)
-    else if (parts.length === 2 && fullName.length > 15) {
-        return (parts[0][0] + " " + parts[1]).toUpperCase();
-    }
-    
-    // Agar naam chhota hai toh waisa hi return karo
-    return fullName.toUpperCase();
-}
 function generateHubMatrix() {
     const year = document.getElementById('hub-year-select').value;
     const month = document.getElementById('hub-month-select').value;
@@ -2189,14 +2349,18 @@ function generateHubMatrix() {
     html += `</tr></thead><tbody>`;
 
     // Build Rows
-    sortedCLIs.forEach(name => {
-        // *** NEW: Format Name/Lobby ***
-        const shortName = getShortName(name); // Naam chhota kiya
-        const lobby = lobbyMap[name] ? lobbyMap[name] : '??';
-        const displayName = `${shortName}/${lobby}`;
-
-        html += `<tr><td><a class="cli-link" onclick="openPersonalDashboard('${name}', '${year}', '${month}')">${displayName}</a></td>`;
-        
+   // Build Rows
+        sortedCLIs.forEach(name => {
+            const lobby = lobbyMap[name] ? lobbyMap[name] : '??';
+            
+            // Naam ko pura rakha aur Lobby ko new line mein chhota kar diya, CSS styling ke sath
+            html += `<tr>
+                <td title="${name} (Lobby: ${lobby})" style="white-space: normal; line-height: 1.2; padding: 6px 8px;">
+                    <a class="cli-link" onclick="openPersonalDashboard('${name}', '${year}', '${month}')" style="display: flex; flex-direction: column; gap: 2px;">
+                        <span style="font-weight: 600; font-size: 0.75rem; letter-spacing: 0.5px;">${name}</span>
+                        <span style="color: var(--neon-blue); font-size: 0.55rem; font-weight: 700;">[ LOBBY: ${lobby} ]</span>
+                    </a>
+                </td>`;
        // generateHubMatrix function ke andar loop ke beech mein:
 
 // generateHubMatrix function ke andar ka loop yahan se replace karein:
@@ -3081,6 +3245,163 @@ function resetInterface() {
     document.getElementById('cli-name-input').value = '';
     document.getElementById('year-select').value = "";
     document.getElementById('month-select').selectedIndex = 0;
+}
+// ==========================================
+// --- CLI TARGET ANALYSIS LOGIC ---
+// ==========================================
+
+let notAchievedDataStore = {};
+
+function openTargetAnalysis() {
+    const year = document.getElementById('hub-year-select').value;
+    const month = document.getElementById('hub-month-select').value;
+    
+    if(!year || !month) { 
+        alert("Please select Year and Month first in the Hub module!"); 
+        return; 
+    }
+
+    document.getElementById('target-analysis-modal').style.display = 'block';
+    document.getElementById('target-subtitle').innerText = `MONTH: ${month}/${year}`;
+    document.getElementById('not-achieved-list-box').classList.add('hidden');
+
+    const padMonth = m => m.toString().padStart(2, '0');
+    const prefix = `${year}-${padMonth(month)}`;
+    
+    let targetStats = {};
+    const norm = (str) => str ? str.toString().toUpperCase().trim() : "";
+    
+    const getStat = (name) => {
+        let n = norm(name);
+        if (!n) return null;
+        if (!targetStats[n]) targetStats[n] = { spm: 0, cvvrs: 0, fam: 0, lob: 0, run: 0, ba: 0, origName: name };
+        return targetStats[n];
+    };
+
+    // 1. FP Data (Family, Lobby, Running Room, BA)
+    allData.forEach(r => {
+        if(r[COLS.DATE] && r[COLS.DATE].startsWith(prefix)) {
+            let st = getStat(r[COLS.NAME]);
+            if(st) {
+                st.ba += safeInt(r[COLS_OA.BA_AMBUSH]);
+                if(safeInt(r[COLS_INSP.FAMILY]) > 0) st.fam += 1;
+                st.run += safeInt(r[COLS_INSP.RUNNING]);
+                st.lob += safeInt(r[COLS_INSP.LOBBY]);
+            }
+        }
+    });
+
+    // 2. Register Other Duty (Taki sab active CLIs ka count accurate aaye)
+    otherDutyData.forEach(r => {
+        if(r[COLS_OD.DATE] && r[COLS_OD.DATE].startsWith(prefix)) {
+            getStat(r[COLS_OD.NAME]);
+        }
+    });
+
+    // 3. SPM Sanket (MDY)
+    spmSanketData.forEach(r => {
+        let d = cleanDate(r[0]); if(!d) return;
+        let p = d.split('/');
+        if(p.length===3 && p[2]==year && parseInt(p[0])==parseInt(month)) {
+            let st = getStat(r[19]); if(st) st.spm++;
+        }
+    });
+
+    // 4. SPM Manual (DMY)
+    spmManualData.forEach(r => {
+        let d = cleanDate(r[0]); if(!d) return;
+        let p = d.split('/');
+        if(p.length===3 && p[2]==year && parseInt(p[1])==parseInt(month)) {
+            let st = getStat(r[3]); if(st) st.spm++;
+        }
+    });
+
+    // 5. CVVRS (DMY)
+    spmCvvrsData.forEach(r => {
+        let d = cleanDate(r[0]); if(!d) return;
+        let p = d.split('/');
+        if(p.length===3 && p[2]==year && parseInt(p[1])==parseInt(month)) {
+            let st = getStat(r[3]); if(st) st.cvvrs++;
+        }
+    });
+
+    let totalCLIs = Object.keys(targetStats).length;
+
+    // TARGET RULES 
+    let results = {
+        spm: { label: 'SPM ANALYSIS', tgt: 5, ach: 0, notAchNames: [] },
+        cvvrs: { label: 'CVVRS ANALYSIS', tgt: 2, ach: 0, notAchNames: [] },
+        fam: { label: 'FAMILY/SAFETY SEMINAR', tgt: 2, ach: 0, notAchNames: [] },
+        lob: { label: 'LOBBY INSPECTION', tgt: 1, ach: 0, notAchNames: [] },
+        run: { label: 'RUNNING ROOM INSPECTION', tgt: 1, ach: 0, notAchNames: [] },
+        ba: { label: 'BA AMBUSH', tgt: 25, ach: 0, notAchNames: [] }
+    };
+
+    // Calculation Loop
+    Object.values(targetStats).forEach(st => {
+        let n = st.origName;
+        if(st.spm >= results.spm.tgt) results.spm.ach++; else results.spm.notAchNames.push(n);
+        if(st.cvvrs >= results.cvvrs.tgt) results.cvvrs.ach++; else results.cvvrs.notAchNames.push(n);
+        if(st.fam >= results.fam.tgt) results.fam.ach++; else results.fam.notAchNames.push(n);
+        if(st.lob >= results.lob.tgt) results.lob.ach++; else results.lob.notAchNames.push(n);
+        if(st.run >= results.run.tgt) results.run.ach++; else results.run.notAchNames.push(n);
+        if(st.ba >= results.ba.tgt) results.ba.ach++; else results.ba.notAchNames.push(n);
+    });
+
+    notAchievedDataStore = results;
+
+    let rowsHTML = '';
+    Object.keys(results).forEach(key => {
+        let r = results[key];
+        let notAchCount = totalCLIs - r.ach;
+        
+        // Tabular Rows Generate kar rahe hain
+        rowsHTML += `
+            <tr>
+                <td style="font-weight:600; color:var(--neon-blue);">${r.label}</td>
+                <td style="text-align:center;">${r.tgt}</td>
+                <td style="text-align:center;">${totalCLIs}</td>
+                <td style="color:#00ff88; font-weight:bold; font-size:1.1rem; text-align:center;">${r.ach}</td>
+                <td style="color:#ff5252; font-weight:bold; font-size:1.1rem; cursor:pointer; text-decoration:underline; text-align:center; background: rgba(255,0,0,0.05);" 
+                    onclick="showNotAchievedList('${key}')" title="Click to view CLI Names">${notAchCount} <i class="fas fa-hand-pointer" style="font-size:0.8rem; margin-left:5px;"></i></td>
+            </tr>
+        `;
+    });
+
+    document.getElementById('target-table-container').innerHTML = `
+        <table class="summary-card-table" style="font-size: 1rem;">
+            <thead>
+                <tr>
+                    <th style="width:30%;">PARAMETERS</th>
+                    <th style="text-align:center;">TARGET</th>
+                    <th style="text-align:center;">TOTAL CLI</th>
+                    <th style="text-align:center;">TARGET ACHIEVED</th>
+                    <th style="text-align:center;">TARGET NOT ACHIEVED</th>
+                </tr>
+            </thead>
+            <tbody>${rowsHTML}</tbody>
+        </table>
+    `;
+}
+
+// Button click par naam show karne ka function
+function showNotAchievedList(key) {
+    let data = notAchievedDataStore[key];
+    if(!data) return;
+    
+    document.getElementById('not-achieved-list-box').classList.remove('hidden');
+    document.getElementById('not-achieved-title').innerText = `${data.label} TARGET PENDING FOR (${data.notAchNames.length} CLIs):`;
+    
+    // Create stylish chips for names
+    let namesHTML = data.notAchNames.sort().map(n => 
+        `<span style="background: rgba(255,82,82,0.15); color: #ff8a8a; padding: 6px 12px; border-radius: 20px; border: 1px solid #ff5252; font-size: 0.85rem; font-weight: 600;">${n}</span>`
+    ).join('');
+    
+    document.getElementById('not-achieved-names').innerHTML = namesHTML || '<i style="color:#00ff88;">Excellent! All CLIs achieved this target.</i>';
+}
+
+function closeTargetAnalysis() {
+    document.getElementById('target-analysis-modal').style.display = 'none';
 }
     </script>
 </body>
