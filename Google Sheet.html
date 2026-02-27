@@ -27,10 +27,28 @@
             background-color: #f0f0f0;
             cursor: not-allowed;
         }
+        /* Notification style */
+        .date-notice {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 15px;
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
+
     <h2>ABNORMALITY DAILY REPORT FOR CLI</h2>
+
+    <div class="date-notice">
+        Notice: The date selection restriction has been temporarily suspended for 3 days to allow back-dated entries.
+    </div>
+
     <form id="abnormalityReportForm" action="https://script.google.com/macros/s/AKfycbzTpR-XJHKJQUT0MnEjOTuh6iH9amkUDoI1pnZ29WdoAH8bDEJaAihhMGlhC4D9Yb5CUA/exec" method="post">
         
         <label for="cliId">CLI ID (Capital Letters and Numbers only):</label>
@@ -178,71 +196,33 @@
 
             if (countInput && detailInput) {
                 countInput.addEventListener('input', function() {
-                    var val = parseInt(this.value); // Convert input to number
-
+                    var val = parseInt(this.value); 
                     if (val > 0) {
-                        // Agar count 0 se bada hai aur abhi NIL likha hai, toh clear kardo
                         if (detailInput.value === 'NIL') {
                             detailInput.value = '';
                         }
                     } else {
-                        // Agar count 0 ya khali hai, toh wapas NIL likh do
                         detailInput.value = 'NIL';
                     }
                 });
             }
         }
 
-        // Setup for Coaching
-        setupAutoFill(
-            'ABNORMALITY COUNT DURING FOOTPLATE IN COACHING', 
-            'ABNORMALITY DETAIL DURING FOOTPLATE IN COACHING'
-        );
+        setupAutoFill('ABNORMALITY COUNT DURING FOOTPLATE IN COACHING', 'ABNORMALITY DETAIL DURING FOOTPLATE IN COACHING');
+        setupAutoFill('ABNORMALITY COUNT DURING FOOTPLATE IN MEMU', 'ABNORMALITY DETAIL DURING FOOTPLATE IN MEMU');
+        setupAutoFill('ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN', 'ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN');
 
-        // Setup for MEMU
-        setupAutoFill(
-            'ABNORMALITY COUNT DURING FOOTPLATE IN MEMU', 
-            'ABNORMALITY DETAIL DURING FOOTPLATE IN MEMU'
-        );
-
-        // Setup for Goods Train
-        setupAutoFill(
-            'ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN', 
-            'ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN'
-        );
-        function setDateBoundaries() {
+        function removeDateBoundaries() {
             var dateInput = document.getElementById("DATE");
-            var today = new Date(); // Aaj ki current date aur time system se lega
-
-            // 1. Aaj ki date (Maximum allowed date) set karna
-            var dd = String(today.getDate()).padStart(2, '0');
-            var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
-            var yyyy = today.getFullYear();
-            
-            var maxDate = yyyy + '-' + mm + '-' + dd;
-            dateInput.setAttribute("max", maxDate); // User aaj se aage ki date select nahi kar payega
-
-            // 2. Pichle 2 din calculate karna (Minimum allowed date)
-            // Example: Agar aaj 27 hai, toh hum 2 din piche jayenge -> 25
-            var minDateObj = new Date();
-            minDateObj.setDate(today.getDate() - 2); 
-            
-            var min_dd = String(minDateObj.getDate()).padStart(2, '0');
-            var min_mm = String(minDateObj.getMonth() + 1).padStart(2, '0');
-            var min_yyyy = minDateObj.getFullYear();
-
-            var minDate = min_yyyy + '-' + min_mm + '-' + min_dd;
-            dateInput.setAttribute("min", minDate); // User is date se purani date select nahi kar payega
+            // Humne min aur max restrictions ko hata diya hai
+            dateInput.removeAttribute("min");
+            dateInput.removeAttribute("max");
         }
 
-        // Page load hone par function run karein
         window.onload = function() {
-            setDateBoundaries();
-            // Agar aapke paas koi aur window.onload function hai toh usse yaha merge kar sakte hain
+            removeDateBoundaries();
         };
     </script>
 
 </body>
 </html>
-
-
