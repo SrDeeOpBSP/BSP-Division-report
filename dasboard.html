@@ -572,7 +572,7 @@
 
     <h1 class="main-title">Performance At A Glance Dashboard</h1>
    <div id="safety-links-sidebar" class="safety-sidebar">
-    <div class="sidebar-title"><i class="fas fa-external-link-alt"></i> USEFUL LINKS</div>
+    <div class="sidebar-title"><i class="fas fa-external-link-alt"></i> CIRCULARS, ORDERS AND CORRECTION SLIPS </div>
     <a href="https://safetysecrbsp.com/" target="_blank" class="s-link portal">
         <i class="fas fa-shield-alt"></i><span>SAFETY PORTAL</span>
     </a>
@@ -897,6 +897,20 @@
                 <option value="04">April</option><option value="05">May</option><option value="06">June</option>
                 <option value="07">July</option><option value="08">August</option><option value="09">September</option>
                 <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+            </select>
+            <select id="hub-lobby-select">
+                <option value="ALL">ALL LOBBIES</option>
+                <option value="AKT">AKT</option>
+                <option value="BJRI">BJRI</option>
+                <option value="BRJN">BRJN</option>
+                <option value="BSP">BSP</option>
+                <option value="KHS">KHS</option>
+                <option value="KRBA">KRBA</option>
+                <option value="PND">PND</option>
+                <option value="RIG">RIG</option>
+                <option value="SDL">SDL</option>
+                <option value="SJQ">SJQ</option>
+                <option value="USL">USL</option>
             </select>
             <button class="action-btn" onclick="generateHubMatrix()"><i class="fas fa-th"></i> LOAD MATRIX</button>
             <button class="action-btn" onclick="openTargetAnalysis()" style="background: linear-gradient(45deg, #ff0055, #ff8800);">
@@ -2300,39 +2314,48 @@ function populateHubYear() {
 function generateHubMatrix() {
     const year = document.getElementById('hub-year-select').value;
     const month = document.getElementById('hub-month-select').value;
+    const selectedLobby = document.getElementById('hub-lobby-select').value; // Naya filter
+    
     if(!year || !month) { alert("Select Year and Month"); return; }
 
     const daysInMonth = new Date(year, month, 0).getDate();
     const matrixDiv = document.getElementById('hub-matrix-container');
     matrixDiv.classList.remove('hidden');
 
-    // Get Unique CLIs
     let clis = new Set();
-    // *** NEW: Create a Map for Name -> Lobby ***
     let lobbyMap = {};
 
-    // Helper to add to map
     const addToMap = (name, lobby) => {
         if(name && lobby) lobbyMap[name.trim()] = lobby.trim();
     };
 
+    // Data collect karte waqt filter lagana
     allData.forEach(r => { 
         if(r[COLS.NAME]) {
             const n = r[COLS.NAME].trim();
-            clis.add(n);
-            addToMap(n, r[COLS.LOBBY]);
+            const l = r[COLS.LOBBY] ? r[COLS.LOBBY].trim() : "";
+            
+            // Lobby Filter Logic
+            if(selectedLobby === "ALL" || l.toUpperCase() === selectedLobby.toUpperCase()) {
+                clis.add(n);
+                addToMap(n, l);
+            }
         }
     });
     
+    // Other Duty data se missing lobbies fill karna
     otherDutyData.forEach(r => { 
         if(r[COLS_OD.NAME]) {
             const n = r[COLS_OD.NAME].trim();
-            clis.add(n);
-            // If lobby missing from main data, try getting it from here
-            if(!lobbyMap[n]) addToMap(n, r[COLS_OD.LOBBY]); 
+            const l = r[COLS_OD.LOBBY] ? r[COLS_OD.LOBBY].trim() : "";
+            
+            if(selectedLobby === "ALL" || l.toUpperCase() === selectedLobby.toUpperCase()) {
+                clis.add(n);
+                if(!lobbyMap[n]) addToMap(n, l);
+            }
         }
     });
-    
+
     const sortedCLIs = Array.from(clis).sort();
 
     // Build Table Header
@@ -2406,46 +2429,47 @@ function generateHubMatrix() {
         }
 
         // --- PRIORITY 3: CHECK FOOTPLATE (FP) ---
-        if(!isBD && fpRow) {
-            const wee = safeInt(fpRow[COLS.WEE]);
-            const noWee = safeInt(fpRow[COLS.NO_WEE]);
-            if(wee > 0 || noWee > 0) {
-                status = 'FP';
-                tooltipText = `FP: Wee(${wee}) + Excl(${noWee})`; // Optional: FP ka detail bhi dikha sakte hain
-            }
-        }
+if(!isBD && fpRow) {
+    const wee = safeInt(fpRow[COLS.WEE]);
+    const noWee = safeInt(fpRow[COLS.NO_WEE]);
+    
+    if(wee > 0 || noWee > 0) {
+        status = 'FP';
+        tooltipText = `FP: Wee(${wee}) + Excl(${noWee})`;
+    } else {
+        // Agar row exist karti hai par hours 0,0 hain
+        status = 'NFP';
+        tooltipText = "Entry exists but hours are 0-0";
+    }
+}
 
-        // --- PRIORITY 4: CHECK SICK, REST, LEAVE, OTHERS ---
-        if(!isBD && status !== 'FP' && odRow) {
-            const dutyRaw = odRow[COLS_OD.TYPE] ? odRow[COLS_OD.TYPE].trim() : '';
-            const dutyCheck = dutyRaw.toLowerCase();
+// --- PRIORITY 4: CHECK SICK, REST, LEAVE, OTHERS ---
+// Status tabhi badlenge agar abhi tak PN hai ya hours 0-0 ki wajah se NFP hua hai
+if(!isBD && (status === 'PN' || status === 'NFP') && odRow) {
+    const dutyRaw = odRow[COLS_OD.TYPE] ? odRow[COLS_OD.TYPE].trim() : '';
+    const dutyCheck = dutyRaw.toLowerCase();
 
-            // *** 1. CHECK SICK / RMC / PMC (Highest Priority in Other Duty) ***
-            if(dutyCheck.includes('sick') || dutyCheck.includes('rmc') || dutyCheck.includes('pmc')) {
-                status = 'SK';
-                tooltipText = dutyRaw; // Asli text (e.g. "Sick since 2 days") tooltip me dikhega
-            }
-            // *** 2. CHECK LEAVE ***
-            else if(dutyCheck.includes('leave') || dutyCheck.includes('cl') || dutyCheck.includes('lap')) {
-                status = 'LV';
-                tooltipText = dutyRaw;
-            } 
-            // *** 3. CHECK REST ***
-            else if(dutyCheck.includes('rest')) {
-                status = 'PR';
-                tooltipText = dutyRaw;
-            }
-            // *** 4. CHECK TRAINING ***
-            else if(dutyCheck.includes('training') || dutyCheck.includes('trg')) {
-                status = 'TRG';
-                tooltipText = dutyRaw;
-            }
-            // *** 5. OTHERS (NFP) ***
-            else {
-                status = 'NFP'; 
-                tooltipText = dutyRaw;
-            }
-        }
+    if(dutyCheck.includes('sick') || dutyCheck.includes('rmc') || dutyCheck.includes('pmc')) {
+        status = 'SK';
+        tooltipText = dutyRaw;
+    } 
+    else if(dutyCheck.includes('leave') || dutyCheck.includes('cl') || dutyCheck.includes('lap')) {
+        status = 'LV';
+        tooltipText = dutyRaw;
+    } 
+    else if(dutyCheck.includes('rest')) {
+        status = 'PR';
+        tooltipText = dutyRaw;
+    }
+    else if(dutyCheck.includes('training') || dutyCheck.includes('trg')) {
+        status = 'TRG';
+        tooltipText = dutyRaw;
+    }
+    else {
+        status = 'NFP'; // Kisi bhi aur type ki Other Duty ke liye
+        tooltipText = dutyRaw;
+    }
+}
 
         // --- RENDER CELL WITH TOOLTIP ---
         // title attribute add kiya gaya hai
