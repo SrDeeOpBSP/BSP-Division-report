@@ -116,7 +116,7 @@
         <div class="report-block">
             <label class="report-header">
                 <input type="checkbox" id="chk_ab" onchange="toggleSection('sec_ab', this.checked)">
-                1. Abnormality Daily Report
+                1. ABNORMALITY DAILY REPORT
             </label>
             <div id="sec_ab" class="sub-section">
                 <label>ANY FOOTPLATE DONE AS PER TLC:</label>
@@ -215,29 +215,139 @@
 
         <div class="report-block">
             <label class="report-header">
-                <input type="checkbox" id="chk_ms" onchange="toggleSection('sec_ms', this.checked)">
-                2. Micro Sleep Counselling
+                <input type="checkbox" id="chk_lp" onchange="toggleSection('sec_lp', this.checked)">
+                2. END TO END LP
             </label>
-            <div id="sec_ms" class="sub-section">
-                <label>Crew ID(s) [Comma Separated]:</label>
-                <input type="text" id="ms_crew_id" placeholder="Example: BSP0068,BSP0075" oninput="formatMultipleCrewIDs(this, 'ms_char_limit')" class="req-ms">
-                <p id="ms_char_limit" class="char-limit-message"></p>
+            <div id="sec_lp" class="sub-section">
+                <label>LP ID:</label>
+                <select id="lp_id" class="req-lp" onchange="autoFillLpDetails(this.value)">
+                    <option value="">Select LP ID</option>
+                </select>
+                <label>LP NAME:</label>
+                <input type="text" id="lp_name" readonly>
+                <label>DESG:</label>
+                <input type="text" id="lp_desg" readonly>
+                <label>HQ:</label>
+                <input type="text" id="lp_hq" readonly>
+                
+                <label>MAJOR BEAT:</label>
+                <select id="lp_major_beat" class="req-lp">
+                    <option value="">Select MAJOR BEAT</option>
+                </select>
+                
+                <label>BEAT:</label>
+                <select id="lp_beat" class="req-lp" onchange="toggleOtherBeat(this, 'lp_other_beat')">
+                    <option value="">Select BEAT</option>
+                    <option value="AKT-RIG">AKT-RIG</option><option value="RIG-AKT">RIG-AKT</option><option value="AKT-KRBA">AKT-KRBA</option><option value="KRBA-AKT">KRBA-AKT</option><option value="BSP-SDL">BSP-SDL</option><option value="BSP-RIG">BSP-RIG</option><option value="BSP-KRBA">BSP-KRBA</option><option value="BSP-DBEC">BSP-DBEC</option><option value="USL-NKJ">USL-NKJ</option><option value="USL-DBEC">USL-DBEC</option><option value="USL-RIG">USL-RIG</option><option value="USL-KRBA">USL-KRBA</option><option value="PND-BSP">PND-BSP</option><option value="PND-NKJ">PND-NKJ</option><option value="SDL-SGO">SDL-SGO</option><option value="SDL-BSP">SDL-BSP</option><option value="SDL-NKJ">SDL-NKJ</option><option value="NKJ-SDL">NKJ-SDL</option><option value="SDL-BJRI">SDL-BJRI</option><option value="BJRI-SDL">BJRI-SDL</option><option value="SDL-ABKP">SDL-ABKP</option><option value="KHS-USL">KHS-USL</option><option value="KHS-BRJN">KHS-BRJN</option><option value="KHS-DMJY">KHS-DMJY</option><option value="KHS-KRBA">KHS-KRBA</option><option value="BRJN-ROU">BRJN-ROU</option><option value="BRJN-RIG">BRJN-RIG</option><option value="BRJN-SBP">BRJN-SBP</option><option value="KRBA-DPK">KRBA-DPK</option><option value="KRBA-GAD">KRBA-GAD</option><option value="KRBA-USL">KRBA-USL</option><option value="KRBA-RIG">KRBA-RIG</option><option value="BJRI-ABKP">BJRI-ABKP</option><option value="BJRI-BSP">BJRI-BSP</option><option value="BJRI-NKJ">BJRI-NKJ</option><option value="RIG-USL">RIG-USL</option><option value="RIG-ROU">RIG-ROU</option><option value="SJQ-ABKP-PSRS">SJQ-ABKP-PSRS</option><option value="SJQ-SDL">SJQ-SDL</option><option value="BSP-BJRI">BSP-BJRI</option><option value="USL-RSD">USL-RSD</option><option value="BSP-RSD">BSP-RSD</option><option value="BSP-NGP">BSP-NGP</option><option value="NGP-BSP">NGP-BSP</option><option value="BSP-CKP">BSP-CKP</option><option value="BSP-TATA">BSP-TATA</option><option value="BSP-ROU">BSP-ROU</option><option value="BSP-SBP">BSP-SBP</option><option value="OTHER">OTHER</option>
+                </select>
+                <input type="text" id="lp_other_beat" class="hidden" placeholder="Enter other beat" style="margin-top: 10px;">
 
-                <label>Counselling on VCD Done:</label>
-                <select id="ms_vcd" class="req-ms">
-                    <option value="">Select</option><option value="YES">YES</option><option value="NO">NO</option>
+                <label>LOCO NUMBER:</label>
+                <input type="number" id="lp_loco" class="req-lp">
+                <label>TRAIN NUMBER:</label>
+                <input type="text" id="lp_train" class="req-lp">
+                <label>FROM TIME:</label>
+                <input type="time" id="lp_from" class="req-lp">
+                <label>TO TIME:</label>
+                <input type="time" id="lp_to" class="req-lp">
+            </div>
+        </div>
+
+        <div class="report-block">
+            <label class="report-header">
+                <input type="checkbox" id="chk_alp" onchange="toggleSection('sec_alp', this.checked)">
+                3. END TO END ALP
+            </label>
+            <div id="sec_alp" class="sub-section">
+                <label>ALP ID:</label>
+                <select id="alp_id" class="req-alp" onchange="autoFillAlpDetails(this.value)">
+                    <option value="">Select ALP ID</option>
                 </select>
-                <label>Micro Sleep Counselling Done At:</label>
-                <select id="ms_loc" class="req-ms">
-                    <option value="">Select</option><option value="LOBBY">LOBBY</option><option value="FOOTPLATE">FOOTPLATE</option>
+                <label>ALP NAME:</label>
+                <input type="text" id="alp_name" readonly>
+                <label>DESG:</label>
+                <input type="text" id="alp_desg" readonly>
+                <label>HQ:</label>
+                <input type="text" id="alp_hq" readonly>
+                
+                <label>BEAT:</label>
+                <select id="alp_beat" class="req-alp" onchange="toggleOtherBeat(this, 'alp_other_beat')">
+                    <option value="">Select BEAT</option>
+                    <option value="AKT-USL">AKT-USL</option><option value="AKT-RIG">AKT-RIG</option><option value="AKT-KRBA">AKT-KRBA</option><option value="BSP-SDL">BSP-SDL</option><option value="BSP-RIG">BSP-RIG</option><option value="BSP-KRBA">BSP-KRBA</option><option value="BSP-DBEC">BSP-DBEC</option><option value="USL-NKJ">USL-NKJ</option><option value="USL-DBEC">USL-DBEC</option><option value="USL-RIG">USL-RIG</option><option value="USL-KRBA">USL-KRBA</option><option value="PND-BSP">PND-BSP</option><option value="PND-NKJ">PND-NKJ</option><option value="SDL-SGO">SDL-SGO</option><option value="SDL-BSP">SDL-BSP</option><option value="SDL-NKJ">SDL-NKJ</option><option value="NKJ-SDL">NKJ-SDL</option><option value="SDL-BJRI">SDL-BJRI</option><option value="BJRI-SDL">BJRI-SDL</option><option value="SDL-ABKP">SDL-ABKP</option><option value="KHS-USL">KHS-USL</option><option value="KHS-BRJN">KHS-BRJN</option><option value="KHS-DMJY">KHS-DMJY</option><option value="KHS-KRBA">KHS-KRBA</option><option value="BRJN-ROU">BRJN-ROU</option><option value="BRJN-RIG">BRJN-RIG</option><option value="BRJN-SBP">BRJN-SBP</option><option value="KRBA-DPK">KRBA-DPK</option><option value="KRBA-USL">KRBA-USL</option><option value="KRBA-RIG">KRBA-RIG</option><option value="BJRI-ABKP">BJRI-ABKP</option><option value="BJRI-BSP">BJRI-BSP</option><option value="BJRI-NKJ">BJRI-NKJ</option><option value="RIG-USL">RIG-USL</option><option value="RIG-ROU">RIG-ROU</option><option value="SJQ-ABKP-PSRS">SJQ-ABKP-PSRS</option><option value="SJQ-SDL">SJQ-SDL</option><option value="BSP-BJRI">BSP-BJRI</option><option value="USL-RSD">USL-RSD</option><option value="BSP-RSD">BSP-RSD</option><option value="BSP-NGP">BSP-NGP</option><option value="BSP-CKP">BSP-CKP</option><option value="BSP-TATA">BSP-TATA</option><option value="BSP-ROU">BSP-ROU</option><option value="BSP-SBP">BSP-SBP</option><option value="OTHER">OTHER BEAT</option>
                 </select>
+                <input type="text" id="alp_other_beat" class="hidden" placeholder="Enter other beat" style="margin-top: 10px;">
+            </div>
+        </div>
+
+        <div class="report-block">
+            <label class="report-header">
+                <input type="checkbox" id="chk_nfp" onchange="toggleSection('sec_nfp', this.checked)">
+                4. NIGHT FOOT PLATE
+            </label>
+            <div id="sec_nfp" class="sub-section">
+                <label>FROM TIME:</label>
+                <input type="time" data-name="FROM TIME" class="req-nfp">
+                <label>TO TIME:</label>
+                <input type="time" data-name="TO TIME" class="req-nfp">
+                <label>TRAIN NUMBER:</label>
+                <input type="text" data-name="TRAIN NUMBER" class="req-nfp">
+                <label>LOCO NUMBER:</label>
+                <input type="text" data-name="LOCO NUMBER" class="req-nfp">
+                <label>SECTION:</label>
+                <input type="text" data-name="SECTION" class="req-nfp">
+                <label>SECTION WHERE FOG FOUND:</label>
+                <textarea data-name="SECTION WHERE FOG FOUND"></textarea>
+                <label>REMARK (OR ANY ABNORMALITIES):</label>
+                <textarea data-name="REMARK(OR ANY ABNORMALITIES)"></textarea>
+            </div>
+        </div>
+
+        <div class="report-block">
+            <label class="report-header">
+                <input type="checkbox" id="chk_ambush" onchange="toggleSection('sec_ambush', this.checked)">
+                5. AMBUSH & INSPECTION
+            </label>
+            <div id="sec_ambush" class="sub-section">
+                <label>Analysis Month:</label>
+                <input type="month" id="amb_month" class="req-ambush">
+                <label>Date of Ambush:</label>
+                <input type="date" id="amb_date" class="req-ambush">
+                <label>Date of Entry:</label>
+                <input type="date" id="amb_entry" class="req-ambush">
+                <label>Type of Ambush:</label>
+                <select id="amb_type" class="req-ambush" onchange="handleAmbushTypeChange(this)">
+                    <option value="">Select Type of Ambush</option>
+                    <option value="Auto Ambush">Auto Ambush</option>
+                    <option value="IB Ambush">IB Ambush</option>
+                    <option value="BA Ambush">BA Ambush</option>
+                    <option value="Random BA Ambush">Random BA Ambush</option>
+                    <option value="BPT & BFT Ambush">BPT & BFT Ambush</option>
+                    <option value="BPC Ambush">BPC Ambush</option>
+                    <option value="SPAD Counselling">SPAD Counselling</option>
+                    <option value="Safety Drive">Safety Drive</option>
+                    <option value="Safety Seminar">Safety Seminar</option>
+                    <option value="Family Seminar">Family Seminar</option>
+                    <option value="Mobile Checking Ambush">Mobile Checking Ambush</option>
+                    <option value="Station Inspection">Station Inspection</option>
+                    <option value="Surprise Crew Cabin Inspection">Surprise Crew Cabin Inspection</option>
+                    <option value="Level Crossing Ambush">Level Crossing Ambush</option>
+                    <option value="NIGHT STABLING INSPECTION">NIGHT STABLING INSPECTION</option>
+                    <option value="STABLE LOAD INSPECTION">STABLE LOAD INSPECTION</option>
+                    <option value="SAND GOOMTY INSPECTION">SAND GOOMTY INSPECTION</option>
+                    <option value="SHUNTING AMBUSH">SHUNTING AMBUSH</option>
+                    <option value="COACHING CLEANLINESS INSPECTION">COACHING CLEANLINESS INSPECTION</option>
+                    <option value="Other">Other</option>
+                </select>
+                <input type="text" id="amb_custom_type" class="hidden" placeholder="Type Custom Ambush Here" style="margin-top:10px;">
+                <label>Abnormalities (Describe in Detail):</label>
+                <textarea id="amb_abnormalities" class="req-ambush" placeholder="Enter detailed description..."></textarea>
             </div>
         </div>
 
         <div class="report-block">
             <label class="report-header">
                 <input type="checkbox" id="chk_mob" onchange="toggleSection('sec_mob', this.checked)">
-                3. Mobile Inspection For Crew
+                6. Mobile Inspection For Crew
             </label>
             <div id="sec_mob" class="sub-section">
                 <label>Crew ID:</label>
@@ -287,35 +397,65 @@
 
         <div class="report-block">
             <label class="report-header">
-                <input type="checkbox" id="chk_nfp" onchange="toggleSection('sec_nfp', this.checked)">
-                4. Night Footplate Inspection
+                <input type="checkbox" id="chk_od" onchange="toggleSection('sec_od', this.checked)">
+                7. Other Duties
             </label>
-            <div id="sec_nfp" class="sub-section">
+            <div id="sec_od" class="sub-section">
+                <label>DUTY TYPE:</label>
+                <select id="od_dutyType" class="req-od" onchange="toggleODFields()">
+                    <option value="" disabled selected>Select DUTY TYPE</option>
+                    <option value="LOBBY DUTY">LOBBY DUTY</option>
+                    <option value="STALLING DUTY">STALLING DUTY</option>
+                    <option value="PUNCTUALITY DUTY">PUNCTUALITY DUTY</option>
+                    <option value="REST">REST</option>
+                    <option value="AUTO CLASS">AUTO CLASS</option>
+                    <option value="LEAVE">LEAVE</option>
+                    <option value="TRAINING">TRAINING</option>
+                    <option value="OTHER DUTY">OTHER DUTY</option>
+                </select>
+
+                <div id="od_extra_group">
+                    <label>OTHER DUTY DONE:</label>
+                    <select id="od_subType">
+                        <option value="AS PER TLC">AS PER TLC</option>
+                        <option value="SELF PROGRAMMED">SELF PROGRAMMED</option>
+                    </select>
+                    <label>ENTER DESCRIPTION:</label>
+                    <input type="text" id="od_desc" placeholder="Description yahan likhen...">
+                </div>
+
                 <label>FROM TIME:</label>
-                <input type="time" data-name="FROM TIME" class="req-nfp">
+                <input type="time" id="od_fromTime" class="req-od">
                 <label>TO TIME:</label>
-                <input type="time" data-name="TO TIME" class="req-nfp">
-                <label>TRAIN NUMBER:</label>
-                <input type="text" data-name="TRAIN NUMBER" class="req-nfp">
-                <label>LOCO NUMBER:</label>
-                <input type="text" data-name="LOCO NUMBER" class="req-nfp">
-                <label>SECTION:</label>
-                <input type="text" data-name="SECTION" class="req-nfp">
-                <label>SECTION WHERE FOG FOUND:</label>
-                <textarea data-name="SECTION WHERE FOG FOUND"></textarea>
-                <label>REMARK (OR ANY ABNORMALITIES):</label>
-                <textarea data-name="REMARK(OR ANY ABNORMALITIES)"></textarea>
+                <input type="time" id="od_toTime" class="req-od">
             </div>
         </div>
 
         <div class="report-block">
             <label class="report-header">
                 <input type="checkbox" id="chk_sd" onchange="toggleSection('sec_sd', this.checked)">
-                5. Regular and Ongoing Safety Drive
+                8. Permanent Safety Drives
             </label>
             <div id="sec_sd" class="sub-section">
                 <p style="font-size:0.85em; color:#666; margin-top:0;">Note: Fill Crew IDs for whichever drive you want to submit.</p>
                 
+                <div class="sd-drive-section">
+                    <label style="color: #1e3a8a; font-size: 1.1em; border-bottom: 2px solid #cbd5e1; padding-bottom: 5px; margin-bottom: 15px; display: block; text-transform: uppercase;">Micro Sleep Counselling</label>
+                    
+                    <label style="margin-top:0;">Crew ID(s) [Comma Separated]:</label>
+                    <input type="text" id="ms_crew_id" placeholder="Example: BSP0068,BSP0075" oninput="formatMultipleCrewIDs(this, 'ms_char_limit')">
+                    <p id="ms_char_limit" class="char-limit-message"></p>
+
+                    <label>Counselling on VCD Done:</label>
+                    <select id="ms_vcd">
+                        <option value="">Select</option><option value="YES">YES</option><option value="NO">NO</option>
+                    </select>
+                    <label>Micro Sleep Counselling Done At:</label>
+                    <select id="ms_loc">
+                        <option value="">Select</option><option value="LOBBY">LOBBY</option><option value="FOOTPLATE">FOOTPLATE</option>
+                    </select>
+                </div>
+
                 <div class="sd-drive-section">
                     <label>Counselling on Maximum speed for YY and Y aspect of Signal</label>
                     <input type="text" class="sd-crew-input" data-drive-name="Counselling on Maximum speed for YY and Y aspect of Signal (Railway Board letter No 2024/Elect(TRS)/113/10)" placeholder="Crew IDs (comma separated)..." oninput="formatMultipleCrewIDs(this, 'sd_limit_1')">
@@ -383,150 +523,6 @@
             </div>
         </div>
 
-        <div class="report-block">
-            <label class="report-header">
-                <input type="checkbox" id="chk_od" onchange="toggleSection('sec_od', this.checked)">
-                6. Other Duties
-            </label>
-            <div id="sec_od" class="sub-section">
-                <label>DUTY TYPE:</label>
-                <select id="od_dutyType" class="req-od" onchange="toggleODFields()">
-                    <option value="" disabled selected>Select DUTY TYPE</option>
-                    <option value="LOBBY DUTY">LOBBY DUTY</option>
-                    <option value="STALLING DUTY">STALLING DUTY</option>
-                    <option value="PUNCTUALITY DUTY">PUNCTUALITY DUTY</option>
-                    <option value="REST">REST</option>
-                    <option value="AUTO CLASS">AUTO CLASS</option>
-                    <option value="LEAVE">LEAVE</option>
-                    <option value="TRAINING">TRAINING</option>
-                    <option value="OTHER DUTY">OTHER DUTY</option>
-                </select>
-
-                <div id="od_extra_group">
-                    <label>OTHER DUTY DONE:</label>
-                    <select id="od_subType">
-                        <option value="AS PER TLC">AS PER TLC</option>
-                        <option value="SELF PROGRAMMED">SELF PROGRAMMED</option>
-                    </select>
-                    <label>ENTER DESCRIPTION:</label>
-                    <input type="text" id="od_desc" placeholder="Description yahan likhen...">
-                </div>
-
-                <label>FROM TIME:</label>
-                <input type="time" id="od_fromTime" class="req-od">
-                <label>TO TIME:</label>
-                <input type="time" id="od_toTime" class="req-od">
-            </div>
-        </div>
-
-        <div class="report-block">
-            <label class="report-header">
-                <input type="checkbox" id="chk_ambush" onchange="toggleSection('sec_ambush', this.checked)">
-                7. Ambush Analysis Form
-            </label>
-            <div id="sec_ambush" class="sub-section">
-                <label>Analysis Month:</label>
-                <input type="month" id="amb_month" class="req-ambush">
-                <label>Date of Ambush:</label>
-                <input type="date" id="amb_date" class="req-ambush">
-                <label>Date of Entry:</label>
-                <input type="date" id="amb_entry" class="req-ambush">
-                <label>Type of Ambush:</label>
-                <select id="amb_type" class="req-ambush" onchange="handleAmbushTypeChange(this)">
-                    <option value="">Select Type of Ambush</option>
-                    <option value="Auto Ambush">Auto Ambush</option>
-                    <option value="IB Ambush">IB Ambush</option>
-                    <option value="BA Ambush">BA Ambush</option>
-                    <option value="Random BA Ambush">Random BA Ambush</option>
-                    <option value="BPT & BFT Ambush">BPT & BFT Ambush</option>
-                    <option value="BPC Ambush">BPC Ambush</option>
-                    <option value="SPAD Counselling">SPAD Counselling</option>
-                    <option value="Safety Drive">Safety Drive</option>
-                    <option value="Safety Seminar">Safety Seminar</option>
-                    <option value="Family Seminar">Family Seminar</option>
-                    <option value="Mobile Checking Ambush">Mobile Checking Ambush</option>
-                    <option value="Station Inspection">Station Inspection</option>
-                    <option value="Surprise Crew Cabin Inspection">Surprise Crew Cabin Inspection</option>
-                    <option value="Level Crossing Ambush">Level Crossing Ambush</option>
-                    <option value="NIGHT STABLING INSPECTION">NIGHT STABLING INSPECTION</option>
-                    <option value="STABLE LOAD INSPECTION">STABLE LOAD INSPECTION</option>
-                    <option value="SAND GOOMTY INSPECTION">SAND GOOMTY INSPECTION</option>
-                    <option value="SHUNTING AMBUSH">SHUNTING AMBUSH</option>
-                    <option value="COACHING CLEANLINESS INSPECTION">COACHING CLEANLINESS INSPECTION</option>
-                    <option value="Other">Other</option>
-                </select>
-                <input type="text" id="amb_custom_type" class="hidden" placeholder="Type Custom Ambush Here" style="margin-top:10px;">
-                <label>Abnormalities (Describe in Detail):</label>
-                <textarea id="amb_abnormalities" class="req-ambush" placeholder="Enter detailed description..."></textarea>
-            </div>
-        </div>
-
-        <div class="report-block">
-            <label class="report-header">
-                <input type="checkbox" id="chk_alp" onchange="toggleSection('sec_alp', this.checked)">
-                8. End To End Footplate Form (ALP)
-            </label>
-            <div id="sec_alp" class="sub-section">
-                <label>ALP ID:</label>
-                <select id="alp_id" class="req-alp" onchange="autoFillAlpDetails(this.value)">
-                    <option value="">Select ALP ID</option>
-                </select>
-                <label>ALP NAME:</label>
-                <input type="text" id="alp_name" readonly>
-                <label>DESG:</label>
-                <input type="text" id="alp_desg" readonly>
-                <label>HQ:</label>
-                <input type="text" id="alp_hq" readonly>
-                
-                <label>BEAT:</label>
-                <select id="alp_beat" class="req-alp" onchange="toggleOtherBeat(this, 'alp_other_beat')">
-                    <option value="">Select BEAT</option>
-                    <option value="AKT-USL">AKT-USL</option><option value="AKT-RIG">AKT-RIG</option><option value="AKT-KRBA">AKT-KRBA</option><option value="BSP-SDL">BSP-SDL</option><option value="BSP-RIG">BSP-RIG</option><option value="BSP-KRBA">BSP-KRBA</option><option value="BSP-DBEC">BSP-DBEC</option><option value="USL-NKJ">USL-NKJ</option><option value="USL-DBEC">USL-DBEC</option><option value="USL-RIG">USL-RIG</option><option value="USL-KRBA">USL-KRBA</option><option value="PND-BSP">PND-BSP</option><option value="PND-NKJ">PND-NKJ</option><option value="SDL-SGO">SDL-SGO</option><option value="SDL-BSP">SDL-BSP</option><option value="SDL-NKJ">SDL-NKJ</option><option value="NKJ-SDL">NKJ-SDL</option><option value="SDL-BJRI">SDL-BJRI</option><option value="BJRI-SDL">BJRI-SDL</option><option value="SDL-ABKP">SDL-ABKP</option><option value="KHS-USL">KHS-USL</option><option value="KHS-BRJN">KHS-BRJN</option><option value="KHS-DMJY">KHS-DMJY</option><option value="KHS-KRBA">KHS-KRBA</option><option value="BRJN-ROU">BRJN-ROU</option><option value="BRJN-RIG">BRJN-RIG</option><option value="BRJN-SBP">BRJN-SBP</option><option value="KRBA-DPK">KRBA-DPK</option><option value="KRBA-USL">KRBA-USL</option><option value="KRBA-RIG">KRBA-RIG</option><option value="BJRI-ABKP">BJRI-ABKP</option><option value="BJRI-BSP">BJRI-BSP</option><option value="BJRI-NKJ">BJRI-NKJ</option><option value="RIG-USL">RIG-USL</option><option value="RIG-ROU">RIG-ROU</option><option value="SJQ-ABKP-PSRS">SJQ-ABKP-PSRS</option><option value="SJQ-SDL">SJQ-SDL</option><option value="BSP-BJRI">BSP-BJRI</option><option value="USL-RSD">USL-RSD</option><option value="BSP-RSD">BSP-RSD</option><option value="BSP-NGP">BSP-NGP</option><option value="BSP-CKP">BSP-CKP</option><option value="BSP-TATA">BSP-TATA</option><option value="BSP-ROU">BSP-ROU</option><option value="BSP-SBP">BSP-SBP</option><option value="OTHER">OTHER BEAT</option>
-                </select>
-                <input type="text" id="alp_other_beat" class="hidden" placeholder="Enter other beat" style="margin-top: 10px;">
-            </div>
-        </div>
-
-        <div class="report-block">
-            <label class="report-header">
-                <input type="checkbox" id="chk_lp" onchange="toggleSection('sec_lp', this.checked)">
-                9. End To End Footplate Form (LP)
-            </label>
-            <div id="sec_lp" class="sub-section">
-                <label>LP ID:</label>
-                <select id="lp_id" class="req-lp" onchange="autoFillLpDetails(this.value)">
-                    <option value="">Select LP ID</option>
-                </select>
-                <label>LP NAME:</label>
-                <input type="text" id="lp_name" readonly>
-                <label>DESG:</label>
-                <input type="text" id="lp_desg" readonly>
-                <label>HQ:</label>
-                <input type="text" id="lp_hq" readonly>
-                
-                <label>MAJOR BEAT:</label>
-                <select id="lp_major_beat" class="req-lp">
-                    <option value="">Select MAJOR BEAT</option>
-                </select>
-                
-                <label>BEAT:</label>
-                <select id="lp_beat" class="req-lp" onchange="toggleOtherBeat(this, 'lp_other_beat')">
-                    <option value="">Select BEAT</option>
-                    <option value="AKT-RIG">AKT-RIG</option><option value="RIG-AKT">RIG-AKT</option><option value="AKT-KRBA">AKT-KRBA</option><option value="KRBA-AKT">KRBA-AKT</option><option value="BSP-SDL">BSP-SDL</option><option value="BSP-RIG">BSP-RIG</option><option value="BSP-KRBA">BSP-KRBA</option><option value="BSP-DBEC">BSP-DBEC</option><option value="USL-NKJ">USL-NKJ</option><option value="USL-DBEC">USL-DBEC</option><option value="USL-RIG">USL-RIG</option><option value="USL-KRBA">USL-KRBA</option><option value="PND-BSP">PND-BSP</option><option value="PND-NKJ">PND-NKJ</option><option value="SDL-SGO">SDL-SGO</option><option value="SDL-BSP">SDL-BSP</option><option value="SDL-NKJ">SDL-NKJ</option><option value="NKJ-SDL">NKJ-SDL</option><option value="SDL-BJRI">SDL-BJRI</option><option value="BJRI-SDL">BJRI-SDL</option><option value="SDL-ABKP">SDL-ABKP</option><option value="KHS-USL">KHS-USL</option><option value="KHS-BRJN">KHS-BRJN</option><option value="KHS-DMJY">KHS-DMJY</option><option value="KHS-KRBA">KHS-KRBA</option><option value="BRJN-ROU">BRJN-ROU</option><option value="BRJN-RIG">BRJN-RIG</option><option value="BRJN-SBP">BRJN-SBP</option><option value="KRBA-DPK">KRBA-DPK</option><option value="KRBA-GAD">KRBA-GAD</option><option value="KRBA-USL">KRBA-USL</option><option value="KRBA-RIG">KRBA-RIG</option><option value="BJRI-ABKP">BJRI-ABKP</option><option value="BJRI-BSP">BJRI-BSP</option><option value="BJRI-NKJ">BJRI-NKJ</option><option value="RIG-USL">RIG-USL</option><option value="RIG-ROU">RIG-ROU</option><option value="SJQ-ABKP-PSRS">SJQ-ABKP-PSRS</option><option value="SJQ-SDL">SJQ-SDL</option><option value="BSP-BJRI">BSP-BJRI</option><option value="USL-RSD">USL-RSD</option><option value="BSP-RSD">BSP-RSD</option><option value="BSP-NGP">BSP-NGP</option><option value="NGP-BSP">NGP-BSP</option><option value="BSP-CKP">BSP-CKP</option><option value="BSP-TATA">BSP-TATA</option><option value="BSP-ROU">BSP-ROU</option><option value="BSP-SBP">BSP-SBP</option><option value="OTHER">OTHER</option>
-                </select>
-                <input type="text" id="lp_other_beat" class="hidden" placeholder="Enter other beat" style="margin-top: 10px;">
-
-                <label>LOCO NUMBER:</label>
-                <input type="number" id="lp_loco" class="req-lp">
-                <label>TRAIN NUMBER:</label>
-                <input type="text" id="lp_train" class="req-lp">
-                <label>FROM TIME:</label>
-                <input type="time" id="lp_from" class="req-lp">
-                <label>TO TIME:</label>
-                <input type="time" id="lp_to" class="req-lp">
-            </div>
-        </div>
-
         <div class="links-section">
             <h3 style="margin-top:0; color:#334155; border-bottom: 2px solid #cbd5e1; padding-bottom: 10px;">Ongoing Safety Drive & Important Links</h3>
             <div class="ongoing-drive-table">
@@ -534,13 +530,6 @@
                     <div>Drive / Google Link</div>
                     <div>Download PDF</div>
                 </div>
-
-               <div class="table-cell">
-                <a href="https://docs.google.com/spreadsheets/d/1AzJEp0--ScREpzMMvUT9lO3RkdhUoyvJT2BZWAG_WgA/edit?gid=0#gid=0" target="_blank" class="drive-link-button">(RS PRACTICE ON RUN DETAILS)</a>
-            </div>
-            <div class="table-cell">
-                <div class="empty-pdf"></div> 
-            </div>
 
             <div class="table-cell">
                 <a href="https://docs.google.com/spreadsheets/d/1sh45QJ75aFe07CRbHTJ-muTuw2ZCXCfcRM_jMxo_ezA/edit?usp=sharing" target="_blank" class="drive-link-button">Drive No. 22 (FY 2025-26): 30 days Intra Railway Audit inspection of Lobbies and Running room.((16-01-2026 to 16-03-2026))</a>
@@ -842,28 +831,38 @@
         const c_date = document.getElementById('c_date').value;
 
         const doAb = document.getElementById('chk_ab').checked;
-        const doMs = document.getElementById('chk_ms').checked;
-        const doMob = document.getElementById('chk_mob').checked;
-        const doNfp = document.getElementById('chk_nfp').checked;
-        const doSd = document.getElementById('chk_sd').checked;
-        const doOd = document.getElementById('chk_od').checked;
-        const doAmbush = document.getElementById('chk_ambush').checked;
-        const doAlp = document.getElementById('chk_alp').checked;
         const doLp = document.getElementById('chk_lp').checked;
+        const doAlp = document.getElementById('chk_alp').checked;
+        const doNfp = document.getElementById('chk_nfp').checked;
+        const doAmbush = document.getElementById('chk_ambush').checked;
+        const doMob = document.getElementById('chk_mob').checked;
+        const doOd = document.getElementById('chk_od').checked;
+        const doSd = document.getElementById('chk_sd').checked;
 
-        if(!doAb && !doMs && !doMob && !doNfp && !doSd && !doOd && !doAmbush && !doAlp && !doLp) {
+        if(!doAb && !doLp && !doAlp && !doNfp && !doAmbush && !doMob && !doOd && !doSd) {
             alert("Please select at least one report to submit."); return;
         }
 
-        // Custom Validation
+        // --- Custom Validation ---
+
+        // Derive doMs (Micro Sleep) state dynamically from SD section
+        const msCrewInput = document.getElementById('ms_crew_id') ? document.getElementById('ms_crew_id').value.trim() : "";
+        const doMs = doSd && msCrewInput !== "";
+
         if (doMs) {
-            let msCrewIDs = document.getElementById('ms_crew_id').value.split(',').map(id => id.trim()).filter(id => id !== "");
+            let msCrewIDs = msCrewInput.split(',').map(id => id.trim()).filter(id => id !== "");
             for (const id of msCrewIDs) {
                 if (id.length > 8 || !/[A-Z]/.test(id) || !/[0-9]/.test(id)) { alert(`Micro Sleep Error: Invalid Crew ID "${id}".`); return; }
             }
+            if (document.getElementById('ms_vcd').value === "" || document.getElementById('ms_loc').value === "") {
+                alert("Micro Sleep Error: Please select VCD and Location.");
+                return;
+            }
         }
+
         if (doSd) {
-            let totalCrew = 0; let sdError = false;
+            let totalCrew = doMs ? 1 : 0; // Treat filled Micro Sleep as valid SD entry
+            let sdError = false;
             document.querySelectorAll('.sd-crew-input').forEach(input => {
                 if(input.value.trim() !== "") {
                     totalCrew++;
@@ -873,8 +872,9 @@
                 }
             });
             if(sdError) return;
-            if(totalCrew === 0) { alert("Safety Drive Error: Please enter at least one Crew ID in Safety Drive section."); return; }
+            if(totalCrew === 0) { alert("Safety Drive Error: Please enter at least one Crew ID in Permanent Safety Drives section."); return; }
         }
+
         if (doMob) {
             const mobCrewInput = document.getElementById('mob_crew_id').value;
             if(mobCrewInput && !crewData[mobCrewInput]) {
@@ -900,7 +900,7 @@
         if (doMs) {
             const vcd = document.getElementById('ms_vcd').value;
             const loc = document.getElementById('ms_loc').value;
-            document.getElementById('ms_crew_id').value.split(',').map(id => id.trim()).filter(id => id !== "").forEach(id => {
+            msCrewInput.split(',').map(id => id.trim()).filter(id => id !== "").forEach(id => {
                 let jsonData = {
                     date: c_date, cli_id: c_cli_id, cli_name: c_cli_name, cli_hq: c_cli_hq,
                     crew_id: id, vcd_counselling: vcd, micro_counselling: loc,
@@ -911,15 +911,52 @@
             });
         }
 
-        // --- C. Mobile Ambush Request ---
-        if (doMob) {
+        // --- C. LP Footplate Request ---
+        if (doLp) {
             let fd = new FormData();
-            fd.append("crew_id", document.getElementById('mob_crew_id').value);
-            document.querySelectorAll('#sec_mob [data-name]').forEach(el => fd.append(el.getAttribute('data-name'), el.value));
-            promises.push(fetch(URL_MOB, { method: 'POST', body: fd }));
+            fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name);
+            fd.append("LP ID", document.getElementById('lp_id').value);
+            fd.append("LP NAME", document.getElementById('lp_name').value);
+            fd.append("DESG", document.getElementById('lp_desg').value);
+            fd.append("HQ", document.getElementById('lp_hq').value);
+            fd.append("MAJOR BEAT", document.getElementById('lp_major_beat').value);
+            
+            const beatVal = document.getElementById('lp_beat').value;
+            if(beatVal === 'OTHER') {
+                fd.append("BEAT_OTHER", "OTHER");
+                fd.append("BEAT", document.getElementById('lp_other_beat').value);
+            } else {
+                fd.append("BEAT", beatVal);
+            }
+            fd.append("LOCO NUMBER", document.getElementById('lp_loco').value);
+            fd.append("TRAIN NUMBER", document.getElementById('lp_train').value);
+            fd.append("DATE", c_date);
+            fd.append("FROM TIME", document.getElementById('lp_from').value);
+            fd.append("TO TIME", document.getElementById('lp_to').value);
+            promises.push(fetch(URL_LP, { method: 'POST', mode: 'no-cors', body: fd }));
         }
 
-        // --- D. Night Footplate Request ---
+        // --- D. ALP Footplate Request ---
+        if (doAlp) {
+            let fd = new FormData();
+            fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name);
+            fd.append("ALP ID", document.getElementById('alp_id').value);
+            fd.append("ALP NAME", document.getElementById('alp_name').value);
+            fd.append("DESG", document.getElementById('alp_desg').value);
+            fd.append("HQ", document.getElementById('alp_hq').value);
+            
+            const beatVal = document.getElementById('alp_beat').value;
+            if(beatVal === 'OTHER') {
+                fd.append("BEAT_OTHER", "OTHER");
+                fd.append("BEAT", document.getElementById('alp_other_beat').value);
+            } else {
+                fd.append("BEAT", beatVal);
+            }
+            fd.append("DATE", c_date); 
+            promises.push(fetch(URL_ALP, { method: 'POST', mode: 'no-cors', body: fd }));
+        }
+
+        // --- E. Night Footplate Request ---
         if (doNfp) {
             let fd = new FormData();
             fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name);
@@ -928,7 +965,51 @@
             promises.push(fetch(URL_NFP, { method: 'POST', body: fd }));
         }
 
-        // --- E. Safety Drive Request ---
+        // --- F. Ambush Form Request ---
+        if (doAmbush) {
+            let fd = new FormData();
+            fd.append("cliId", c_cli_id); fd.append("cliName", c_cli_name); fd.append("cliHQ", c_cli_hq);
+            fd.append("analysisMonth", document.getElementById('amb_month').value);
+            fd.append("dateOfAmbush", document.getElementById('amb_date').value);
+            fd.append("dateOfEntry", document.getElementById('amb_entry').value);
+            
+            const ambType = document.getElementById('amb_type').value;
+            fd.append("typeOfAmbush", ambType === "Other" ? document.getElementById('amb_custom_type').value : ambType);
+            fd.append("abnormalities", document.getElementById('amb_abnormalities').value);
+            
+            const ts = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+            fd.append('timestamp', ts);
+            fd.append('submissionId', `${ts}-${Math.random().toString(36).substr(2, 9)}`);
+            promises.push(fetch(URL_AMBUSH, { method: 'POST', mode: 'no-cors', body: fd }));
+        }
+
+        // --- G. Mobile Ambush Request ---
+        if (doMob) {
+            let fd = new FormData();
+            fd.append("crew_id", document.getElementById('mob_crew_id').value);
+            document.querySelectorAll('#sec_mob [data-name]').forEach(el => fd.append(el.getAttribute('data-name'), el.value));
+            promises.push(fetch(URL_MOB, { method: 'POST', body: fd }));
+        }
+
+        // --- H. Other Duties Request ---
+        if (doOd) {
+            let fd = new FormData();
+            fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name);
+            fd.append("CLI LOBBY", c_cli_hq); fd.append("DATE", c_date);
+            fd.append("FROM TIME", document.getElementById('od_fromTime').value);
+            fd.append("TO TIME", document.getElementById('od_toTime').value);
+
+            let dType = document.getElementById('od_dutyType').value;
+            if(dType === "OTHER DUTY") {
+                const subType = document.getElementById('od_subType').value;
+                const desc = document.getElementById('od_desc').value;
+                dType = `${desc} (${subType})`;
+            }
+            fd.append("DUTY TYPE", dType);
+            promises.push(fetch(URL_OD, { method: 'POST', body: fd }));
+        }
+
+        // --- I. Safety Drive Request (Standard Drives) ---
         if (doSd) {
             document.querySelectorAll('.sd-crew-input').forEach(inputField => {
                 let crewIDsString = inputField.value.trim();
@@ -959,87 +1040,6 @@
                     promises.push(fetch(URL_SD, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(jsonData) }));
                 });
             });
-        }
-
-        // --- F. Other Duties Request ---
-        if (doOd) {
-            let fd = new FormData();
-            fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name);
-            fd.append("CLI LOBBY", c_cli_hq); fd.append("DATE", c_date);
-            fd.append("FROM TIME", document.getElementById('od_fromTime').value);
-            fd.append("TO TIME", document.getElementById('od_toTime').value);
-
-            let dType = document.getElementById('od_dutyType').value;
-            if(dType === "OTHER DUTY") {
-                const subType = document.getElementById('od_subType').value;
-                const desc = document.getElementById('od_desc').value;
-                dType = `${desc} (${subType})`;
-            }
-            fd.append("DUTY TYPE", dType);
-            promises.push(fetch(URL_OD, { method: 'POST', body: fd }));
-        }
-
-        // --- G. Ambush Form Request ---
-        if (doAmbush) {
-            let fd = new FormData();
-            fd.append("cliId", c_cli_id); fd.append("cliName", c_cli_name); fd.append("cliHQ", c_cli_hq);
-            fd.append("analysisMonth", document.getElementById('amb_month').value);
-            fd.append("dateOfAmbush", document.getElementById('amb_date').value);
-            fd.append("dateOfEntry", document.getElementById('amb_entry').value);
-            
-            const ambType = document.getElementById('amb_type').value;
-            fd.append("typeOfAmbush", ambType === "Other" ? document.getElementById('amb_custom_type').value : ambType);
-            fd.append("abnormalities", document.getElementById('amb_abnormalities').value);
-            
-            const ts = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-            fd.append('timestamp', ts);
-            fd.append('submissionId', `${ts}-${Math.random().toString(36).substr(2, 9)}`);
-            promises.push(fetch(URL_AMBUSH, { method: 'POST', mode: 'no-cors', body: fd }));
-        }
-
-        // --- H. ALP Footplate Request ---
-        if (doAlp) {
-            let fd = new FormData();
-            fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name);
-            fd.append("ALP ID", document.getElementById('alp_id').value);
-            fd.append("ALP NAME", document.getElementById('alp_name').value);
-            fd.append("DESG", document.getElementById('alp_desg').value);
-            fd.append("HQ", document.getElementById('alp_hq').value);
-            
-            const beatVal = document.getElementById('alp_beat').value;
-            if(beatVal === 'OTHER') {
-                fd.append("BEAT_OTHER", "OTHER");
-                fd.append("BEAT", document.getElementById('alp_other_beat').value);
-            } else {
-                fd.append("BEAT", beatVal);
-            }
-            fd.append("DATE", c_date); 
-            promises.push(fetch(URL_ALP, { method: 'POST', mode: 'no-cors', body: fd }));
-        }
-
-        // --- I. LP Footplate Request ---
-        if (doLp) {
-            let fd = new FormData();
-            fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name);
-            fd.append("LP ID", document.getElementById('lp_id').value);
-            fd.append("LP NAME", document.getElementById('lp_name').value);
-            fd.append("DESG", document.getElementById('lp_desg').value);
-            fd.append("HQ", document.getElementById('lp_hq').value);
-            fd.append("MAJOR BEAT", document.getElementById('lp_major_beat').value);
-            
-            const beatVal = document.getElementById('lp_beat').value;
-            if(beatVal === 'OTHER') {
-                fd.append("BEAT_OTHER", "OTHER");
-                fd.append("BEAT", document.getElementById('lp_other_beat').value);
-            } else {
-                fd.append("BEAT", beatVal);
-            }
-            fd.append("LOCO NUMBER", document.getElementById('lp_loco').value);
-            fd.append("TRAIN NUMBER", document.getElementById('lp_train').value);
-            fd.append("DATE", c_date);
-            fd.append("FROM TIME", document.getElementById('lp_from').value);
-            fd.append("TO TIME", document.getElementById('lp_to').value);
-            promises.push(fetch(URL_LP, { method: 'POST', mode: 'no-cors', body: fd }));
         }
 
         // Execute all requests concurrently
