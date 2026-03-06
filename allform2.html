@@ -115,7 +115,7 @@
 
         <div class="report-block">
             <label class="report-header">
-                <input type="checkbox" id="chk_ab" onchange="toggleSection('sec_ab', this.checked)">
+               <input type="checkbox" id="chk_ab" onchange="checkAbnormalityDate(this)">
                 1. ABNORMALITY DAILY REPORT
             </label>
             <div id="sec_ab" class="sub-section">
@@ -531,7 +531,7 @@
                     <div>Download PDF</div>
                 </div>
 
-            <div class="table-cell">
+             <div class="table-cell">
                 <a href="https://docs.google.com/spreadsheets/d/1sh45QJ75aFe07CRbHTJ-muTuw2ZCXCfcRM_jMxo_ezA/edit?usp=sharing" target="_blank" class="drive-link-button">Drive No. 22 (FY 2025-26): 30 days Intra Railway Audit inspection of Lobbies and Running room.((16-01-2026 to 16-03-2026))</a>
             </div>
             <div class="table-cell">
@@ -579,8 +579,6 @@
             <div class="table-cell">
                 <div class="empty-pdf"></div> 
             </div>
-
-                
             </div>
         </div>
 
@@ -686,7 +684,50 @@
             sec.querySelectorAll('[class^="req-"]').forEach(el => el.required = false);
         }
     }
+   // === ABNORMALITY DATE RESTRICTION LOGIC ===
+    function checkAbnormalityDate(checkbox) {
+        if (checkbox.checked) {
+            const dateStr = document.getElementById('c_date').value;
+            if (!dateStr) {
+                alert("Please select a DATE first in Common Details.");
+                checkbox.checked = false;
+                return;
+            }
 
+            const selectedDate = new Date(dateStr);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            selectedDate.setHours(0, 0, 0, 0);
+
+            const diffDays = Math.ceil((today - selectedDate) / (1000 * 60 * 60 * 24));
+
+            if (diffDays > 2) {
+                alert("❌ System Alert: Entry for the Abnormality Daily Report is restricted to the past 2 days. Please select a valid date.");
+                checkbox.checked = false;       // Checkbox tick nahi hoga
+                toggleSection('sec_ab', false); // Section open nahi hoga
+                return;
+            }
+        }
+        // Agar date valid hai ya checkbox uncheck kar rahe hain, toh section khul/band ho jayega
+        toggleSection('sec_ab', checkbox.checked);
+    }
+
+    // Event listener: Agar user pehle checkbox on kar le, aur BAAD mein date change kare toh auto-close ho jaye
+    document.getElementById('c_date').addEventListener('change', function() {
+        const chkAb = document.getElementById('chk_ab');
+        if (chkAb.checked) {
+            const selectedDate = new Date(this.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            selectedDate.setHours(0, 0, 0, 0);
+            
+            if (Math.ceil((today - selectedDate) / (1000 * 60 * 60 * 24)) > 2) {
+                alert("❌ You selected an out of range date. Abnormality Report is closing.");
+                chkAb.checked = false;
+                toggleSection('sec_ab', false);
+            }
+        }
+    });
     function setupAutoNil(countId, detailId) {
         document.getElementById(countId).addEventListener('input', function() {
             let val = parseInt(this.value); 
@@ -1065,4 +1106,3 @@
 </script>
 </body>
 </html>
-
