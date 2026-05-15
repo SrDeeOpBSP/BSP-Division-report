@@ -733,7 +733,7 @@
 
             const diffDays = Math.ceil((today - selectedDate) / (1000 * 60 * 60 * 24));
 
-            if (diffDays > 2) {
+            if (diffDays > 3) {
                 alert("❌ System Alert: Entry for the Abnormality Daily Report is restricted to the past 2 days. Please select a valid date.");
                 checkbox.checked = false;       // Checkbox tick nahi hoga
                 toggleSection('sec_ab', false); // Section open nahi hoga
@@ -753,7 +753,7 @@
             today.setHours(0, 0, 0, 0);
             selectedDate.setHours(0, 0, 0, 0);
             
-            if (Math.ceil((today - selectedDate) / (1000 * 60 * 60 * 24)) > 2) {
+            if (Math.ceil((today - selectedDate) / (1000 * 60 * 60 * 24)) > 3) {
                 alert("❌ You selected an out of range date. Abnormality Report is closing.");
                 chkAb.checked = false;
                 toggleSection('sec_ab', false);
