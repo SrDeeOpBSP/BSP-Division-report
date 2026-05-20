@@ -1035,17 +1035,25 @@
         </button>
     </div>
 
-    <div id="couns-selection" class="control-panel">
-        <div class="option-card" onclick="showCounsellingSearchInterface('search')">
-            <i class="fas fa-search-location"></i>
-            <h3>SEARCH BY NAME</h3>
-        </div>
-        <div class="option-card" onclick="showCounsellingSearchInterface('summary')">
-            <i class="fas fa-chart-pie"></i>
-            <h3>SHOW SUMMARY</h3>
-        </div>
+<div id="couns-selection" class="control-panel">
+
+    <div class="option-card" onclick="showCounsellingSearchInterface('search')">
+        <i class="fas fa-search-location"></i>
+        <h3>SEARCH BY NAME</h3>
     </div>
 
+    <div class="option-card" onclick="showCounsellingSearchInterface('summary')">
+        <i class="fas fa-chart-pie"></i>
+        <h3>SHOW SUMMARY</h3>
+    </div>
+
+    <!-- NEW DRIVE SUMMARY -->
+    <div class="option-card" onclick="openDriveSummary()">
+        <i class="fas fa-chart-line"></i>
+        <h3>DRIVE SUMMARY</h3>
+    </div>
+
+</div>
     <div id="couns-inputs" class="hidden" style="text-align: center; margin-bottom: 30px;">
         <div class="input-group">
             <div id="couns-cli-name-wrapper">
@@ -1372,6 +1380,9 @@ function openModule(moduleName) {
         }
     }
     
+}
+function openDriveSummary() {
+    window.open("og2_dashboard.html", "_blank");
 }
 function resetDriveInterface() {
     document.getElementById('drive-selection').classList.remove('hidden');
@@ -3809,4 +3820,3 @@ function showE2eTable() {
     </script>
 </body>
 </html>
-
