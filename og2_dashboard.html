@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Railway Crew Counselling Management System</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --secondary: #06b6d4;
+            --bg-dark: #020617;
+            --glass-bg: rgba(15, 23, 42, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ambient Background Animations */
+        .ambient-bg {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            z-index: -1;
+            background: radial-gradient(circle at 15% 50%, rgba(29, 78, 216, 0.1), transparent 35%),
+                        radial-gradient(circle at 85% 30%, rgba(8, 145, 178, 0.1), transparent 35%);
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.25rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #ffffff 0%, #67e8f9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.4); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.8); }
+
+        /* Tables */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 1rem;
+
+    will-change: transform;
+
+    transform: translateZ(0);
+
+    backface-visibility: hidden;
+}
+       table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+
+    contain: content;
+}
+        
+        th {
+            background: rgba(15, 23, 42, 0.95);
+            color: #94a3b8;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 1rem;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            white-space: nowrap;
+        }
+        
+        td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.02);
+            font-size: 0.875rem;
+            white-space: nowrap;
+        }
+        
+        tr:hover td { background: rgba(37, 99, 235, 0.1); }
+
+        /* Sticky Columns */
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            background: rgba(15, 23, 42, 0.98) !important;
+            z-index: 10;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        th.sticky-col { z-index: 20; }
+
+        /* Popups & Modals */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .drive-popup {
+            background: rgba(15, 23, 42, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            border-radius: 1rem;
+            animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Inputs & Buttons */
+        .modern-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .modern-input:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary { background: linear-gradient(135deg, #2563eb, #0ea5e9); color: white; }
+        .btn-primary:hover { box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); transform: translateY(-1px); }
+        .btn-success { background: linear-gradient(135deg, #059669, #10b981); color: white; }
+        .btn-success:hover { box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); transform: translateY(-1px); }
+        
+        .toast-card {
+            background: rgba(15, 23, 42, 0.95);
+            border-left: 4px solid var(--primary);
+            animation: slideIn 0.3s ease forwards;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="ambient-bg"></div>
+
+<!-- Toasts -->
+<div id="toastContainer" class="fixed bottom-6 right-6 z-[99999] flex flex-col gap-3"></div>
+
+<div class="p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto">
+
+    <!-- Header -->
+    <header class="glass p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-4 w-full md:w-auto">
+            <div class="bg-blue-600 p-3 rounded-xl shadow-lg shadow-blue-500/30 hidden sm:block">
+                <i data-lucide="train-front" class="w-7 h-7 text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold gradient-text">Crew Counselling System</h1>
+                <p class="text-slate-400 text-xs md:text-sm font-medium flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Live Data Synchronization
+                </p>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+            <div class="bg-black/30 px-4 py-2 rounded-lg border border-white/5 text-right hidden lg:block">
+                <div id="liveClock" class="text-slate-200 text-sm font-medium"></div>
+            </div>
+        </div>
+    </header>
+    <!-- DASHBOARD SECTION -->
+    <div id="dashboardSection" class="space-y-6">
+        
+        <!-- Filter Bar -->
+        <div class="glass p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                <i data-lucide="bar-chart-2" class="text-cyan-400"></i> Analytics Overview
+            </h2>
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <label class="text-sm font-medium text-slate-400 whitespace-nowrap">Filter by HQ:</label>
+                <select id="hqFilter" onchange="debounceDashboard()" class="modern-input py-1.5 min-w-[150px]">
+                    <option value="ALL">All Headquarters</option>
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div class="glass p-5 relative overflow-hidden group">
+                <i data-lucide="users" class="absolute -right-4 -bottom-4 w-24 h-24 text-blue-500/10 group-hover:text-blue-500/20 transition-colors"></i>
+                <div class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">Total Counselling</div>
+                <div id="statTotal" class="text-4xl font-black text-white">0</div>
+            </div>
+            <div class="glass p-5 relative overflow-hidden group">
+                <i data-lucide="user-check" class="absolute -right-4 -bottom-4 w-24 h-24 text-emerald-500/10 group-hover:text-emerald-500/20 transition-colors"></i>
+                <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1">Active CLIs</div>
+                <div id="statCLI" class="text-4xl font-black text-white">0</div>
+            </div>
+            <div class="glass p-5 relative overflow-hidden group">
+                <i data-lucide="building-2" class="absolute -right-4 -bottom-4 w-24 h-24 text-amber-500/10 group-hover:text-amber-500/20 transition-colors"></i>
+                <div class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-1">HQs Covered</div>
+                <div id="statHQ" class="text-4xl font-black text-white">0</div>
+            </div>
+            <div class="glass p-5 relative overflow-hidden group">
+                <i data-lucide="target" class="absolute -right-4 -bottom-4 w-24 h-24 text-fuchsia-500/10 group-hover:text-fuchsia-500/20 transition-colors"></i>
+                <div class="text-xs font-bold text-fuchsia-400 uppercase tracking-wider mb-1">Drives Executed</div>
+                <div id="statDrives" class="text-4xl font-black text-white">0</div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="glass p-5">
+                <h3 class="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wide">Drive Distribution</h3>
+                <div class="h-[250px]"><canvas id="driveChart"></canvas></div>
+            </div>
+            <div class="glass p-5">
+                <h3 class="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wide">HQ Distribution</h3>
+                <div class="h-[250px]"><canvas id="hqChart"></canvas></div>
+            </div>
+        </div>
+<!-- Pending Analysis -->
+<!-- Pending Analysis -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+
+    <div class="glass p-5 h-[420px] flex flex-col">
+<div class="flex items-center justify-between mb-4">
+    <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wide">
+        Pending By Category
+    </h3>
+
+<select id="pendingCategoryDriveFilter"
+    onchange="debounceDashboard()"
+    class="modern-input py-1 px-2 text-xs w-[220px]">
+
+    <option value="ALL">All Drives</option>
+
+</select>
+</div>
+        <div class="flex-1 min-h-0">
+            <canvas id="pendingCategoryChart"></canvas>
+        </div>
+    </div>
+<div class="glass p-5 h-[420px] flex flex-col">
+
+    <div class="flex items-center justify-between mb-4">
+
+        <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wide">
+            Pending By HQ
+        </h3>
+
+        <select id="pendingHQDriveFilter"
+            onchange="debounceDashboard()"
+            class="modern-input py-1 px-2 text-xs w-[220px]">
+
+            <option value="ALL">All Drives</option>
+
+        </select>
+
+    </div>
+
+    <div class="flex-1 min-h-0">
+        <canvas id="pendingHQChart"></canvas>
+    </div>
+
+</div>
+
+<!-- YE AB ALAG BLOCK HAI -->
+<div class="lg:col-span-2">
+<div class="lg:col-span-2">
+
+    <div class="glass p-5">
+
+        <div class="flex items-center justify-between mb-4">
+
+            <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wide">
+                Pending By Drive
+            </h3>
+
+            <select id="pendingDriveHQFilter"
+                onchange="debounceDashboard()"
+                class="modern-input py-1 px-2 text-xs w-[220px]">
+
+                <option value="ALL">All HQ</option>
+
+            </select>
+
+        </div>
+
+        <div class="overflow-auto max-h-[550px]">
+
+            <table class="w-full text-sm border border-white/10">
+
+                <thead id="pendingDriveHead"></thead>
+
+                <tbody id="pendingDriveBody"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+        <!-- CLI Matrix Table -->
+        <div class="glass p-5">
+            <h3 class="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wide flex items-center gap-2">
+                <i data-lucide="table-2" class="w-4 h-4 text-emerald-400"></i> CLI-Wise Counselling Matrix
+            </h3>
+            <div class="table-container border border-white/10">
+                <table id="cliMatrixTable" class="w-full text-sm">
+                    <!-- Matrix dynamically generated here -->
+                </table>
+            </div>
+        </div>
+    </div>
+   <!-- SUMMARY SECTION -->
+<div id="summarySection" class="space-y-6">
+
+    <div class="glass p-5">
+
+<div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+
+    <h3 class="text-lg font-bold text-slate-200 flex items-center gap-2">
+
+        <i data-lucide="table-properties"
+           class="w-5 h-5 text-cyan-400"></i>
+
+        CLI Wise Counselling Summary
+
+    </h3>
+
+    <select id="summaryDriveFilter"
+        onchange="debounceDashboard()"
+        class="modern-input py-2 px-3 text-sm w-[250px]">
+
+        <option value="ALL">
+            All Drives
+        </option>
+
+    </select>
+
+</div>
+
+        <div class="overflow-auto max-h-[75vh] border border-white/10 rounded-xl">
+
+            <table class="w-full text-sm">
+
+                <thead id="cliSummaryHead"></thead>
+
+                <tbody id="cliSummaryBody"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+</div>
+
+<script>
+    // Icons Init
+    requestAnimationFrame(() => {
+    lucide.createIcons();
+});
+
+    /* Google Sheets config */
+    const API_KEY = "AIzaSyAw23pJz0K9fZb2rRRAe2C2cJDilRc0Kac";
+    const SHEET_ID = "1EXYvdvs9OGwgXwvK_DmMpgFQ39nh-g5LWDk0-cZhl0A";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxmbolJU4ozd61W9rMFyoAfiLATEvLV1lIR1eVzSTslsKjzDfg6Cm-bTZ0YWf_j2f_F/exec";
+    // ===============================
+// CREW STATUS SHEET CONFIG
+// ===============================
+
+const CREW_SHEET_ID = "1c5niOafzh20MEepDrnwjZSXBWfJoD87_efAoC1mwxb8";
+
+const CREW_RANGE = "'COMBINE'!A:L";
+
+const CREW_API =
+`https://sheets.googleapis.com/v4/spreadsheets/${CREW_SHEET_ID}/values/${encodeURIComponent(CREW_RANGE)}?key=${API_KEY}`;
+
+    /* State Variables */
+    let historyData = [];
+    let DRIVE_LIST = [];
+    let latestCrewData = [];
+    let driveBreakdownData = {};
+    let historyMap = new Set();
+    let crewMapByEmp = {};
+    let dashboardTimer;
+
+    /* Initialize Drives */
+async function initDrives() {
+
+    try {
+
+        const url =
+        `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/DRIVE_MASTER!A:B?key=${API_KEY}`;
+
+        const response =
+        await fetch(url);
+
+        const data =
+        await response.json();
+
+        const rows =
+        data.values || [];
+
+        DRIVE_LIST =
+        rows
+        .slice(1)
+        .filter(row =>
+            (row[1] || "")
+            .toUpperCase()
+            ===
+            "ACTIVE"
+        )
+        .map(row => row[0])
+        .filter(Boolean);
+
+console.log(
+    "ACTIVE DRIVES:",
+    DRIVE_LIST
+);
+
+    } catch (err) {
+
+        console.error(
+            "DRIVE MASTER ERROR:",
+            err
+        );
+
+        toast(
+            "Drive Master Load Failed",
+            "error"
+        );
+    }
+}
+    /* Drive Management UI Logic */
+
+function addDrive() {
+
+    toast(
+        "Add drive from DRIVE_MASTER sheet",
+        "info"
+    );
+}
+
+function removeDrive(index) {
+
+    toast(
+        "Delete drive from DRIVE_MASTER sheet",
+        "info"
+    );
+}
+    function debounceDashboard() {
+
+    clearTimeout(dashboardTimer);
+
+    dashboardTimer = setTimeout(() => {
+
+        loadDashboard(true);
+
+    }, 150);
+}
+
+    /* Professional Toast */
+    function toast(msg, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const div = document.createElement('div');
+        
+        let icon = `<i data-lucide="${type==='success'?'check-circle':type==='error'?'alert-circle':'info'}" 
+                     class="w-5 h-5 ${type==='success'?'text-emerald-400':type==='error'?'text-red-400':'text-blue-400'}"></i>`;
+        
+        div.className = `toast-card p-4 rounded-xl flex items-center gap-3 min-w-[250px] shadow-2xl`;
+        div.innerHTML = `${icon} <span class="font-medium text-sm text-white">${msg}</span>`;
+        
+        container.appendChild(div);
+        requestAnimationFrame(() => {
+    lucide.createIcons({ root: div });
+});
+        setTimeout(() => {
+            div.style.opacity = '0'; div.style.transform = 'translateY(10px)'; div.style.transition = 'all 0.3s ease';
+            setTimeout(() => div.remove(), 300);
+        }, 3000);
+    }
+
+    /* Clock */
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById('liveClock').innerText = now.toLocaleString('en-IN', {
+            weekday: 'short', day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+    }, 1000);
+    /* Fetch History Data */
+async function loadHistory() {
+
+    try {
+
+        const res =
+        await fetch(WEB_APP_URL);
+
+        const data =
+        await res.json();
+
+        historyData =
+        data.slice(1).map(r => ({
+
+            empCode:
+            String(r[0] || '').trim(),
+
+            crewId:
+            String(r[1] || '').trim(),
+
+            crewName:
+            String(r[2] || '').trim(),
+
+            date:
+            normalizeDate(r[3]),
+
+            drive:
+            String(r[4] || '').trim(),
+
+            cliName:
+            String(r[5] || '').trim(),
+
+            hq:
+            String(r[6] || '').trim(),
+
+            desg:
+            String(r[7] || '').trim()
+
+        }));
+
+        console.log(
+            "History Loaded:",
+            historyData.length
+        );
+        // FAST LOOKUP MAP
+
+historyMap.clear();
+
+historyData.forEach(h => {
+
+    historyMap.add(
+        `${String(h.empCode).trim()}|${String(h.drive).trim()}`
+    );
+
+});
+
+    } catch (err) {
+
+        console.warn(
+            "API Note: Data fetch failed.",
+            err
+        );
+    }
+}
+  // =====================================
+// LOAD LATEST CREW FROM COMBINE SHEET
+// =====================================
+
+async function loadLatestCrewData() {
+
+    try {
+
+        const response = await fetch(CREW_API);
+
+        const data = await response.json();
+
+        const rows = data.values || [];
+
+        const records = rows.slice(1);
+
+        const crewMap = {};
+
+        records.forEach(row => {
+
+            const obj = {
+
+                crewId: row[0] || "",
+                crewName: row[1] || "",
+                hrmsId: row[2] || "",
+                crewType: row[3] || "",
+                empCode: row[4] || "",
+                crewGrade: row[5] || "",
+                cliName: row[6] || "",
+                hq: row[7] || "",
+                updateDate: row[8] || "",
+                allotmentType: row[9] || "Permanent",
+                originalCLI: row[10] || "",
+                status: (row[11] || "ACTIVE").toUpperCase()
+
+            };
+
+            if (!obj.empCode) return;
+
+            if (!crewMap[obj.empCode]) {
+                crewMap[obj.empCode] = [];
+            }
+
+            crewMap[obj.empCode].push(obj);
+
+        });
+
+        latestCrewData = Object.values(crewMap).map(records => {
+            return records[records.length - 1];
+        });
+
+        console.log(
+            "Latest Crew Loaded:",
+            latestCrewData.length
+        );
+        // FAST CREW LOOKUP
+
+crewMapByEmp = {};
+
+latestCrewData.forEach(c => {
+
+    crewMapByEmp[
+        String(c.empCode).trim()
+    ] = c;
+
+});
+
+    } catch (err) {
+
+        console.error(
+            "Crew Fetch Error:",
+            err
+        );
+
+    }
+}
+    /* DASHBOARD LOGIC (Includes HQ Filter & Matrix) */
+let driveChart = null,
+    hqChart = null,
+    pendingCategoryChart = null,
+    pendingHQChart = null;
+
+async function loadDashboard(skipFetch = true) {
+
+    if (!skipFetch) {
+        await loadHistory();
+        await loadLatestCrewData();
+    }
+        
+        // Populate HQ Dropdown if empty
+        const hqFilterEl = document.getElementById('hqFilter');
+        const uniqueHQs =
+[...new Set(latestCrewData.map(h => h.hq))]
+.filter(Boolean)
+.sort();
+        
+        if (hqFilterEl.options.length <= 1) {
+            uniqueHQs.forEach(hq => {
+                const opt = document.createElement('option');
+                opt.value = hq; opt.textContent = hq;
+                hqFilterEl.appendChild(opt);
+            });
+        }
+const categoryDriveFilter =
+document.getElementById(
+'pendingCategoryDriveFilter'
+);
+
+const hqDriveFilter =
+document.getElementById(
+'pendingHQDriveFilter'
+);
+
+if (
+categoryDriveFilter &&
+categoryDriveFilter.options.length <= 1
+) {
+
+DRIVE_LIST.forEach(drive => {
+
+        const opt =
+        document.createElement('option');
+
+        opt.value = drive;
+
+        opt.textContent = drive;
+
+        categoryDriveFilter.appendChild(opt);
+    });
+}
+
+if (
+hqDriveFilter &&
+hqDriveFilter.options.length <= 1
+) {
+
+    DRIVE_LIST.forEach(drive => {
+
+        const opt =
+        document.createElement('option');
+
+        opt.value = drive;
+
+        opt.textContent = drive;
+
+        hqDriveFilter.appendChild(opt);
+    });
+}
+
+const pendingDriveHQFilter =
+document.getElementById(
+'pendingDriveHQFilter'
+);
+const summaryDriveFilter =
+document.getElementById(
+'summaryDriveFilter'
+);
+
+if (
+summaryDriveFilter &&
+summaryDriveFilter.options.length <= 1
+) {
+
+    DRIVE_LIST.forEach(drive => {
+
+        const opt =
+        document.createElement('option');
+
+        opt.value = drive;
+
+        opt.textContent = drive;
+
+        summaryDriveFilter.appendChild(opt);
+
+    });
+}
+if (
+pendingDriveHQFilter &&
+pendingDriveHQFilter.options.length <= 1
+) {
+
+    uniqueHQs.forEach(hq => {
+
+        const opt =
+        document.createElement('option');
+
+        opt.value = hq;
+
+        opt.textContent = hq;
+
+        pendingDriveHQFilter.appendChild(opt);
+    });
+}
+const selectedHQ = hqFilterEl.value;
+const selectedPendingCategoryDrive =
+document.getElementById(
+'pendingCategoryDriveFilter'
+)?.value || 'ALL';
+
+const selectedPendingHQDrive =
+document.getElementById(
+'pendingHQDriveFilter'
+)?.value || 'ALL';
+
+const selectedPendingDriveHQ =
+document.getElementById(
+'pendingDriveHQFilter'
+)?.value || 'ALL';
+const selectedSummaryDrive =
+document.getElementById(
+'summaryDriveFilter'
+)?.value || 'ALL';
+const filteredData =
+(
+    selectedHQ === "ALL"
+    ? historyData
+    : historyData.filter(
+        d => d.hq === selectedHQ
+    )
+)
+.filter(d =>
+    DRIVE_LIST.includes(d.drive)
+);
+
+        // Update Stat Cards
+        document.getElementById('statTotal').innerText = filteredData.length;
+        document.getElementById('statCLI').innerText = new Set(filteredData.map(h => h.cliName)).size;
+        document.getElementById('statHQ').innerText = new Set(filteredData.map(h => h.hq)).size;
+        document.getElementById('statDrives').innerText = new Set(filteredData.map(h => h.drive)).size;
+
+// =========================================
+// DRIVE CATEGORY GRAPH
+// =========================================
+
+const LP_TYPES = [
+    'LPP',
+    'LPM',
+    'LPG'
+];
+
+const ALP_TYPES = [
+    'ALP',
+    'SALP',
+    'SHT',
+    'SSHT'
+];
+
+const driveStats = {};
+
+driveBreakdownData = {};
+
+filteredData.forEach(entry => {
+
+  const drive =
+String(entry.drive || '')
+.trim();
+
+if (!drive) return;
+
+const crew =
+crewMapByEmp[
+    String(entry.empCode).trim()
+];
+
+    if (!crew) return;
+
+    const type =
+    (crew.crewType || '')
+    .toUpperCase()
+    .trim();
+
+    if (!driveStats[drive]) {
+
+        driveStats[drive] = {
+            LP: 0,
+            ALP: 0
+        };
+
+        driveBreakdownData[drive] = {
+            LPP: 0,
+            LPM: 0,
+            LPG: 0,
+            ALP: 0,
+            SALP: 0,
+            SHT: 0,
+            SSHT: 0
+        };
+    }
+
+    if (LP_TYPES.includes(type)) {
+        driveStats[drive].LP++;
+    }
+
+    if (ALP_TYPES.includes(type)) {
+        driveStats[drive].ALP++;
+    }
+
+    if (
+        driveBreakdownData[drive][type]
+        !==
+        undefined
+    ) {
+        driveBreakdownData[drive][type]++;
+    }
+
+});
+
+const fullLabels =
+Object.keys(driveStats);
+
+const labels =
+fullLabels.map((d, i) =>
+    `D${i + 1}`
+);
+
+const lpData =
+fullLabels.map(
+    d => driveStats[d].LP
+);
+
+const alpData =
+fullLabels.map(
+    d => driveStats[d].ALP
+);
+
+if (driveChart) {
+
+    driveChart.data.labels = labels;
+
+    driveChart.data.datasets[0].data = lpData;
+
+    driveChart.data.datasets[1].data = alpData;
+
+    driveChart.update();
+
+} else {
+
+    const ctxD =
+    document
+    .getElementById('driveChart')
+    .getContext('2d');
+
+    driveChart = new Chart(ctxD, {
+
+        type: 'bar',
+
+        data: {
+
+            labels: labels,
+
+            datasets: [
+                {
+                    label: 'LP',
+                    data: lpData,
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 6
+                },
+                {
+                    label: 'ALP',
+                    data: alpData,
+                    backgroundColor: '#10b981',
+                    borderRadius: 6
+                }
+            ]
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            onClick: (evt, elements) => {
+
+                if (!elements.length) return;
+
+                const index =
+                elements[0].index;
+
+                const driveName =
+                fullLabels[index];
+
+                const detail =
+                driveBreakdownData[driveName];
+
+                alert(
+                    `Drive: ${driveName}\n\n` +
+                    `LPP : ${detail.LPP}\n` +
+                    `LPM : ${detail.LPM}\n` +
+                    `LPG : ${detail.LPG}\n\n` +
+                    `ALP : ${detail.ALP}\n` +
+                    `SALP : ${detail.SALP}\n` +
+                    `SHT : ${detail.SHT}\n` +
+                    `SSHT : ${detail.SSHT}`
+                );
+            },
+
+            plugins: {
+
+                legend: {
+                    display: true,
+                    labels: {
+                        color: '#ffffff'
+                    }
+                }
+            },
+
+            scales: {
+
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color:
+                        'rgba(255,255,255,0.05)'
+                    }
+                },
+
+                x: {
+
+                    ticks: {
+
+                        color: '#94a3b8',
+
+                        maxRotation: 0,
+
+                        minRotation: 0,
+
+                        font: {
+                            size: 11
+                        }
+                    },
+
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+}
+        // HQ Chart
+        const hqCounts = {};
+        filteredData.forEach(h => hqCounts[h.hq] = (hqCounts[h.hq] || 0) + 1);
+        if (hqChart) {
+
+    hqChart.data.labels =
+    Object.keys(hqCounts).length
+    ? Object.keys(hqCounts)
+    : ['No Data'];
+
+    hqChart.data.datasets[0].data =
+    Object.values(hqCounts).length
+    ? Object.values(hqCounts)
+    : [1];
+
+    hqChart.update();
+
+} else {
+
+hqChart = new Chart(document.getElementById('hqChart'), {
+
+    type: 'doughnut',
+
+    data: {
+
+        labels:
+        Object.keys(hqCounts).length
+        ? Object.keys(hqCounts)
+        : ['No Data'],
+
+        datasets: [{
+            data:
+            Object.values(hqCounts).length
+            ? Object.values(hqCounts)
+            : [1],
+
+            backgroundColor: [
+                '#3b82f6',
+                '#06b6d4',
+                '#10b981',
+                '#f59e0b',
+                '#8b5cf6'
+            ],
+
+            borderWidth: 0,
+            hoverOffset: 4
+        }]
+    },
+
+    options: {
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        cutout: '75%',
+
+        plugins: {
+
+            legend: {
+
+                position: 'right',
+
+                labels: {
+                    color: '#e2e8f0'
+                }
+            }
+        }
+    }
+});
+}
+        // Generate CLI-Wise Matrix
+        renderCLIMatrix(filteredData);
+        // ======================================
+// PENDING COUNSELLING ANALYSIS
+// ======================================
+const pendingHQ = {};
+const pendingDrive = {};
+const pendingCategory = {};
+
+latestCrewData.forEach(crew => {
+
+    const emp =
+    String(crew.empCode || '').trim();
+
+    const cli =
+    String(crew.cliName || 'UNKNOWN').trim();
+
+    const hq =
+    String(crew.hq || 'UNKNOWN').trim();
+
+    const category =
+    String(crew.crewType || 'UNKNOWN').trim();
+
+    DRIVE_LIST.forEach(drive => {
+     const categoryDriveMatch =
+selectedPendingCategoryDrive === 'ALL'
+||
+drive === selectedPendingCategoryDrive;
+
+const hqDriveMatch =
+selectedPendingHQDrive === 'ALL'
+||
+drive === selectedPendingHQDrive;
+
+const completed =
+historyMap.has(
+    `${emp}|${drive}`
+);
+
+       if (!completed) {
+
+    if (categoryDriveMatch) {
+
+        pendingCategory[category] =
+        (pendingCategory[category] || 0) + 1;
+    }
+
+    if (hqDriveMatch) {
+
+        pendingHQ[hq] =
+        (pendingHQ[hq] || 0) + 1;
+    }
+
+    pendingDrive[drive] =
+    (pendingDrive[drive] || 0) + 1;
+}
+    });
+});
+
+// ================= CATEGORY =================
+
+if (pendingCategoryChart)
+pendingCategoryChart.destroy();
+
+pendingCategoryChart =
+new Chart(
+document.getElementById('pendingCategoryChart'),
+{
+    type: 'doughnut',
+
+    data: {
+        labels: Object.keys(pendingCategory),
+        datasets: [{
+            data: Object.values(pendingCategory)
+        }]
+    },
+
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+
+// ================= HQ =================
+
+if (pendingHQChart)
+pendingHQChart.destroy();
+
+pendingHQChart =
+new Chart(
+document.getElementById('pendingHQChart'),
+{
+    type: 'bar',
+
+    data: {
+        labels: Object.keys(pendingHQ),
+        datasets: [{
+            label: 'Pending',
+            data: Object.values(pendingHQ)
+        }]
+    },
+
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+// ================= DRIVE TABLE =================
+
+const categories =
+[
+    'ALP',
+    'SALP',
+    'LPP',
+    'LPG',
+    'LPM',
+    'SHT',
+    'SSHT'
+];
+
+let headHtml =
+'<tr><th>Drive</th>';
+
+categories.forEach(cat => {
+    headHtml += `<th>${cat}</th>`;
+});
+
+headHtml += '</tr>';
+
+document.getElementById(
+'pendingDriveHead'
+).innerHTML = headHtml;
+
+let bodyHtml = '';
+
+DRIVE_LIST.forEach(drive => {
+
+    let row =
+    `<tr>
+        <td class="font-medium text-white">
+            ${drive}
+        </td>`;
+
+    categories.forEach(cat => {
+
+        const count =
+        latestCrewData.filter(crew => {
+
+            if (
+                selectedPendingDriveHQ !== 'ALL'
+                &&
+                crew.hq !== selectedPendingDriveHQ
+            ) {
+                return false;
+            }
+
+const completed =
+historyMap.has(
+    `${String(crew.empCode).trim()}|${drive}`
+);
+
+            return (
+                !completed
+                &&
+                String(crew.crewType)
+                .trim()
+                .toUpperCase()
+                ===
+                cat
+            );
+
+        }).length;
+
+        row += `
+        <td class="text-center">
+            ${count}
+        </td>`;
+    });
+
+    row += '</tr>';
+
+    bodyHtml += row;
+});
+
+document.getElementById(
+'pendingDriveBody'
+).innerHTML = bodyHtml;
+// ======================================
+// CLI WISE COUNSELLING SUMMARY
+// ======================================
+
+const cliSummaryMap = {};
+
+latestCrewData.forEach(crew => {
+
+    const cli =
+    String(crew.cliName || 'UNKNOWN').trim();
+
+    const emp =
+    String(crew.empCode || '').trim();
+
+    if (!cliSummaryMap[cli]) {
+
+        cliSummaryMap[cli] = {
+            totalCrewSet: new Set(),
+            drives: {}
+        };
+    }
+
+    cliSummaryMap[cli]
+    .totalCrewSet
+    .add(emp);
+
+    DRIVE_LIST.forEach(drive => {
+
+        if (!cliSummaryMap[cli].drives[drive]) {
+
+            cliSummaryMap[cli].drives[drive] = {
+                done: 0,
+                pending: 0
+            };
+        }
+
+const completed =
+historyMap.has(
+    `${emp}|${drive}`
+);
+
+        if (completed) {
+
+            cliSummaryMap[cli]
+            .drives[drive]
+            .done++;
+
+        } else {
+
+            cliSummaryMap[cli]
+            .drives[drive]
+            .pending++;
+        }
+    });
+});
+
+// TABLE HEADER
+
+document.getElementById(
+'cliSummaryHead'
+).innerHTML = `
+<tr>
+    <th>CLI</th>
+    <th>Total Crew</th>
+    <th>Drive</th>
+    <th>Done</th>
+    <th>Pending</th>
+</tr>
+`;
+
+// TABLE BODY
+
+let cliSummaryHtml = '';
+
+Object.keys(cliSummaryMap)
+.sort()
+.forEach(cli => {
+
+    const totalCrew =
+    cliSummaryMap[cli]
+    .totalCrewSet.size;
+
+   DRIVE_LIST
+.filter(drive =>
+
+    selectedSummaryDrive === 'ALL'
+    ||
+    drive === selectedSummaryDrive
+
+)
+.forEach(drive => {
+
+        const obj =
+        cliSummaryMap[cli]
+        .drives[drive];
+
+        cliSummaryHtml += `
+        <tr>
+
+            <td class="font-medium text-cyan-300">
+                ${cli}
+            </td>
+
+            <td class="text-center">
+                ${totalCrew}
+            </td>
+
+            <td class="text-slate-200">
+                ${drive}
+            </td>
+
+            <td class="text-center">
+                <span class="text-emerald-400 font-semibold">
+                    ${obj.done}
+                </span>
+            </td>
+
+            <td class="text-center">
+                <span class="text-amber-400 font-semibold">
+                    ${obj.pending}
+                </span>
+            </td>
+
+        </tr>
+        `;
+    });
+});
+
+document.getElementById(
+'cliSummaryBody'
+).innerHTML = cliSummaryHtml;
+    }
+
+    function renderCLIMatrix(data) {
+        let html = `<thead><tr><th class="sticky-col z-20">CLI Name</th>`;
+        DRIVE_LIST.forEach(d => html += `<th>${d}</th>`);
+        html += `</tr></thead><tbody>`;
+
+        if (data.length === 0) {
+            html += `<tr><td colspan="${DRIVE_LIST.length + 1}" class="text-center text-slate-500 py-6">No data available for selected filter</td></tr></tbody>`;
+            document.getElementById('cliMatrixTable').innerHTML = html;
+            return;
+        }
+
+        const matrix = {};
+        data.forEach(r => {
+            if(!matrix[r.cliName]) matrix[r.cliName] = {};
+            matrix[r.cliName][r.drive] = (matrix[r.cliName][r.drive] || 0) + 1;
+        });
+
+        Object.keys(matrix).sort().forEach(cli => {
+            html += `<tr><td class="sticky-col font-medium text-white">${cli}</td>`;
+            DRIVE_LIST.forEach(d => {
+                const count = matrix[cli][d] || 0;
+                if(count > 0) {
+                    html += `<td class="text-center"><span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-md text-xs font-bold">${count}</span></td>`;
+                } else {
+                    html += `<td class="text-center text-slate-600">-</td>`;
+                }
+            });
+            html += `</tr>`;
+        });
+        html += `</tbody>`;
+        document.getElementById('cliMatrixTable').innerHTML = html;
+    }
+    function normalizeDate(dateStr) {
+
+    if (!dateStr) return '';
+
+    dateStr =
+    String(dateStr).trim();
+
+    // ISO Date Handling
+    if (dateStr.includes('T')) {
+
+        const date = new Date(dateStr);
+
+        const day =
+        String(date.getDate()).padStart(2, '0');
+
+        const month =
+        String(date.getMonth() + 1).padStart(2, '0');
+
+        const year =
+        date.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    }
+
+    const parts =
+    dateStr.split('/');
+
+    if (parts.length !== 3)
+        return dateStr;
+
+    const day =
+    String(parts[0]).trim()
+    .padStart(2,'0');
+
+    const month =
+    String(parts[1]).trim()
+    .padStart(2,'0');
+
+    let year =
+    String(parts[2]).trim();
+
+    if (year.length === 2) {
+        year = '20' + year;
+    }
+
+    return `${day}/${month}/${year}`;
+}
+function formatDisplayDate(dateStr) {
+
+    if (!dateStr) return '';
+
+    // ISO Date Handling
+    if (dateStr.includes('T')) {
+
+        const isoPart =
+dateStr.split('T')[0];
+
+const [year, month, day] =
+isoPart.split('-');
+
+return `${day}/${month}/${year}`;
+    }
+
+    // Already Normal Format
+    return normalizeDate(dateStr);
+}
+    /* Boot */
+async function bootApp() {
+
+    await initDrives();
+
+    await Promise.all([
+        loadHistory(),
+        loadLatestCrewData()
+    ]);
+
+    loadDashboard(true);
+}
+
+bootApp();
+
+</script>
+</body>
+</html>
