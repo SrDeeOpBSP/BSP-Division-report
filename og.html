@@ -33,7 +33,6 @@
         
         /* Custom Sticky Columns for Double Freeze (ID & Name) */
         .sticky-id { position: sticky; left: 0; z-index: 10; border-right: 1px solid #e2e8f0; background: #f8fafc !important; font-weight: 600; }
-        .sticky-name { position: sticky; left: 100px; z-index: 10; border-right: 2px solid #e2e8f0; background: #f8fafc !important; font-weight: 600; }
         th.sticky-id, th.sticky-name { background: #e2e8f0 !important; z-index: 20; }
         
         /* Matrix Popup */
@@ -546,16 +545,16 @@
         const days = new Date(year, month, 0).getDate();
         // Sticky th for both Crew ID and Name
         let html = `<thead class="sticky top-0 z-30"><tr>
-                    <th class="sticky-id min-w-[100px] max-w-[100px]">Crew ID</th>
-                    <th class="sticky-name min-w-[200px] max-w-[200px]">Name</th>`;
-        for(let d=1; d<=days; d++) html += `<th class="text-center min-w-[120px] bg-[#e2e8f0]">${String(d).padStart(2,'0')}/${String(month).padStart(2,'0')}</th>`;
+                   <th class="sticky-id min-w-[75px] max-w-[75px] text-[10px]">Crew ID</th>
+                    <th class="min-w-[140px] max-w-[140px]">Name</th>`;
+        for(let d=1; d<=days; d++) html += `<th class="text-center min-w-[70px] text-[10px] px-1 bg-[#e2e8f0]">${String(d).padStart(2,'0')}/${String(month).padStart(2,'0')}</th>`;
         html += `</tr></thead><tbody>`;
 
         data.forEach(row => {
             // Sticky td for both Crew ID and Name
             html += `<tr data-emp="${row.empCode}">
-                        <td class="sticky-id font-mono text-blue-600 min-w-[100px] max-w-[100px]">${row.crewId}</td>
-                        <td class="sticky-name font-bold truncate min-w-[200px] max-w-[200px]" title="${row.crewName}">${row.crewName}</td>`;
+                        <td class="sticky-id font-mono text-blue-600 min-w-[75px] max-w-[75px] text-[10px]">${row.crewId}</td>
+                        <td class="font-bold truncate min-w-[140px] max-w-[140px]" title="${row.crewName}">${row.crewName}</td>`;
             for(let d=1; d<=days; d++) {
                 const date = `${String(d).padStart(2,'0')}/${String(month).padStart(2,'0')}/${year}`;
                 let completedCount = 0;
@@ -569,7 +568,7 @@
 
                 html += `
                 <td class="relative">
-                    <button type="button" onclick="togglePopup(this)" class="w-full py-1.5 px-2 rounded-md text-xs font-bold flex justify-center items-center gap-1 transition-all ${btnClass}">
+                    <button type="button" onclick="togglePopup(this)" class="w-full py-1 px-1 rounded text-[10px] font-bold flex justify-center items-center gap-1 transition-all ${btnClass}">
                      ${btnText}
                     </button>
                     <div class="drive-popup hidden absolute z-50 p-3 mt-1 w-[260px] right-0 sm:left-1/2 sm:-translate-x-1/2">
