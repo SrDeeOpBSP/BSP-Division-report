@@ -3,1153 +3,727 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Master CLI Inspection Report</title>
+    <title>Unified Railway Crew Inspection & Matrix Portal</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
-            padding: 20px;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; overflow-x: hidden; }
+        
+        .ambient-bg { position: fixed; inset: 0; z-index: -1; background: linear-gradient(135deg, #f0f9ff 0%, #e2e8f0 100%); }
+        
+        .clean-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 1rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); }
+        
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Tables for Matrix */
+        .table-container { width: 100%; overflow-x: auto; border-radius: 0.75rem; border: 1px solid #e2e8f0; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th { background: #f1f5f9; color: #475569; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 1rem; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+        td { padding: 0.75rem; border-bottom: 1px solid #f1f5f9; background: #ffffff; font-size: 0.85rem; white-space: nowrap; color: #334155; }
+        tr:hover td { background: #f8fafc; }
+        
+        /* Custom Sticky Columns for Double Freeze (ID & Name) */
+        .sticky-id { position: sticky; left: 0; z-index: 10; border-right: 1px solid #e2e8f0; background: #f8fafc !important; font-weight: 600; }
+        .sticky-name { position: sticky; left: 100px; z-index: 10; border-right: 2px solid #e2e8f0; background: #f8fafc !important; font-weight: 600; }
+        th.sticky-id, th.sticky-name { background: #e2e8f0 !important; z-index: 20; }
+        
+        /* Matrix Popup */
+        .drive-popup { background: #ffffff; border: 1px solid #cbd5e1; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); border-radius: 0.75rem; animation: scaleIn 0.2s ease; z-index: 50;}
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-        .master-container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            max-width: 800px;
-            width: 100%;
-            margin-bottom: 40px;
-        }
+        /* Form Inputs */
+        .modern-input { width: 100%; padding: 0.65rem 1rem; border-radius: 0.5rem; background: #f8fafc; border: 1px solid #cbd5e1; color: #1e293b; font-size: 0.85rem; transition: all 0.2s; }
+        .modern-input:focus { border-color: #3b82f6; background: #ffffff; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); outline: none; }
+        .modern-input[readonly] { background: #e2e8f0; color: #64748b; cursor: not-allowed; border-color: #cbd5e1; }
+        .modern-label { display: block; margin-bottom: 0.35rem; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;}
+        
+        /* Accordion Styles */
+        .section-header { padding: 1.25rem 1.5rem; background: #f1f5f9; cursor: pointer; display: flex; align-items: center; gap: 1rem; border-radius: 0.75rem; transition: all 0.2s; border: 1px solid #e2e8f0; }
+        .section-header:hover { background: #e2e8f0; border-color: #cbd5e1; }
+        .section-body { padding: 1.5rem; border-top: 1px solid #e2e8f0; background: #ffffff; border-radius: 0 0 0.75rem 0.75rem; }
+        .checkbox-custom { width: 1.25rem; height: 1.25rem; accent-color: #2563eb; cursor: pointer; flex-shrink: 0; }
+        
+        /* Links section styles */
+        .link-card { display: flex; flex-direction: column; gap: 10px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .btn-link { padding: 10px; text-align: center; border-radius: 6px; font-weight: bold; font-size: 0.8rem; text-decoration: none; color: white; transition: 0.3s; }
+        .btn-drive { background: linear-gradient(45deg, #10b981, #059669); }
+        .btn-pdf { background: linear-gradient(45deg, #f59e0b, #d97706); }
+        .btn-link:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-        h2 { text-align: center; color: #1e3a8a; margin-bottom: 10px; }
-        .subtitle { text-align: center; color: #64748b; font-size: 0.9em; margin-bottom: 25px; }
-
-        /* Common Info Section */
-        .common-section {
-            background: #f8fafc; padding: 20px; border-radius: 8px; border: 2px solid #cbd5e1; margin-bottom: 25px;
-        }
-
-        /* Report Block (Accordion Style) */
-        .report-block {
-            background: #f1f5f9; border-radius: 8px; margin-bottom: 15px; border: 1px solid #cbd5e1;
-            overflow: hidden; transition: all 0.3s ease;
-        }
-        .report-header {
-            padding: 15px 20px; font-size: 1.1em; font-weight: bold; color: #1e40af; cursor: pointer;
-            display: flex; align-items: center; background: #e2e8f0; margin: 0; transition: background 0.2s ease;
-        }
-        .report-header:hover { background: #cbd5e1; }
-        .report-header input[type="checkbox"] { width: 20px; height: 20px; margin-right: 15px; cursor: pointer; }
-
-        /* Form Sections */
-        .sub-section {
-            display: none; padding: 20px; background: #ffffff; border-top: 2px solid #94a3b8;
-            animation: slideDown 0.3s ease-in-out;
-        }
-        .sub-section.active { display: block; }
-        .sub-section h3 { margin-top: 0; color: #0f172a; font-size: 1.1em; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
-
-        /* Inputs */
-        label { display: block; margin-top: 15px; margin-bottom: 5px; font-weight: 600; color: #334155; font-size: 0.9em; }
-        input[type="text"], input[type="month"], input[type="date"], input[type="time"], input[type="number"], input[type="tel"], select, textarea {
-            width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px;
-            background-color: #f8fafc; transition: 0.3s;
-        }
-        input:focus, select:focus, textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); outline: none; }
-        input[readonly] { background-color: #e2e8f0; cursor: not-allowed; color: #475569; }
-        textarea { height: 70px; resize: vertical; }
-
-        /* Specific Styles for Sections */
-        .sd-drive-section { border: 1px solid #e9ecef; padding: 15px; margin-top: 15px; border-radius: 8px; background-color: #fcfcfc; }
-        .sd-action-container { margin-top: 10px; padding: 10px; border: 1px dashed #007BFF; border-radius: 6px; background-color: rgba(0, 123, 255, 0.05); display: none; }
-        .checkbox-group { display: flex; gap: 15px; align-items: center; margin-bottom: 10px; }
-        .checkbox-group input[type="checkbox"] { width: auto; margin-right: 5px; }
-        .char-limit-message { color: #d9534f; font-size: 0.85em; margin-top: 2px; }
-        #od_extra_group { background: #fffbea; padding: 15px; border: 1px dashed #eab308; border-radius: 8px; margin-top: 10px; display: none; }
-
-        /* Important Links Section */
-        .links-section { margin-top: 30px; padding: 20px; background: #f8fafc; border-radius: 8px; border: 2px dashed #94a3b8; }
-        .ongoing-drive-table { display: grid; grid-template-columns: 3fr 1fr; gap: 15px; margin-top: 10px; }
-        .table-header { grid-column: 1 / -1; display: grid; grid-template-columns: 3fr 1fr; gap: 15px; padding-bottom: 10px; border-bottom: 2px solid #ced4da; font-weight: bold; color: #2c3e50; }
-        .table-cell { display: flex; align-items: center; justify-content: center; }
-        .drive-link-button, .pdf-link-button { width: 100%; padding: 12px; text-align: center; text-decoration: none; color: white; border-radius: 8px; font-weight: bold; display: flex; align-items: center; justify-content: center; min-height: 60px; box-sizing: border-box; font-size: 0.9em;}
-        .drive-link-button { background: linear-gradient(45deg, #28a745, #218838); }
-        .pdf-link-button { background: linear-gradient(45deg, #fd7e14, #ffc107); }
-        .empty-pdf { background-color: transparent; border: 1px dashed #ccc; width: 100%; min-height: 60px; border-radius: 8px; }
-
-        /* Master Submit Button */
-        button#masterSubmitBtn {
-            background: linear-gradient(to right, #10b981, #059669); color: white; padding: 15px; border: none; border-radius: 8px;
-            cursor: pointer; font-size: 18px; font-weight: bold; width: 100%; margin-top: 20px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
-        }
-        button#masterSubmitBtn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4); }
-        button#masterSubmitBtn:disabled { background: #9ca3af; cursor: not-allowed; transform: none; }
-
-        .hidden { display: none !important; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-15px); } to { opacity: 1; transform: translateY(0); } }
+        /* Toast */
+        .toast-card { background: #ffffff; border-left: 4px solid #3b82f6; color: #1e293b; border-radius: 0.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); animation: slideIn 0.3s ease forwards; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;}
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
 
-<div class="master-container">
-    <h2>UNIFIED CLI INSPECTION REPORT</h2>
-    <div class="subtitle">Unified Inspection Portal. Kindly check the applicable boxes below to proceed with data entry.</div>
+<div class="ambient-bg"></div>
+<div id="toastContainer" class="fixed bottom-6 right-6 z-[99999] flex flex-col gap-3"></div>
 
-    <form id="masterForm">
+<div class="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
+    <header class="clean-card p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+            <div class="bg-blue-100 p-3 rounded-xl border border-blue-200 text-blue-600">
+                <i data-lucide="clipboard-check" class="w-7 h-7"></i>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800">Unified CLI Master Inspection Form</h1>
+                <p class="text-slate-500 text-xs md:text-sm font-semibold flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Cloud Synchronized System
+                </p>
+            </div>
+        </div>
+        <div class="bg-slate-100 px-4 py-2 rounded-lg border border-slate-200 text-right">
+            <div id="liveClock" class="text-slate-600 text-sm font-bold"></div>
+        </div>
+    </header>
+
+    <form id="masterForm" onsubmit="event.preventDefault();" class="space-y-5">
         
-        <div class="common-section">
-            <h3 style="margin-top:0; color:#1e3a8a;">Common Details</h3>
-            <label>CLI ID:</label>
-            <input type="text" id="c_cli_id" placeholder="Example: BSP0068" style="text-transform:uppercase" required>
-            <label>CLI NAME:</label>
-            <input type="text" id="c_cli_name" readonly required>
-            <label>CLI HQ:</label>
-            <input type="text" id="c_cli_hq" readonly required>
-            <label>DATE:</label>
-            <input type="date" id="c_date" required>
-        </div>
-
-        <div class="report-block">
-            <label class="report-header">
-               <input type="checkbox" id="chk_ab" onchange="checkAbnormalityDate(this)">
-                1. ABNORMALITY DAILY REPORT
-            </label>
-            <div id="sec_ab" class="sub-section">
-                <label>ANY FOOTPLATE DONE AS PER TLC:</label>
-                <select data-name="ANY FOOTPLATE DONE AS PER TLC" class="req-ab">
-                    <option value="" disabled selected>Select</option><option value="YES">YES</option><option value="NO">NO</option>
-                </select>
-                <label>FOOTPLATE DURING WEE HOURS:</label>
-                <input type="number" data-name="FOOTPLATE DURING WEE HOURS" value="0" min="0" class="req-ab">
-                <label>ABNORMALITIES ON FOOTPLATE DURING WEE HOURS:</label>
-                <input type="number" data-name="ABNORMALITIES ON FOOTPLATE DURING WEE HOURS" value="0" min="0" class="req-ab">
-                <label>FOOTPLATE EXCLUDING WEE HOURS:</label>
-                <input type="number" data-name="FOOTPLATE EXCLUDING WEE HOURS" value="0" min="0" class="req-ab">
-                <label>ABNORMALITIES ON FOOTPLATE EXCLUDING WEE HOURS:</label>
-                <input type="number" data-name="ABNORMALITIES ON FOOTPLATE EXCLUDING WEE HOURS" value="0" min="0" class="req-ab">
-                
-                <label>FOOT PLATE DONE IN COACHING:</label>
-                <input type="number" data-name="FOOT PLATE DONE IN COACHING" value="0" min="0" class="req-ab">
-                <label>ABNORMALITY COUNT DURING FOOTPLATE IN COACHING:</label>
-                <input type="number" id="abCoachingCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN COACHING" value="0" min="0" class="req-ab">
-                <label>ABNORMALITY DETAIL DURING FOOTPLATE IN COACHING:</label>
-                <textarea id="abCoachingDetail" data-name="ABNORMALITY DETAIL DURING FOOTPLATE IN COACHING">NIL</textarea>
-                
-                <label>FOOT PLATE DONE IN MEMU:</label>
-                <input type="number" data-name="FOOT PLATE DONE IN MEMU" value="0" min="0" class="req-ab">
-                <label>ABNORMALITY COUNT DURING FOOTPLATE IN MEMU:</label>
-                <input type="number" id="abMemuCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN MEMU" value="0" min="0" class="req-ab">
-                <label>ABNORMALITY DETAIL DURING FOOTPLATE IN MEMU:</label>
-                <textarea id="abMemuDetail" data-name="ABNORMALITY DETAIL DURING FOOTPLATE IN MEMU">NIL</textarea>
-                
-                <label>FOOT PLATE DONE IN GOODS TRAIN:</label>
-                <input type="number" data-name="FOOT PLATE DONE IN GOODS TRAIN" value="0" min="0" class="req-ab">
-                <label>ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN:</label>
-                <input type="number" id="abGoodsCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN" value="0" min="0" class="req-ab">
-                <label>ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN:</label>
-                <textarea id="abGoodsDetail" data-name="ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN">NIL</textarea>
-                
-                <label>FOOTPLATE DONE WITH GROUP LP ON DATE:</label>
-                <input type="number" data-name="FOOTPLATE DONE WITH GROUP LP ON DATE" value="0" min="0">
-                <label>FOOTPLATE DONE WITH GROUP ALP ON DATE:</label>
-                <input type="number" data-name="FOOTPLATE DONE WITH GROUP ALP ON DATE" value="0" min="0">
-                <label>FOOTPLATE DONE WITH GROUP LPS ON DATE:</label>
-                <input type="number" data-name="FOOTPLATE DONE WITH GROUP LPS ON DATE" value="0" min="0">
-                <label>SPECIAL FOOTPLATE(IMPROVING DRIVING TECHNIQUES):</label>
-                <input type="number" data-name="SPECIAL FOOTPLATE(IMPROVING DRIVING/BRAKING TECHNIQUES LIKE HANDLING)" value="0" min="0" class="req-ab">
-                
-                <label>AUTO AND IB AMBUSH(NO OF TRAINS):</label>
-                <input type="number" data-name="AUTO AND IB AMBUSH(NO OF TRAINS)" value="0" min="0" class="req-ab">
-                <label>ABNORMALITIES ON AUTO AND IB AMBUSH:</label>
-                <input type="number" data-name="ABNORMALITIES ON AUTO AND IB AMBUSH" value="0" min="0" class="req-ab">
-                <label>LEVEL CROSSING AMBUSH(NO OF TRAINS):</label>
-                <input type="number" data-name="LEVEL CROSSING AMBUSH(NO OF TRAINS)" value="0" min="0" class="req-ab">
-                <label>ABNORMALITIES ON LEVEL CROSSING AMBUSH:</label>
-                <input type="number" data-name="ABNORMALITIES ON LEVEL CROSSING AMBUSH" value="0" min="0" class="req-ab">
-                <label>CD ZONES AMBUSH(NO OF TRAINS):</label>
-                <input type="number" data-name="CD ZONES AMBUSH(NO OF TRAINS)" value="0" min="0" class="req-ab">
-                <label>ABNBORMALITIES ON CD ZONES AMBUSH:</label>
-                <input type="number" data-name="ABNBORMALITIES ON CD ZONES AMBUSH" value="0" min="0" class="req-ab">
-                <label>BA AMBUSH(NO OF CREWS):</label>
-                <input type="number" data-name="BA AMBUSH(NO OF CREWS)" value="0" min="0" class="req-ab">
-                <label>ABNORMALITIES ON BA AMBUSH:</label>
-                <input type="number" data-name="ABNORMALITIES ON BA AMBUSH" value="0" min="0" class="req-ab">
-                
-                <label>SPEED GUN CHECKING AUTO AT ON:</label>
-                <input type="number" data-name="SPEED GUN CHECKING AUTO AT ON (NO OF TRAINS)" value="0" min="0" class="req-ab">
-                <label>ABNORMALITIES ON SPEED GUN CHECKING AUTO AT ON:</label>
-                <input type="number" data-name="ABNORMALITIES ON SPEED GUN CHECKING AUTO AT ON" value="0" min="0" class="req-ab">
-                <label>SPEED GUN CHECKING PASSING AT YELLOW:</label>
-                <input type="number" data-name="SPEED GUN CHECKING PASSING AT YELLOW (NO OF TRAINS)" value="0" min="0" class="req-ab">
-                <label>ABNORMALITIES ON SPEED GUN CHECKING PASSING AT YELLOW:</label>
-                <input type="number" data-name="ABNORMALITIES ON SPEED GUN CHECKING PASSING AT YELLOW" value="0" min="0" class="req-ab">
-                
-                <label>COUNSELLING AT LOBBY CONCERNED TO SAFETY:</label>
-                <input type="number" data-name="COUNCELLING AT LOBBY CONCERNED TO SAFETY(NO OF CREWS)" value="0" min="0" class="req-ab">
-                <label>SHUNTING PROCEDURE & RULES INVOLVED AS PER GR 5.13:</label>
-                <input type="number" data-name="SHUNTING PROCEDURE & RULES INVOLVED AS PER GR 5.13" value="0" min="0" class="req-ab">
-                <label>COUNSELLING FOR SPAD PREVENTION:</label>
-                <input type="number" data-name="COUNSELLING FOR SPAD PREVENTION" value="0" min="0" class="req-ab">
-                <label>LONG HOURS DUTY OF CREW:</label>
-                <input type="number" data-name="LONG HOURS DUTY OF CREW" value="0" min="0" class="req-ab">
-                <label>FAMILY/SAFETY SEMINAR:</label>
-                <input type="number" data-name="FAMILY/SAFETY SEMINAR" value="0" min="0" class="req-ab">
-                <label>RUNNING ROOM INSPECTION:</label>
-                <input type="number" data-name="RUNNING ROOM INSPECTION" value="0" min="0" class="req-ab">
-                <label>ABNORMALITIES ON RUNNING ROOM INSPECTION:</label>
-                <input type="number" data-name="ABNORMALITIES ON RUNNING ROOM INSPECTION" value="0" min="0" class="req-ab">
-                <label>ABNORMALITY DETAIL DURING RUNNING ROOM INSPECTION:</label>
-                <textarea id="abRrDetail" data-name="ABNORMALITY DETAIL DURING RUNNING ROOM INSPECTION">NIL</textarea>
-                <label>LOBBY INSPECTION:</label>
-                <input type="number" data-name="LOBBY INSPECTION" value="0" min="0" class="req-ab">
-                <label>ABNORMALITIES ON LOBBY INSPECTION:</label>
-                <input type="number" data-name="ABNORMALITIES ON LOBBY INSPECTION" value="0" min="0" class="req-ab">
-                <label>ABNORMALITY DETAIL DURING LOBBY INSPECTION:</label>
-                <textarea id="abLobbyDetail" data-name="ABNORMALITY DETAIL DURING LOBBY INSPECTION">NIL</textarea>
-                <label>ABNORMALITIES DESCRIPTION IN DETAILS:</label>
-                <textarea data-name="ABNORMALITIES DESCRIPTION RELATED ABOVE ALL FIELD IN DETAILS"></textarea>
+        <div class="clean-card p-6 border-t-4 border-t-blue-500">
+            <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i data-lucide="user" class="text-blue-500 w-5 h-5"></i> COMMON CLI DETAILS
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div><label class="modern-label">CLI ID (Type to Auto-Fill)</label><input type="text" id="c_cli_id" class="modern-input font-mono uppercase font-bold" placeholder="e.g. BSP0068" required></div>
+                <div><label class="modern-label">CLI NAME</label><input type="text" id="c_cli_name" class="modern-input font-semibold" readonly required placeholder="Auto Fetched"></div>
+                <div><label class="modern-label">CLI HQ</label><input type="text" id="c_cli_hq" class="modern-input font-semibold" readonly required placeholder="Auto Fetched"></div>
+                <div><label class="modern-label">DATE</label><input type="date" id="c_date" class="modern-input font-semibold" required></div>
             </div>
         </div>
 
-        <div class="report-block">
-            <label class="report-header">
-                <input type="checkbox" id="chk_lp" onchange="toggleSection('sec_lp', this.checked)">
-                2. END TO END LP
+        <div class="clean-card overflow-hidden">
+            <label class="section-header">
+                <input type="checkbox" id="chk_ab" class="checkbox-custom" onchange="checkAbnormalityDate(this)">
+                <span class="font-bold text-slate-700 text-lg">1. ABNORMALITY DAILY REPORT</span>
             </label>
-            <div id="sec_lp" class="sub-section">
-                <label>LP ID:</label>
-                <select id="lp_id" class="req-lp" onchange="autoFillLpDetails(this.value)">
-                    <option value="">Select LP ID</option>
-                </select>
-                <label>LP NAME:</label>
-                <input type="text" id="lp_name" readonly>
-                <label>DESG:</label>
-                <input type="text" id="lp_desg" readonly>
-                <label>HQ:</label>
-                <input type="text" id="lp_hq" readonly>
+            <div id="sec_ab" class="section-body hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div><label class="modern-label">ANY FOOTPLATE DONE AS PER TLC</label><select data-name="ANY FOOTPLATE DONE AS PER TLC" class="modern-input req-ab"><option value="" disabled selected>Select</option><option value="YES">YES</option><option value="NO">NO</option></select></div>
+                <div><label class="modern-label">FOOTPLATE DURING WEE HOURS</label><input type="number" data-name="FOOTPLATE DURING WEE HOURS" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">ABNORMALITIES ON FP DURING WEE HOURS</label><input type="number" data-name="ABNORMALITIES ON FOOTPLATE DURING WEE HOURS" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">FOOTPLATE DURING NIGHT HOURS</label><input type="number" data-name="FOOTPLATE DURING NIGHT HOURS" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">ABNORMALITIES ON FOOTPLATE DURING NIGHT HOURS</label><input type="number" data-name="ABNORMALITIES ON FOOTPLATE DURING NIGHT HOURS" value="0" min="0" class="modern-input req-ab"></div>
                 
-                <label>MAJOR BEAT:</label>
-                <select id="lp_major_beat" class="req-lp">
-                    <option value="">Select MAJOR BEAT</option>
-                </select>
+                <div><label class="modern-label">FOOTPLATE EXCLUDING WEE HOURS</label><input type="number" data-name="FOOTPLATE EXCLUDING WEE HOURS" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">ABN ON FP EXCLUDING WEE HOURS</label><input type="number" data-name="ABNORMALITIES ON FOOTPLATE EXCLUDING WEE HOURS" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">FOOT PLATE DONE IN COACHING</label><input type="number" data-name="FOOT PLATE DONE IN COACHING" value="0" min="0" class="modern-input req-ab"></div>
                 
-                <label>BEAT:</label>
-                <select id="lp_beat" class="req-lp" onchange="toggleOtherBeat(this, 'lp_other_beat')">
-                    <option value="">Select BEAT</option>
-                    <option value="AKT-RIG">AKT-RIG</option><option value="RIG-AKT">RIG-AKT</option><option value="AKT-KRBA">AKT-KRBA</option><option value="KRBA-AKT">KRBA-AKT</option><option value="BSP-SDL">BSP-SDL</option><option value="BSP-RIG">BSP-RIG</option><option value="BSP-KRBA">BSP-KRBA</option><option value="BSP-DBEC">BSP-DBEC</option><option value="USL-NKJ">USL-NKJ</option><option value="USL-DBEC">USL-DBEC</option><option value="USL-RIG">USL-RIG</option><option value="USL-KRBA">USL-KRBA</option><option value="PND-BSP">PND-BSP</option><option value="PND-NKJ">PND-NKJ</option><option value="SDL-SGO">SDL-SGO</option><option value="SDL-BSP">SDL-BSP</option><option value="SDL-NKJ">SDL-NKJ</option><option value="NKJ-SDL">NKJ-SDL</option><option value="SDL-BJRI">SDL-BJRI</option><option value="BJRI-SDL">BJRI-SDL</option><option value="SDL-ABKP">SDL-ABKP</option><option value="KHS-USL">KHS-USL</option><option value="KHS-BRJN">KHS-BRJN</option><option value="KHS-DMJY">KHS-DMJY</option><option value="KHS-KRBA">KHS-KRBA</option><option value="BRJN-ROU">BRJN-ROU</option><option value="BRJN-RIG">BRJN-RIG</option><option value="BRJN-SBP">BRJN-SBP</option><option value="KRBA-DPK">KRBA-DPK</option><option value="KRBA-GAD">KRBA-GAD</option><option value="KRBA-USL">KRBA-USL</option><option value="KRBA-RIG">KRBA-RIG</option><option value="BJRI-ABKP">BJRI-ABKP</option><option value="BJRI-BSP">BJRI-BSP</option><option value="BJRI-NKJ">BJRI-NKJ</option><option value="RIG-USL">RIG-USL</option><option value="RIG-ROU">RIG-ROU</option><option value="SJQ-ABKP-PSRS">SJQ-ABKP-PSRS</option><option value="SJQ-SDL">SJQ-SDL</option><option value="BSP-BJRI">BSP-BJRI</option><option value="USL-RSD">USL-RSD</option><option value="BSP-RSD">BSP-RSD</option><option value="BSP-NGP">BSP-NGP</option><option value="NGP-BSP">NGP-BSP</option><option value="BSP-CKP">BSP-CKP</option><option value="BSP-TATA">BSP-TATA</option><option value="BSP-ROU">BSP-ROU</option><option value="BSP-SBP">BSP-SBP</option><option value="OTHER">OTHER</option>
-                </select>
-                <input type="text" id="lp_other_beat" class="hidden" placeholder="Enter other beat" style="margin-top: 10px;">
-
-                <label>LOCO NUMBER:</label>
-                <input type="number" id="lp_loco" class="req-lp">
-                <label>TRAIN NUMBER:</label>
-                <input type="text" id="lp_train" class="req-lp">
-                <label>FROM TIME:</label>
-                <input type="time" id="lp_from" class="req-lp">
-                <label>TO TIME:</label>
-                <input type="time" id="lp_to" class="req-lp">
-            </div>
-        </div>
-
-        <div class="report-block">
-            <label class="report-header">
-                <input type="checkbox" id="chk_alp" onchange="toggleSection('sec_alp', this.checked)">
-                3. END TO END ALP
-            </label>
-            <div id="sec_alp" class="sub-section">
-                <label>ALP ID:</label>
-                <select id="alp_id" class="req-alp" onchange="autoFillAlpDetails(this.value)">
-                    <option value="">Select ALP ID</option>
-                </select>
-                <label>ALP NAME:</label>
-                <input type="text" id="alp_name" readonly>
-                <label>DESG:</label>
-                <input type="text" id="alp_desg" readonly>
-                <label>HQ:</label>
-                <input type="text" id="alp_hq" readonly>
+                <div><label class="modern-label">ABN COUNT DURING FP IN COACHING</label><input type="number" id="abCoachingCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN COACHING" value="0" min="0" class="modern-input req-ab"></div>
+                <div class="lg:col-span-2"><label class="modern-label">ABN DETAIL DURING FP IN COACHING</label><textarea id="abCoachingDetail" data-name="ABNORMALITY DETAIL DURING FOOTPLATE IN COACHING" class="modern-input">NIL</textarea></div>
                 
-                <label>BEAT:</label>
-                <select id="alp_beat" class="req-alp" onchange="toggleOtherBeat(this, 'alp_other_beat')">
-                    <option value="">Select BEAT</option>
-                    <option value="AKT-USL">AKT-USL</option><option value="AKT-RIG">AKT-RIG</option><option value="AKT-KRBA">AKT-KRBA</option><option value="BSP-SDL">BSP-SDL</option><option value="BSP-RIG">BSP-RIG</option><option value="BSP-KRBA">BSP-KRBA</option><option value="BSP-DBEC">BSP-DBEC</option><option value="USL-NKJ">USL-NKJ</option><option value="USL-DBEC">USL-DBEC</option><option value="USL-RIG">USL-RIG</option><option value="USL-KRBA">USL-KRBA</option><option value="PND-BSP">PND-BSP</option><option value="PND-NKJ">PND-NKJ</option><option value="SDL-SGO">SDL-SGO</option><option value="SDL-BSP">SDL-BSP</option><option value="SDL-NKJ">SDL-NKJ</option><option value="NKJ-SDL">NKJ-SDL</option><option value="SDL-BJRI">SDL-BJRI</option><option value="BJRI-SDL">BJRI-SDL</option><option value="SDL-ABKP">SDL-ABKP</option><option value="KHS-USL">KHS-USL</option><option value="KHS-BRJN">KHS-BRJN</option><option value="KHS-DMJY">KHS-DMJY</option><option value="KHS-KRBA">KHS-KRBA</option><option value="BRJN-ROU">BRJN-ROU</option><option value="BRJN-RIG">BRJN-RIG</option><option value="BRJN-SBP">BRJN-SBP</option><option value="KRBA-DPK">KRBA-DPK</option><option value="KRBA-USL">KRBA-USL</option><option value="KRBA-RIG">KRBA-RIG</option><option value="BJRI-ABKP">BJRI-ABKP</option><option value="BJRI-BSP">BJRI-BSP</option><option value="BJRI-NKJ">BJRI-NKJ</option><option value="RIG-USL">RIG-USL</option><option value="RIG-ROU">RIG-ROU</option><option value="SJQ-ABKP-PSRS">SJQ-ABKP-PSRS</option><option value="SJQ-SDL">SJQ-SDL</option><option value="BSP-BJRI">BSP-BJRI</option><option value="USL-RSD">USL-RSD</option><option value="BSP-RSD">BSP-RSD</option><option value="BSP-NGP">BSP-NGP</option><option value="BSP-CKP">BSP-CKP</option><option value="BSP-TATA">BSP-TATA</option><option value="BSP-ROU">BSP-ROU</option><option value="BSP-SBP">BSP-SBP</option><option value="OTHER">OTHER BEAT</option>
-                </select>
-                <input type="text" id="alp_other_beat" class="hidden" placeholder="Enter other beat" style="margin-top: 10px;">
+                <div><label class="modern-label">FOOT PLATE DONE IN MEMU</label><input type="number" data-name="FOOT PLATE DONE IN MEMU" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">ABN COUNT DURING FP IN MEMU</label><input type="number" id="abMemuCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN MEMU" value="0" min="0" class="modern-input req-ab"></div>
+                <div class="lg:col-span-2"><label class="modern-label">ABN DETAIL DURING FP IN MEMU</label><textarea id="abMemuDetail" data-name="ABNORMALITY DETAIL DURING FOOTPLATE IN MEMU" class="modern-input">NIL</textarea></div>
+                
+                <div><label class="modern-label">FOOT PLATE DONE IN GOODS TRAIN</label><input type="number" data-name="FOOT PLATE DONE IN GOODS TRAIN" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">ABN COUNT DURING FP IN GOODS TRAIN</label><input type="number" id="abGoodsCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN" value="0" min="0" class="modern-input req-ab"></div>
+                <div class="lg:col-span-2"><label class="modern-label">ABN DETAIL DURING FP IN GOODS TRAIN</label><textarea id="abGoodsDetail" data-name="ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN" class="modern-input">NIL</textarea></div>
+                
+                <div><label class="modern-label">FP DONE WITH GROUP LP ON DATE</label><input type="number" data-name="FOOTPLATE DONE WITH GROUP LP ON DATE" value="0" min="0" class="modern-input"></div>
+                <div><label class="modern-label">FP DONE WITH GROUP ALP ON DATE</label><input type="number" data-name="FOOTPLATE DONE WITH GROUP ALP ON DATE" value="0" min="0" class="modern-input"></div>
+                <div><label class="modern-label">FOOTPLATE DONE WITH GROUP LPS ON DATE</label><input type="number" data-name="FOOTPLATE DONE WITH GROUP LPS ON DATE" value="0" min="0" class="modern-input"></div>
+                <div><label class="modern-label">SPECIAL FP (IMPROVING TECHNIQUES)</label><input type="number" data-name="SPECIAL FOOTPLATE(IMPROVING DRIVING/BRAKING TECHNIQUES LIKE HANDLING)" value="0" min="0" class="modern-input req-ab"></div>
+                
+                <div><label class="modern-label">AUTO AND IB AMBUSH (NO OF TRAINS)</label><input type="number" data-name="AUTO AND IB AMBUSH(NO OF TRAINS)" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">ABNORMALITIES ON AUTO/IB AMBUSH</label><input type="number" data-name="ABNORMALITIES ON AUTO AND IB AMBUSH" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">LEVEL CROSSING AMBUSH (NO OF TRAINS)</label><input type="number" data-name="LEVEL CROSSING AMBUSH(NO OF TRAINS)" value="0" min="0" class="modern-input req-ab"></div>
+                
+                <div><label class="modern-label">ABN ON LEVEL CROSSING AMBUSH</label><input type="number" data-name="ABNORMALITIES ON LEVEL CROSSING AMBUSH" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">CD ZONES AMBUSH (NO OF TRAINS)</label><input type="number" data-name="CD ZONES AMBUSH(NO OF TRAINS)" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">ABNBORMALITIES ON CD ZONES AMBUSH</label><input type="number" data-name="ABNBORMALITIES ON CD ZONES AMBUSH" value="0" min="0" class="modern-input req-ab"></div>
+                
+                <div><label class="modern-label">BA AMBUSH (NO OF CREWS)</label><input type="number" data-name="BA AMBUSH(NO OF CREWS)" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">ABNORMALITIES ON BA AMBUSH</label><input type="number" data-name="ABNORMALITIES ON BA AMBUSH" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">SPEED GUN CHECKING AUTO AT ON (TRAINS)</label><input type="number" data-name="SPEED GUN CHECKING AUTO AT ON (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab"></div>
+                
+                <div><label class="modern-label">ABN ON SPEED GUN AUTO AT ON</label><input type="number" data-name="ABNORMALITIES ON SPEED GUN CHECKING AUTO AT ON" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">SPEED GUN CHECKING PASSING AT YELLOW</label><input type="number" data-name="SPEED GUN CHECKING PASSING AT YELLOW (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">ABN ON SPEED GUN PASSING AT YELLOW</label><input type="number" data-name="ABNORMALITIES ON SPEED GUN CHECKING PASSING AT YELLOW" value="0" min="0" class="modern-input req-ab"></div>
+                
+                <div><label class="modern-label">COUNSELLING AT LOBBY CONCERNED TO SAFETY</label><input type="number" data-name="COUNCELLING AT LOBBY CONCERNED TO SAFETY(NO OF CREWS)" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">SHUNTING PROCEDURE (GR 5.13)</label><input type="number" data-name="SHUNTING PROCEDURE & RULES INVOLVED AS PER GR 5.13" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">COUNSELLING FOR SPAD PREVENTION</label><input type="number" data-name="COUNSELLING FOR SPAD PREVENTION" value="0" min="0" class="modern-input req-ab"></div>
+                
+                <div><label class="modern-label">LONG HOURS DUTY OF CREW</label><input type="number" data-name="LONG HOURS DUTY OF CREW" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">FAMILY/SAFETY SEMINAR</label><input type="number" data-name="FAMILY/SAFETY SEMINAR" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">RUNNING ROOM INSPECTION</label><input type="number" data-name="RUNNING ROOM INSPECTION" value="0" min="0" class="modern-input req-ab"></div>
+                
+                <div><label class="modern-label">ABNORMALITIES ON RUNNING ROOM INSPECTION</label><input type="number" data-name="ABNORMALITIES ON RUNNING ROOM INSPECTION" value="0" min="0" class="modern-input req-ab"></div>
+                <div class="lg:col-span-2"><label class="modern-label">ABNORMALITY DETAIL DURING RUNNING ROOM INSPECTION</label><textarea id="abRrDetail" data-name="ABNORMALITY DETAIL DURING RUNNING ROOM INSPECTION" class="modern-input">NIL</textarea></div>
+                
+                <div><label class="modern-label">LOBBY INSPECTION</label><input type="number" data-name="LOBBY INSPECTION" value="0" min="0" class="modern-input req-ab"></div>
+                <div><label class="modern-label">ABNORMALITIES ON LOBBY INSPECTION</label><input type="number" data-name="ABNORMALITIES ON LOBBY INSPECTION" value="0" min="0" class="modern-input req-ab"></div>
+                <div class="lg:col-span-2"><label class="modern-label">ABNORMALITY DETAIL DURING LOBBY INSPECTION</label><textarea id="abLobbyDetail" data-name="ABNORMALITY DETAIL DURING LOBBY INSPECTION" class="modern-input">NIL</textarea></div>
+                
+                <div class="lg:col-span-3"><label class="modern-label">ABNORMALITIES DESCRIPTION IN DETAILS (ALL FIELDS)</label><textarea data-name="ABNORMALITIES DESCRIPTION RELATED ABOVE ALL FIELD IN DETAILS" class="modern-input"></textarea></div>
             </div>
         </div>
 
-        <div class="report-block">
-            <label class="report-header">
-                <input type="checkbox" id="chk_nfp" onchange="toggleSection('sec_nfp', this.checked)">
-                4. NIGHT FOOT PLATE
+        <div class="clean-card overflow-hidden">
+            <label class="section-header">
+                <input type="checkbox" id="chk_lp" class="checkbox-custom" onchange="toggleSection('sec_lp', this.checked)">
+                <span class="font-bold text-slate-700 text-lg">2. END TO END LP</span>
             </label>
-            <div id="sec_nfp" class="sub-section">
-                <label>FROM TIME:</label>
-                <input type="time" data-name="FROM TIME" class="req-nfp">
-                <label>TO TIME:</label>
-                <input type="time" data-name="TO TIME" class="req-nfp">
-                <label>TRAIN NUMBER:</label>
-                <input type="text" data-name="TRAIN NUMBER" class="req-nfp">
-                <label>LOCO NUMBER:</label>
-                <input type="text" data-name="LOCO NUMBER" class="req-nfp">
-                <label>SECTION:</label>
-                <input type="text" data-name="SECTION" class="req-nfp">
-                <label>SECTION WHERE FOG FOUND:</label>
-                <textarea data-name="SECTION WHERE FOG FOUND"></textarea>
-                <label>REMARK (OR ANY ABNORMALITIES):</label>
-                <textarea data-name="REMARK(OR ANY ABNORMALITIES)"></textarea>
-            </div>
-        </div>
-
-        <div class="report-block">
-            <label class="report-header">
-                <input type="checkbox" id="chk_ambush" onchange="toggleSection('sec_ambush', this.checked)">
-                5. AMBUSH & INSPECTION
-            </label>
-            <div id="sec_ambush" class="sub-section">
-                <label>Analysis Month:</label>
-                <input type="month" id="amb_month" class="req-ambush">
-                <label>Date of Ambush:</label>
-                <input type="date" id="amb_date" class="req-ambush">
-                <label>Date of Entry:</label>
-                <input type="date" id="amb_entry" class="req-ambush">
-                <label>Type of Ambush:</label>
-                <select id="amb_type" class="req-ambush" onchange="handleAmbushTypeChange(this)">
-                    <option value="">Select Type of Ambush</option>
-                    <option value="Auto Ambush">Auto Ambush</option>
-                    <option value="IB Ambush">IB Ambush</option>
-                    <option value="BA Ambush">BA Ambush</option>
-                    <option value="Random BA Ambush">Random BA Ambush</option>
-                    <option value="BPT & BFT Ambush">BPT & BFT Ambush</option>
-                    <option value="BPC Ambush">BPC Ambush</option>
-                    <option value="SPAD Counselling">SPAD Counselling</option>
-                    <option value="Safety Drive">Safety Drive</option>
-                    <option value="Safety Seminar">Safety Seminar</option>
-                    <option value="Family Seminar">Family Seminar</option>
-                    <option value="Mobile Checking Ambush">Mobile Checking Ambush</option>
-                    <option value="Station Inspection">Station Inspection</option>
-                    <option value="Surprise Crew Cabin Inspection">Surprise Crew Cabin Inspection</option>
-                    <option value="Level Crossing Ambush">Level Crossing Ambush</option>
-                    <option value="NIGHT STABLING INSPECTION">NIGHT STABLING INSPECTION</option>
-                    <option value="STABLE LOAD INSPECTION">STABLE LOAD INSPECTION</option>
-                    <option value="SAND GOOMTY INSPECTION">SAND GOOMTY INSPECTION</option>
-                    <option value="SHUNTING AMBUSH">SHUNTING AMBUSH</option>
-                    <option value="COACHING CLEANLINESS INSPECTION">COACHING CLEANLINESS INSPECTION</option>
-                    <option value="FSD ROUTE SETTING AMBUSH">FSD ROUTE SETTING AMBUSH</option>
-                    <option value="Other">Other</option>
-                </select>
-                <input type="text" id="amb_custom_type" class="hidden" placeholder="Type Custom Ambush Here" style="margin-top:10px;">
-                <label>Abnormalities (Describe in Detail):</label>
-                <textarea id="amb_abnormalities" class="req-ambush" placeholder="Enter detailed description..."></textarea>
-            </div>
-        </div>
-
-        <div class="report-block">
-            <label class="report-header">
-                <input type="checkbox" id="chk_mob" onchange="toggleSection('sec_mob', this.checked)">
-                6. Mobile Inspection For Crew
-            </label>
-            <div id="sec_mob" class="sub-section">
-                <label>Crew ID:</label>
-                <input type="text" id="mob_crew_id" class="req-mob" oninput="formatAndFillMobileCrew(this)" placeholder="Enter Crew ID">
-                <label>Crew Name:</label>
-                <input type="text" id="mob_crew_name" data-name="crew_name" readonly>
-                <label>DESG:</label>
-                <input type="text" id="mob_desg" data-name="desg" readonly>
-                <label>HQ:</label>
-                <input type="text" id="mob_hq" data-name="hq" readonly>
-                <label>CLI NAME (From Database):</label>
-                <input type="text" id="mob_cli_name" data-name="cli_name" readonly>
-
-                <label>AMBUSH DONE BY (Enter CLI ID):</label>
-                <input type="text" id="mob_ambush" data-name="ambush_done_by" class="req-mob" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')">
-
-                <label>Whether Crew carrying personal mobile other than CUG:</label>
-                <select id="mob_usage" data-name="mobile_usage" onchange="toggleMobileFields()" class="req-mob">
-                    <option value="">Select</option><option value="YES">YES</option><option value="NO">NO</option>
-                </select>
-
-                <div id="mob_reason_field" class="hidden">
-                    <label>Reason:</label>
-                    <textarea id="mob_reason" data-name="reason"></textarea>
+            <div id="sec_lp" class="section-body hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div><label class="modern-label">LP ID</label><select id="lp_id" class="modern-input req-lp font-mono" onchange="autoFillLpDetails(this.value)"><option value="">Select LP ID</option></select></div>
+                <div><label class="modern-label">LP NAME</label><input type="text" id="lp_name" class="modern-input font-semibold" readonly></div>
+                <div><label class="modern-label">DESG</label><input type="text" id="lp_desg" class="modern-input" readonly></div>
+                <div><label class="modern-label">HQ</label><input type="text" id="lp_hq" class="modern-input" readonly></div>
+                
+                <div class="md:col-span-2"><label class="modern-label">MAJOR BEAT</label><select id="lp_major_beat" class="modern-input req-lp"><option value="">Select MAJOR BEAT</option></select></div>
+                <div class="md:col-span-2"><label class="modern-label">BEAT</label>
+                    <select id="lp_beat" class="modern-input req-lp" onchange="toggleOtherBeat(this, 'lp_other_beat')">
+                        <option value="">Select BEAT</option><option value="AKT-RIG">AKT-RIG</option><option value="RIG-AKT">RIG-AKT</option><option value="AKT-KRBA">AKT-KRBA</option><option value="KRBA-AKT">KRBA-AKT</option><option value="BSP-SDL">BSP-SDL</option><option value="BSP-RIG">BSP-RIG</option><option value="BSP-KRBA">BSP-KRBA</option><option value="BSP-DBEC">BSP-DBEC</option><option value="USL-NKJ">USL-NKJ</option><option value="USL-DBEC">USL-DBEC</option><option value="USL-RIG">USL-RIG</option><option value="USL-KRBA">USL-KRBA</option><option value="PND-BSP">PND-BSP</option><option value="PND-NKJ">PND-NKJ</option><option value="SDL-SGO">SDL-SGO</option><option value="SDL-BSP">SDL-BSP</option><option value="SDL-NKJ">SDL-NKJ</option><option value="NKJ-SDL">NKJ-SDL</option><option value="SDL-BJRI">SDL-BJRI</option><option value="BJRI-SDL">BJRI-SDL</option><option value="SDL-ABKP">SDL-ABKP</option><option value="KHS-USL">KHS-USL</option><option value="KHS-BRJN">KHS-BRJN</option><option value="KHS-DMJY">KHS-DMJY</option><option value="KHS-KRBA">KHS-KRBA</option><option value="BRJN-ROU">BRJN-ROU</option><option value="BRJN-RIG">BRJN-RIG</option><option value="BRJN-SBP">BRJN-SBP</option><option value="KRBA-DPK">KRBA-DPK</option><option value="KRBA-GAD">KRBA-GAD</option><option value="KRBA-USL">KRBA-USL</option><option value="KRBA-RIG">KRBA-RIG</option><option value="BJRI-ABKP">BJRI-ABKP</option><option value="BJRI-BSP">BJRI-BSP</option><option value="BJRI-NKJ">BJRI-NKJ</option><option value="RIG-USL">RIG-USL</option><option value="RIG-ROU">RIG-ROU</option><option value="SJQ-ABKP-PSRS">SJQ-ABKP-PSRS</option><option value="SJQ-SDL">SJQ-SDL</option><option value="BSP-BJRI">BSP-BJRI</option><option value="USL-RSD">USL-RSD</option><option value="BSP-RSD">BSP-RSD</option><option value="BSP-NGP">BSP-NGP</option><option value="NGP-BSP">NGP-BSP</option><option value="BSP-CKP">BSP-CKP</option><option value="BSP-TATA">BSP-TATA</option><option value="BSP-ROU">BSP-ROU</option><option value="BSP-SBP">BSP-SBP</option><option value="OTHER">OTHER</option>
+                    </select>
+                    <input type="text" id="lp_other_beat" class="modern-input hidden mt-2" placeholder="Enter other beat">
                 </div>
-                <div id="mob_used_on_run_field" class="hidden">
-                    <label>Whether Crew used personal mobile while on run:</label>
-                    <select id="mob_used_on_run" data-name="mobile_used_on_run">
-                        <option value="">Select</option><option value="YES">YES</option><option value="NO">NO</option>
+
+                <div><label class="modern-label">LOCO NUMBER</label><input type="number" id="lp_loco" class="modern-input req-lp"></div>
+                <div><label class="modern-label">TRAIN NUMBER</label><input type="text" id="lp_train" class="modern-input req-lp"></div>
+                <div><label class="modern-label">FROM TIME</label><input type="time" id="lp_from" class="modern-input req-lp"></div>
+                <div><label class="modern-label">TO TIME</label><input type="time" id="lp_to" class="modern-input req-lp"></div>
+            </div>
+        </div>
+
+        <div class="clean-card overflow-hidden">
+            <label class="section-header">
+                <input type="checkbox" id="chk_alp" class="checkbox-custom" onchange="toggleSection('sec_alp', this.checked)">
+                <span class="font-bold text-slate-700 text-lg">3. END TO END ALP</span>
+            </label>
+            <div id="sec_alp" class="section-body hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div><label class="modern-label">ALP ID</label><select id="alp_id" class="modern-input req-alp font-mono" onchange="autoFillAlpDetails(this.value)"><option value="">Select ALP ID</option></select></div>
+                <div><label class="modern-label">ALP NAME</label><input type="text" id="alp_name" class="modern-input font-semibold" readonly></div>
+                <div><label class="modern-label">DESG</label><input type="text" id="alp_desg" class="modern-input" readonly></div>
+                <div><label class="modern-label">HQ</label><input type="text" id="alp_hq" class="modern-input" readonly></div>
+                
+                <div class="md:col-span-4"><label class="modern-label">BEAT</label>
+                    <select id="alp_beat" class="modern-input req-alp" onchange="toggleOtherBeat(this, 'alp_other_beat')">
+                        <option value="">Select BEAT</option><option value="AKT-USL">AKT-USL</option><option value="AKT-RIG">AKT-RIG</option><option value="AKT-KRBA">AKT-KRBA</option><option value="BSP-SDL">BSP-SDL</option><option value="BSP-RIG">BSP-RIG</option><option value="BSP-KRBA">BSP-KRBA</option><option value="BSP-DBEC">BSP-DBEC</option><option value="USL-NKJ">USL-NKJ</option><option value="USL-DBEC">USL-DBEC</option><option value="USL-RIG">USL-RIG</option><option value="USL-KRBA">USL-KRBA</option><option value="PND-BSP">PND-BSP</option><option value="PND-NKJ">PND-NKJ</option><option value="SDL-SGO">SDL-SGO</option><option value="SDL-BSP">SDL-BSP</option><option value="SDL-NKJ">SDL-NKJ</option><option value="NKJ-SDL">NKJ-SDL</option><option value="SDL-BJRI">SDL-BJRI</option><option value="BJRI-SDL">BJRI-SDL</option><option value="SDL-ABKP">SDL-ABKP</option><option value="KHS-USL">KHS-USL</option><option value="KHS-BRJN">KHS-BRJN</option><option value="KHS-DMJY">KHS-DMJY</option><option value="KHS-KRBA">KHS-KRBA</option><option value="BRJN-ROU">BRJN-ROU</option><option value="BRJN-RIG">BRJN-RIG</option><option value="BRJN-SBP">BRJN-SBP</option><option value="KRBA-DPK">KRBA-DPK</option><option value="KRBA-USL">KRBA-USL</option><option value="KRBA-RIG">KRBA-RIG</option><option value="BJRI-ABKP">BJRI-ABKP</option><option value="BJRI-BSP">BJRI-BSP</option><option value="BJRI-NKJ">BJRI-NKJ</option><option value="RIG-USL">RIG-USL</option><option value="RIG-ROU">RIG-ROU</option><option value="SJQ-ABKP-PSRS">SJQ-ABKP-PSRS</option><option value="SJQ-SDL">SJQ-SDL</option><option value="BSP-BJRI">BSP-BJRI</option><option value="USL-RSD">USL-RSD</option><option value="BSP-RSD">BSP-RSD</option><option value="BSP-NGP">BSP-NGP</option><option value="BSP-CKP">BSP-CKP</option><option value="BSP-TATA">BSP-TATA</option><option value="BSP-ROU">BSP-ROU</option><option value="BSP-SBP">BSP-SBP</option><option value="OTHER">OTHER BEAT</option>
+                    </select>
+                    <input type="text" id="alp_other_beat" class="modern-input hidden mt-2" placeholder="Enter other beat">
+                </div>
+            </div>
+        </div>
+
+        <div class="clean-card overflow-hidden">
+            <label class="section-header">
+                <input type="checkbox" id="chk_ambush" class="checkbox-custom" onchange="toggleSection('sec_ambush', this.checked)">
+                <span class="font-bold text-slate-700 text-lg">4. AMBUSH & INSPECTION</span>
+            </label>
+            <div id="sec_ambush" class="section-body hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div><label class="modern-label">Analysis Month</label><input type="month" id="amb_month" class="modern-input req-ambush"></div>
+                <div><label class="modern-label">Date of Ambush</label><input type="date" id="amb_date" class="modern-input req-ambush"></div>
+                <div><label class="modern-label">Date of Entry</label><input type="date" id="amb_entry" class="modern-input req-ambush"></div>
+                <div class="md:col-span-2 lg:col-span-3"><label class="modern-label">Type of Ambush</label>
+                    <select id="amb_type" class="modern-input req-ambush" onchange="handleAmbushTypeChange(this)">
+                        <option value="">Select Type of Ambush</option><option value="Auto Ambush">Auto Ambush</option><option value="IB Ambush">IB Ambush</option><option value="BA Ambush">BA Ambush</option><option value="Random BA Ambush">Random BA Ambush</option><option value="BPT & BFT Ambush">BPT & BFT Ambush</option><option value="BPC Ambush">BPC Ambush</option><option value="SPAD Counselling">SPAD Counselling</option><option value="Safety Drive">Safety Drive</option><option value="Safety Seminar">Safety Seminar</option><option value="Family Seminar">Family Seminar</option><option value="Station Inspection">Station Inspection</option><option value="Surprise Crew Cabin Inspection">Surprise Crew Cabin Inspection</option><option value="Level Crossing Ambush">Level Crossing Ambush</option><option value="NIGHT STABLING INSPECTION">NIGHT STABLING INSPECTION</option><option value="STABLE LOAD INSPECTION">STABLE LOAD INSPECTION</option><option value="SAND GOOMTY INSPECTION">SAND GOOMTY INSPECTION</option><option value="SHUNTING AMBUSH">SHUNTING AMBUSH</option><option value="COACHING CLEANLINESS INSPECTION">COACHING CLEANLINESS INSPECTION</option><option value="FSD ROUTE SETTING AMBUSH">FSD ROUTE SETTING AMBUSH</option><option value="Other">Other</option>
+                    </select>
+                    <input type="text" id="amb_custom_type" class="modern-input hidden mt-2" placeholder="Type Custom Ambush Here">
+                </div>
+                <div class="md:col-span-2 lg:col-span-3"><label class="modern-label">Abnormalities (Describe in Detail)</label><textarea id="amb_abnormalities" class="modern-input req-ambush"></textarea></div>
+            </div>
+        </div>
+
+        <div class="clean-card overflow-hidden">
+            <label class="section-header">
+                <input type="checkbox" id="chk_od" class="checkbox-custom" onchange="toggleSection('sec_od', this.checked)">
+                <span class="font-bold text-slate-700 text-lg">5. OTHER DUTIES</span>
+            </label>
+            <div id="sec_od" class="section-body hidden grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="md:col-span-2"><label class="modern-label">DUTY TYPE</label>
+                    <select id="od_dutyType" class="modern-input req-od" onchange="toggleODFields()">
+                        <option value="" disabled selected>Select DUTY TYPE</option><option value="LOBBY DUTY">LOBBY DUTY</option><option value="STALLING DUTY">STALLING DUTY</option><option value="PUNCTUALITY DUTY">PUNCTUALITY DUTY</option><option value="REST">REST</option><option value="AUTO CLASS">AUTO CLASS</option><option value="LEAVE">LEAVE</option><option value="TRAINING">TRAINING</option><option value="OTHER DUTY">OTHER DUTY</option>
                     </select>
                 </div>
-                <div id="mob_personal_field" class="hidden">
-                    <label>Personal Mobile Number:</label>
-                    <input type="tel" id="mob_personal" data-name="personal_mobile" placeholder="10-digit mobile number" pattern="[0-9]{10}">
+                <div id="od_extra_group" class="hidden md:col-span-2 p-5 bg-amber-50 border border-amber-200 rounded-lg space-y-4">
+                    <div><label class="modern-label text-amber-700">OTHER DUTY DONE</label><select id="od_subType" class="modern-input border-amber-300 focus:border-amber-500"><option value="AS PER TLC">AS PER TLC</option><option value="SELF PROGRAMMED">SELF PROGRAMMED</option></select></div>
+                    <div><label class="modern-label text-amber-700">ENTER DESCRIPTION</label><input type="text" id="od_desc" class="modern-input border-amber-300 focus:border-amber-500"></div>
                 </div>
-
-                <label>Number of Calls made/received after on duty?</label>
-                <input type="number" data-name="calls_after_duty" value="0" min="0">
-                <label>Number of Calls made/received while on run?</label>
-                <input type="number" data-name="calls_after_run" value="0" min="0">
-                <label>Number of Calls made/received other than TLC/CLI?</label>
-                <input type="number" data-name="calls_other_than_tlc" value="0" min="0">
-                <label>Remark:</label>
-                <textarea data-name="remark"></textarea>
+                <div><label class="modern-label">FROM TIME</label><input type="time" id="od_fromTime" class="modern-input req-od"></div>
+                <div><label class="modern-label">TO TIME</label><input type="time" id="od_toTime" class="modern-input req-od"></div>
             </div>
         </div>
 
-        <div class="report-block">
-            <label class="report-header">
-                <input type="checkbox" id="chk_od" onchange="toggleSection('sec_od', this.checked)">
-                7. Other Duties
+        <div class="clean-card overflow-hidden border-2 border-emerald-300">
+            <label class="section-header bg-emerald-50 hover:bg-emerald-100 border-b border-emerald-200">
+                <input type="checkbox" id="chk_matrix" class="checkbox-custom" onchange="toggleSection('sec_matrix', this.checked)">
+                <span class="font-bold text-emerald-700 text-lg flex items-center gap-2">
+                    <i data-lucide="grid"></i> 6. MASS CREW COUNSELLING MATRIX
+                </span>
             </label>
-            <div id="sec_od" class="sub-section">
-                <label>DUTY TYPE:</label>
-                <select id="od_dutyType" class="req-od" onchange="toggleODFields()">
-                    <option value="" disabled selected>Select DUTY TYPE</option>
-                    <option value="LOBBY DUTY">LOBBY DUTY</option>
-                    <option value="STALLING DUTY">STALLING DUTY</option>
-                    <option value="PUNCTUALITY DUTY">PUNCTUALITY DUTY</option>
-                    <option value="REST">REST</option>
-                    <option value="AUTO CLASS">AUTO CLASS</option>
-                    <option value="LEAVE">LEAVE</option>
-                    <option value="TRAINING">TRAINING</option>
-                    <option value="OTHER DUTY">OTHER DUTY</option>
-                </select>
-
-                <div id="od_extra_group">
-                    <label>OTHER DUTY DONE:</label>
-                    <select id="od_subType">
-                        <option value="AS PER TLC">AS PER TLC</option>
-                        <option value="SELF PROGRAMMED">SELF PROGRAMMED</option>
-                    </select>
-                    <label>ENTER DESCRIPTION:</label>
-                    <input type="text" id="od_desc" placeholder="Description yahan likhen...">
-                </div>
-
-                <label>FROM TIME:</label>
-                <input type="time" id="od_fromTime" class="req-od">
-                <label>TO TIME:</label>
-                <input type="time" id="od_toTime" class="req-od">
-            </div>
-        </div>
-
-        <div class="report-block">
-            <label class="report-header">
-                <input type="checkbox" id="chk_sd" onchange="toggleSection('sec_sd', this.checked)">
-                8. Permanent Safety Drives
-            </label>
-            <div id="sec_sd" class="sub-section">
-                <p style="font-size:0.85em; color:#666; margin-top:0;">Note: Fill Crew IDs for whichever drive you want to submit.</p>
+            <div id="sec_matrix" class="section-body hidden space-y-5 bg-emerald-50/30">
+                <p class="text-sm text-emerald-700 font-medium">Select month/year and generate grid to bulk-fill completed drives.</p>
                 
-                <div class="sd-drive-section">
-                    <label style="color: #1e3a8a; font-size: 1.1em; border-bottom: 2px solid #cbd5e1; padding-bottom: 5px; margin-bottom: 15px; display: block; text-transform: uppercase;">Micro Sleep Counselling</label>
-                    
-                    <label style="margin-top:0;">Crew ID(s) [Comma Separated]:</label>
-                    <input type="text" id="ms_crew_id" placeholder="Example: BSP0068,BSP0075" oninput="formatMultipleCrewIDs(this, 'ms_char_limit')">
-                    <p id="ms_char_limit" class="char-limit-message"></p>
-
-                    <label>Counselling on VCD Done:</label>
-                    <select id="ms_vcd">
-                        <option value="">Select</option><option value="YES">YES</option><option value="NO">NO</option>
-                    </select>
-                    <label>Micro Sleep Counselling Done At:</label>
-                    <select id="ms_loc">
-                        <option value="">Select</option><option value="LOBBY">LOBBY</option><option value="FOOTPLATE">FOOTPLATE</option>
-                    </select>
-                </div>
-
-                <div class="sd-drive-section">
-                    <label>Counselling on Maximum speed for YY and Y aspect of Signal</label>
-                    <input type="text" class="sd-crew-input" data-drive-name="Counselling on Maximum speed for YY and Y aspect of Signal (Railway Board letter No 2024/Elect(TRS)/113/10)" placeholder="Crew IDs (comma separated)..." oninput="formatMultipleCrewIDs(this, 'sd_limit_1')">
-                    <p id="sd_limit_1" class="char-limit-message"></p>
-                    <label>Counselling Done at:</label>
-                    <select class="sd-loc"><option value="">Select</option><option value="LOBBY">LOBBY</option><option value="FOOTPLATE">FOOTPLATE</option></select>
-                    <label>Abnormalities Found:</label>
-                    <input type="text" class="sd-abn" value="NIL" oninput="checkAbnormalities(this)">
-                    <div class="sd-action-container">
-                        <label style="margin-top:0;">Action Taken:</label>
-                        <div class="checkbox-group">
-                            <label><input type="checkbox" class="sd-action-cms"> Reported in CMS</label>
-                            <label><input type="checkbox" class="sd-action-other" onchange="toggleSDOther(this)"> Other</label>
-                        </div>
-                        <input type="text" class="sd-action-other-text" placeholder="Specify other action..." style="display:none;">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 items-end">
+                    <div>
+                        <label class="modern-label text-emerald-800">Month</label>
+                        <select id="m_month" class="modern-input border-emerald-300 focus:border-emerald-500 appearance-none">
+                            <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+                            <option value="4">April</option><option value="5" selected>May</option><option value="6">June</option>
+                            <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+                            <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+                        </select>
                     </div>
-                    <label>Remark:</label><textarea class="sd-remark" rows="2"></textarea>
-                </div>
-
-                <div class="sd-drive-section">
-                    <label>RAILWAY BOARD SAFETY DRIVE COUNSELLING ON SPAD & APPROACHING DANGER CALL OUT</label>
-                    <input type="text" class="sd-crew-input" data-drive-name="RAILWAY BOARD SAFETY DRIVE COUNSELLING ON SPAD & APPROACHING DANGER CALL OUT" placeholder="Crew IDs (comma separated)..." oninput="formatMultipleCrewIDs(this, 'sd_limit_2')">
-                    <p id="sd_limit_2" class="char-limit-message"></p>
-                    <label>Counselling Done at:</label>
-                    <select class="sd-loc"><option value="">Select</option><option value="LOBBY">LOBBY</option><option value="FOOTPLATE">FOOTPLATE</option></select>
-                    <label>Abnormalities Found:</label>
-                    <input type="text" class="sd-abn" value="NIL" oninput="checkAbnormalities(this)">
-                    <div class="sd-action-container">
-                        <label style="margin-top:0;">Action Taken:</label>
-                        <div class="checkbox-group">
-                            <label><input type="checkbox" class="sd-action-cms"> Reported in CMS</label>
-                            <label><input type="checkbox" class="sd-action-other" onchange="toggleSDOther(this)"> Other</label>
-                        </div>
-                        <input type="text" class="sd-action-other-text" placeholder="Specify other action..." style="display:none;">
+                    <div>
+                        <label class="modern-label text-emerald-800">Year</label>
+                        <select id="m_year" class="modern-input border-emerald-300 focus:border-emerald-500 appearance-none"><option value="2026">2026</option><option value="2027">2027</option></select>
                     </div>
-                    <label>Remark:</label><textarea class="sd-remark" rows="2"></textarea>
-                </div>
-
-                <div class="sd-drive-section">
-                    <label>SUMMER AND MANSOON PREPAREDNESS DRIVE</label>
-                    <input type="text" class="sd-crew-input" data-drive-name="WINTER AND FOG PRECAUTION SAFETY DRIVE" placeholder="Crew IDs (comma separated)..." oninput="formatMultipleCrewIDs(this, 'sd_limit_3')">
-                    <p id="sd_limit_3" class="char-limit-message"></p>
-                    <label>Counselling Done at:</label>
-                    <select class="sd-loc"><option value="">Select</option><option value="LOBBY">LOBBY</option><option value="FOOTPLATE">FOOTPLATE</option></select>
-                    <label>Abnormalities Found:</label>
-                    <input type="text" class="sd-abn" value="NIL" oninput="checkAbnormalities(this)">
-                    <div class="sd-action-container">
-                        <label style="margin-top:0;">Action Taken:</label>
-                        <div class="checkbox-group">
-                            <label><input type="checkbox" class="sd-action-cms"> Reported in CMS</label>
-                            <label><input type="checkbox" class="sd-action-other" onchange="toggleSDOther(this)"> Other</label>
-                        </div>
-                        <input type="text" class="sd-action-other-text" placeholder="Specify other action..." style="display:none;">
+                    <div class="col-span-2 md:col-span-2">
+                        <button type="button" onclick="loadCrewDataMaster()" class="w-full py-2.5 px-4 rounded-lg font-bold text-sm bg-emerald-600 hover:bg-emerald-700 text-white transition-all flex justify-center items-center gap-2 shadow-md hover:shadow-lg">
+                            <i data-lucide="search" class="w-4 h-4"></i> Generate Matrix Grid
+                        </button>
                     </div>
-                    <label>Remark:</label><textarea class="sd-remark" rows="2"></textarea>
                 </div>
 
-                <div class="sd-drive-section">
-                    <label>Practical RS Application during Footplate</label>
-                    <input type="text" class="sd-crew-input" data-drive-name="Practical RS Application during Footplate" placeholder="Crew IDs (comma separated)..." oninput="formatMultipleCrewIDs(this, 'sd_limit_4')">
-                    <p id="sd_limit_4" class="char-limit-message"></p>
-                    <label>Practical RS Application done at:</label>
-                    <input type="text" class="sd-loc-text" placeholder="Enter Location">
+                <div id="tableWrapper" class="hidden mt-4">
+                    <div class="table-container max-h-[55vh] shadow-inner bg-white relative">
+                        <div id="tableContainer"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="links-section">
-            <h3 style="margin-top:0; color:#334155; border-bottom: 2px solid #cbd5e1; padding-bottom: 10px;">Ongoing Safety Drive & Important Links</h3>
-            <div class="ongoing-drive-table">
-                <div class="table-header">
-                    <div>Drive / Google Link</div>
-                    <div>Download PDF</div>
-                </div>   
-                <div class="table-cell">
-                <a href="https://docs.google.com/spreadsheets/d/1qKYI-JIKkkx2AecFiDAULrcDK9EtWSas6kxfzwSnX0Q/edit?usp=sharing" target="_blank" class="drive-link-button">रेलवे की विभिन्न स्थापनाओं एवं ट्रेनों में आग की घटनाओं की रोकथाम हेतु 15 दिनों का संरक्षा अभियान (21.05.26 to 05.06.26 )</a>
+        <div class="clean-card overflow-hidden border-2 border-blue-200">
+            <label class="section-header bg-blue-50 hover:bg-blue-100 border-b border-blue-200">
+                <input type="checkbox" id="chk_links" class="checkbox-custom" onchange="toggleSection('sec_links', this.checked)">
+                <span class="font-bold text-blue-700 text-lg flex items-center gap-2">
+                    <i data-lucide="link"></i> 7. ONGOING SAFETY DRIVE & IMPORTANT LINKS
+                </span>
+            </label>
+            <div id="sec_links" class="section-body hidden bg-blue-50/30">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">Safety Counseling: Immediate Reporting of Track Jerks</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/1ZKYQ-pYpCJfI_9luPaJvWlYQu4RFwtVlJFMmfiZLeC4/edit?usp=sharing" target="_blank" class="btn-link btn-drive flex-1">Google Sheet</a><a href="https://drive.google.com/file/d/17b60VJ-pJlh8dtiZG05q68P8oMcGT4Wo/view?usp=sharing" target="_blank" class="btn-link btn-pdf w-1/3">View PDF</a></div></div>
+                    <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">JOINT ACTION PLAN IN BRAKE BINDING FOR FREIGHT TRAINS</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/108tqTATo_rfNmkojE5GWVtBRFkjrGyv9JEOyTixAFBw/edit?usp=sharing" target="_blank" class="btn-link btn-drive flex-1">Google Sheet</a><a href="https://drive.google.com/file/d/1AVivxpCZ4Sdhgs9sTpbOIR5-ZQAt5owT/view?usp=sharing" target="_blank" class="btn-link btn-pdf w-1/3">View PDF</a></div></div>
+                    <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">11 days Safety Counselling Drive on Whistle & Bell Code</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/1GxArUnDuHiaDrqYLI97rMIBv-6wDY-1VrTxABRP_Yyg/edit?usp=sharing" target="_blank" class="btn-link btn-drive flex-1">Google Sheet</a><a href="https://drive.google.com/file/d/1qQ5iblapqmSnoRG27gQAR5hUaiWtjYHk/view?usp=sharing" target="_blank" class="btn-link btn-pdf w-1/3">View PDF</a></div></div>
+                    <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">HQ/26-27/05-6: Protection of trains / Whistle and Bell Code</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/1qsvGsYa53pyeVx7SWC1-7Bp-g6mhrMfigDcgbaUIZGE/edit?usp=sharing" target="_blank" class="btn-link btn-drive flex-1">Google Sheet</a><a href="https://drive.google.com/file/d/1eKkaYm6P3aZCzukZ4Figxa4NqSqsq_zq/view?usp=sharing" target="_blank" class="btn-link btn-pdf w-1/3">View PDF</a></div></div>
+                    <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">BSP- 10 days Safety Drive on prevention of SPAD</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/1H8WUooZ1ijFWc72VXLR7pqhj2mUG0hHVxL-jvw2mIqw/edit?usp=sharing" target="_blank" class="btn-link btn-drive flex-1">Google Sheet</a><a href="https://drive.google.com/file/d/1kvcMPVeL0DAz18wkjzm1N_dWQWMGNDzC/view?usp=sharing" target="_blank" class="btn-link btn-pdf w-1/3">View PDF</a></div></div>
+                    <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">HQ/Drive/26-27/03&4-Counselling on Accident reporting</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/1tzNtyzYLObr98Ex5kx-2obz4UBvgEfr3TXcnwb2VVJ4/edit?usp=sharing" target="_blank" class="btn-link btn-drive flex-1">Google Sheet</a><a href="https://drive.google.com/file/d/1dfjvWgsfaBfuDwKV59yNf7B4VZaRRDUM/view?usp=sharing" target="_blank" class="btn-link btn-pdf w-1/3">View PDF</a></div></div>
+                    <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">RB Drive: 15 days Special Safety Drive on P. Way materials</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/1jOlv5wB21caNoBVE68yyGqQ0ASX4kku9mM9VjO4uCyM/edit?usp=sharing" target="_blank" class="btn-link btn-drive flex-1">Google Sheet</a><a href="https://drive.google.com/file/d/1jyo72KSD5wmho9NCx_ld_FuPujia1nuK/view?usp=sharing" target="_blank" class="btn-link btn-pdf w-1/3">View PDF</a></div></div>
+                    <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">GLP SPM ANALYSIS WITHIN 90 DAYS PERMANENT DRIVE</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/1K7cL1qHC8kaxgDW7MeQMScWvNeppEncO6zMdiogJ1Cs/edit?usp=sharing" target="_blank" class="btn-link btn-drive w-full">Google Sheet</a></div></div>
+                    <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">Stopping coaching trains at Stop Board</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/1avRB3Mt6nrnoSzekmX8k5NfUS-UakoMw-ti2xOjSL3Y/edit?usp=sharing" target="_blank" class="btn-link btn-drive w-full">Google Sheet</a></div></div>
+                    <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">Turnout speed ambush</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/1H4Jeuo2srq_BEI_nDms0RXLYw79ZW380oy8uVjFy1L8/edit?usp=sharing" target="_blank" class="btn-link btn-drive w-full">Google Sheet</a></div></div>
+                    <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">NRZB Derailment Recommendation Counselling</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/1WB3QhNE0kqpzrG7LURoUS_vm93Qyp5GZvtuZgAn9Q50/edit?usp=sharing" target="_blank" class="btn-link btn-drive flex-1">Google Sheet</a><a href="https://drive.google.com/file/d/1QwaGxZrB1_wyMfnBcP7axYaxhS3HhcY4/view?usp=sharing" target="_blank" class="btn-link btn-pdf w-1/3">View PDF</a></div></div>
+                </div>
             </div>
-            
-            <div class="table-cell">
-                <a href="https://drive.google.com/file/d/1EbEJMCS9Nhx21ruX_qQz4GUEAs0hLP9_/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> 
-            </div>  
-                <div class="table-cell">
-                <a href="https://docs.google.com/spreadsheets/d/1cEnEhCtqvRPBTQec7ZGgPBQWGNxVIdzTfyV-ZDB8Lao/edit?usp=sharing" target="_blank" class="drive-link-button">Zonal Safety Drive on stabling/securing/releasing of load/train/rolling stock in the yard for 15 days from 21.05.2026 to 04.06.2026 </a>
-            </div>
-            
-            <div class="table-cell">
-                <a href="https://drive.google.com/file/d/1zArTwDaEzvLrHVYsctvf5FAOz7juPP38/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> 
-            </div>  
-                 <div class="table-cell">
-                <a href="https://docs.google.com/spreadsheets/d/1ZKYQ-pYpCJfI_9luPaJvWlYQu4RFwtVlJFMmfiZLeC4/edit?usp=sharing" target="_blank" class="drive-link-button">Safety Counseling: Immediate Reporting of Track Jerks & Actions to be Taken on Track</a>
-            </div>
-            
-            <div class="table-cell">
-                <a href="https://drive.google.com/file/d/17b60VJ-pJlh8dtiZG05q68P8oMcGT4Wo/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> 
-            </div>  
-                 <div class="table-cell">
-                <a href="https://docs.google.com/spreadsheets/d/108tqTATo_rfNmkojE5GWVtBRFkjrGyv9JEOyTixAFBw/edit?usp=sharing" target="_blank" class="drive-link-button">JOINT ACTION PLAN IN BRAKE BINDING FOR FREIGHT TRAINS</a>
-            </div>
-            
-            <div class="table-cell">
-                <a href="https://drive.google.com/file/d/1AVivxpCZ4Sdhgs9sTpbOIR5-ZQAt5owT/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> 
-            </div>  
-                
-                <div class="table-cell">
-                <a href="https://docs.google.com/spreadsheets/d/1GxArUnDuHiaDrqYLI97rMIBv-6wDY-1VrTxABRP_Yyg/edit?usp=sharing" target="_blank" class="drive-link-button">11 days Safety Counselling Drive on Whistle & Bell Code from 05.05.2026 to 15.05.26</a>
-            </div>
-            
-            <div class="table-cell">
-                <a href="https://drive.google.com/file/d/1qQ5iblapqmSnoRG27gQAR5hUaiWtjYHk/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> 
-            </div>  
-                 <div class="table-cell">
-                <a href="https://docs.google.com/spreadsheets/d/1qsvGsYa53pyeVx7SWC1-7Bp-g6mhrMfigDcgbaUIZGE/edit?usp=sharing" target="_blank" class="drive-link-button">HQ/26-27/05-6: Counselling of crew regarding: 1. Protection of trains 2. Whistle and Bell Code </a>
-            </div>
-            
-            <div class="table-cell">
-                <a href="https://drive.google.com/file/d/1eKkaYm6P3aZCzukZ4Figxa4NqSqsq_zq/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> 
-            </div> 
-             <div class="table-cell">
-                <a href="https://docs.google.com/spreadsheets/d/1H8WUooZ1ijFWc72VXLR7pqhj2mUG0hHVxL-jvw2mIqw/edit?usp=sharing" target="_blank" class="drive-link-button">BSP- 10 days Safety Drive on prevention of SPAD covering all LPs, ALPs, Track Machine Operators and Tower Wagon Operators at all locations</a>
-            </div>
-            
-            <div class="table-cell">
-                <a href="https://drive.google.com/file/d/1kvcMPVeL0DAz18wkjzm1N_dWQWMGNDzC/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> 
-            </div> 
-                <div class="table-cell">
-                <a href="https://docs.google.com/spreadsheets/d/1tzNtyzYLObr98Ex5kx-2obz4UBvgEfr3TXcnwb2VVJ4/edit?usp=sharing" target="_blank" class="drive-link-button">HQ/Drive/26-27/03&4-Counselling of Crew on Accident reporting system</a>
-            </div>
-            
-            <div class="table-cell">
-                <a href="https://drive.google.com/file/d/1dfjvWgsfaBfuDwKV59yNf7B4VZaRRDUM/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> 
-            </div> 
-                
-                <div class="table-cell">
-                <a href="https://docs.google.com/spreadsheets/d/1jOlv5wB21caNoBVE68yyGqQ0ASX4kku9mM9VjO4uCyM/edit?usp=sharing" target="_blank" class="drive-link-button">RB Drive: 15 days Special Safety Drive on disposal of unused/released P. Way materials. from from 17.04.2026 to 01.05.2026</a>
-            </div>
-            <div class="table-cell">
-                <a href="https://drive.google.com/file/d/1jyo72KSD5wmho9NCx_ld_FuPujia1nuK/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> 
-            </div> 
-
-            <div class="table-cell">
-                <a href="https://docs.google.com/spreadsheets/d/1K7cL1qHC8kaxgDW7MeQMScWvNeppEncO6zMdiogJ1Cs/edit?usp=sharing" target="_blank" class="drive-link-button">GLP SPM ANALYSIS WITHIN 90 DAYS PERMANENT DRIVE</a>
-            </div>
-            <div class="table-cell">
-                <div class="empty-pdf"></div> 
-            </div>
-
-            <div class="table-cell">
-                <a href="https://docs.google.com/spreadsheets/d/1avRB3Mt6nrnoSzekmX8k5NfUS-UakoMw-ti2xOjSL3Y/edit?usp=sharing" target="_blank" class="drive-link-button">Stopping coaching trains at Stop Board</a>
-            </div>
-            <div class="table-cell">
-                <div class="empty-pdf"></div> 
-            </div> 
-
-                <div class="table-cell">
-                <a href="https://docs.google.com/spreadsheets/d/1H4Jeuo2srq_BEI_nDms0RXLYw79ZW380oy8uVjFy1L8/edit?usp=sharing" target="_blank" class="drive-link-button">Turnout speed ambush</a>
-                
-            </div>
-            <div class="table-cell">
-                <div class="empty-pdf"></div> 
-            </div>
-            <div class="table-cell">
-                <a href="https://docs.google.com/spreadsheets/d/1WB3QhNE0kqpzrG7LURoUS_vm93Qyp5GZvtuZgAn9Q50/edit?usp=sharing" target="_blank" class="drive-link-button">NRZB Derailment Recommendation Counselling</a>
-            </div>
-            <div class="table-cell">
-                <a href="https://drive.google.com/file/d/1QwaGxZrB1_wyMfnBcP7axYaxhS3HhcY4/view?usp=sharing" target="_blank" class="pdf-link-button">View PDF</a> 
-            </div>
-            </div>
-
-            
         </div>
 
-        <button id="masterSubmitBtn" type="button" onclick="processMasterSubmit()">SUBMIT ALL SELECTED REPORTS</button>
+        <div class="mt-8 mb-8">
+            <button type="button" id="masterSubmitBtn" onclick="processUnifiedSubmit()" class="w-full py-4 rounded-xl font-black text-lg text-white bg-blue-600 hover:bg-blue-700 shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 flex justify-center items-center gap-3 border border-blue-500">
+                <i data-lucide="upload-cloud" class="w-6 h-6"></i> SUBMIT ALL SELECTED DATA TO CLOUD
+            </button>
+        </div>
+
     </form>
 </div>
 
 <script>
-    // === GLOBAL DATA & URLs ===
-    let cliData = {};
-    let crewData = {};
-    let cliAlpData = [];
-    let lpCliData = [];
-    let majorBeatData = [];
+    // =========================================================
+    // INITIALIZATION & GLOBALS
+    // =========================================================
+    requestAnimationFrame(() => { lucide.createIcons(); });
 
+    // Google Sheets Config
+    const API_KEY = "AIzaSyAw23pJz0K9fZb2rRRAe2C2cJDilRc0Kac";
+    const SHEET_ID = "1EXYvdvs9OGwgXwvK_DmMpgFQ39nh-g5LWDk0-cZhl0A";
+    const CREW_SHEET_ID = "1c5niOafzh20MEepDrnwjZSXBWfJoD87_efAoC1mwxb8";
+    const CREW_RANGE = "'COMBINE'!A:L";
+    const CREW_API = `https://sheets.googleapis.com/v4/spreadsheets/${CREW_SHEET_ID}/values/${encodeURIComponent(CREW_RANGE)}?key=${API_KEY}`;
+    
+    // Cloud URLs
+    const URL_MATRIX = "https://script.google.com/macros/s/AKfycbxmbolJU4ozd61W9rMFyoAfiLATEvLV1lIR1eVzSTslsKjzDfg6Cm-bTZ0YWf_j2f_F/exec";
     const URL_AB = "https://script.google.com/macros/s/AKfycbzTpR-XJHKJQUT0MnEjOTuh6iH9amkUDoI1pnZ29WdoAH8bDEJaAihhMGlhC4D9Yb5CUA/exec";
-    const URL_MS = "https://script.google.com/macros/s/AKfycbxMYVU7x3P5bV0gRu9L_ocLImRLOvv2YvIPImjQot6ErTSbeWFcT9jgiklwI175CKcT/exec";
-    const URL_MOB = "https://script.google.com/macros/s/AKfycbwxdxvdUiFHeZnp29DAf4ChBQ7Dz5VLW38aZf-_7Q_i5dIoYNiruxIBG1oJh99i96Tq-A/exec";
-    const URL_NFP = "https://script.google.com/macros/s/AKfycbxnN-KLQvizpXGXhan4fGwdOw65o4fCwBtPNa69PtFnuQ3brX70Xy6s94iHiDoqWYbN/exec";
-    const URL_SD = "https://script.google.com/macros/s/AKfycbz7VLDi96OQTKCbrveBmauU3mTJSFYyydtlx67qFoO0dPUwI5KU-60HaJGoHwmKlhx-kw/exec";
     const URL_OD = "https://script.google.com/macros/s/AKfycbzD319B272QFM5HK-3ejkl41n3zm1r_0F6bc9ZzJE1Z_6Tc-4wge65Ip16uQe9eDUmrUw/exec";
     const URL_AMBUSH = "https://script.google.com/macros/s/AKfycbwU2c8h2LTTYzaKBIpxpLHVnMLwXURE00TOGok9xPwEVBsuiL9oDD-gJ1yCHdO-eL7r/exec";
     const URL_ALP = "https://script.google.com/macros/s/AKfycbwxnVSd3eGB4SvHVz2IINLEat031qB4xvNKbe8BcdPyg5BQpL0xkbQuAyu_B-fTdIqB0A/exec";
     const URL_LP = "https://script.google.com/macros/s/AKfycbxbHiwAGtuvUh_0M3eGX3gQZ1SGA96ffn9Tw93aKGZbU-8fMtArUmpqzGgfI-CqSOyG/exec";
 
-    // === 1. INITIALIZATION & CSV LOADING ===
-    document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('c_date').valueAsDate = new Date();
+    // State Vars
+    let historyMap = new Set();
+    let latestCrewData = [];
+    let DRIVE_LIST = [];
+    const DRIVE_PDF_LINKS = {
+    "DRIVE FOR FIRE PREVENTION OF ELECTRIC AND DIESEL LOCOMOTIVES": "https://drive.google.com/file/d/107Lwzv7dP1h4tHJNSB1gbBYPqoplzQbh/view?usp=sharing",
+};
+    
+    // CSV Vars
+    let cliData = {};
+    let cliAlpData = [];
+    let lpCliData = [];
+    let majorBeatData = [];
 
-        Papa.parse('CLIMICRO.csv', {
-            download: true, header: false, skipEmptyLines: true,
-            complete: function(results) {
-                let correctedData = [];
-                for (let i = 0; i < results.data.length; i++) {
-                    let row = results.data[i];
-                    if (row.length > 1 && row[0].includes("CHATARJEE DSL") && i > 0 && results.data[i-1][0] === "BSP0052") {
-                        correctedData[correctedData.length - 1][1] += " " + row[0]; continue;
-                    }
-                    if (row.length > 1 && row[0].includes("ANANDA RAO") && i > 0 && results.data[i-1][0] === "BSP0201") {
-                         correctedData[correctedData.length - 1][1] += " " + row[0]; continue;
-                    }
-                    correctedData.push(row);
-                }
-                correctedData.forEach(row => {
-                    if (row.length >= 3) cliData[row[0].trim().toUpperCase()] = { name: row[1].trim(), hq: row[2].trim() };
-                });
-            }
+    // =========================================================
+    // UI HELPERS
+    // =========================================================
+    function toast(msg, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const div = document.createElement('div');
+        let icon = `<i data-lucide="${type==='success'?'check-circle':type==='error'?'alert-circle':'info'}" class="w-5 h-5 ${type==='success'?'text-emerald-500':type==='error'?'text-red-500':'text-blue-500'}"></i>`;
+        div.className = `toast-card p-4 flex items-center gap-3 min-w-[250px] z-50`;
+        div.innerHTML = `${icon} <span class="font-bold text-sm">${msg}</span>`;
+        container.appendChild(div);
+        requestAnimationFrame(() => { lucide.createIcons({ root: div }); });
+        setTimeout(() => { div.style.opacity = '0'; div.style.transform = 'translateY(10px)'; div.style.transition = 'all 0.3s ease'; setTimeout(() => div.remove(), 300); }, 3500);
+    }
+
+    setInterval(() => {
+        document.getElementById('liveClock').innerText = new Date().toLocaleString('en-IN', {
+            weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
         });
+    }, 1000);
 
-        Papa.parse('CREWM.csv', {
-            download: true, header: false, skipEmptyLines: true,
-            complete: function(results) {
-                for(let i = 1; i < results.data.length; i++) { 
-                    let row = results.data[i];
-                    if(row.length >= 1 && row[0]) {
-                        crewData[row[0].trim().toUpperCase()] = { 
-                            name: row[1] ? row[1].trim() : "", desg: row[2] ? row[2].trim() : "", 
-                            hq: row[3] ? row[3].trim() : "", cli: row[4] ? row[4].trim() : "" 
-                        };
-                    }
-                }
-            }
-        });
-
-        // Load New Form CSVs
-        Papa.parse('CLIALP.csv', { header: true, skipEmptyLines: true, download: true, complete: function(results) { cliAlpData = results.data; }});
-        Papa.parse('CLI.csv', { header: true, skipEmptyLines: true, download: true, complete: function(results) { lpCliData = results.data; }});
-        Papa.parse('BEAT.csv', { header: true, skipEmptyLines: true, download: true, complete: function(results) { majorBeatData = results.data; }});
-
-        document.getElementById('c_cli_id').addEventListener('input', (e) => {
-            const sanitized = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            e.target.value = sanitized;
-            document.getElementById('mob_ambush').value = sanitized; 
-
-            if(cliData[sanitized]) {
-                document.getElementById('c_cli_name').value = cliData[sanitized].name;
-                document.getElementById('c_cli_hq').value = cliData[sanitized].hq;
-                
-                // Populate Dropdowns for ALP and LP
-                populateDropdown('alp_id', cliAlpData, cliData[sanitized].name, 'ALP ID');
-                populateDropdown('lp_id', lpCliData, cliData[sanitized].name, 'LP ID');
-            } else {
-                document.getElementById('c_cli_name').value = "";
-                document.getElementById('c_cli_hq').value = "";
-                document.getElementById('alp_id').innerHTML = '<option value="">Select ALP ID</option>';
-                document.getElementById('lp_id').innerHTML = '<option value="">Select LP ID</option>';
-            }
-        });
-
-        setupAutoNil('abCoachingCount', 'abCoachingDetail');
-        setupAutoNil('abMemuCount', 'abMemuDetail');
-        setupAutoNil('abGoodsCount', 'abGoodsDetail');
-    });
-
-    // === 2. UI TOGGLES & LOGIC ===
     function toggleSection(sectionId, isChecked) {
         const sec = document.getElementById(sectionId);
         if(isChecked) {
-            sec.classList.add('active');
-            sec.querySelectorAll('[class^="req-"]').forEach(el => el.required = true);
+            sec.classList.remove('hidden');
+            const reqClass = '.req-' + sectionId.split('_')[1];
+            sec.querySelectorAll(reqClass).forEach(el => el.required = true);
         } else {
-            sec.classList.remove('active');
-            sec.querySelectorAll('[class^="req-"]').forEach(el => el.required = false);
+            sec.classList.add('hidden');
+            const reqClass = '.req-' + sectionId.split('_')[1];
+            sec.querySelectorAll(reqClass).forEach(el => el.required = false);
         }
     }
-   // === ABNORMALITY DATE RESTRICTION LOGIC ===
+
+    // =========================================================
+    // BOOT & DATA FETCHING
+    // =========================================================
+    document.addEventListener('DOMContentLoaded', async () => {
+        document.getElementById('c_date').valueAsDate = new Date();
+        loadCSVs();
+        await Promise.all([ initDrives(), loadHistory(), loadLatestCrewData() ]);
+    });
+
+    function loadCSVs() {
+        Papa.parse('CLIMICRO.csv', { download: true, header: false, skipEmptyLines: true, complete: function(results) {
+            let correctedData = [];
+            for (let i = 0; i < results.data.length; i++) {
+                let row = results.data[i];
+                if (row.length > 1 && row[0].includes("CHATARJEE DSL") && i > 0 && results.data[i-1][0] === "BSP0052") { correctedData[correctedData.length - 1][1] += " " + row[0]; continue; }
+                if (row.length > 1 && row[0].includes("ANANDA RAO") && i > 0 && results.data[i-1][0] === "BSP0201") { correctedData[correctedData.length - 1][1] += " " + row[0]; continue; }
+                correctedData.push(row);
+            }
+            correctedData.forEach(row => { if (row.length >= 3) cliData[row[0].trim().toUpperCase()] = { name: row[1].trim(), hq: row[2].trim() }; });
+        }});
+
+        Papa.parse('CLIALP.csv', { header: true, skipEmptyLines: true, download: true, complete: function(r) { cliAlpData = r.data; }});
+        Papa.parse('CLI.csv', { header: true, skipEmptyLines: true, download: true, complete: function(r) { lpCliData = r.data; }});
+        Papa.parse('BEAT.csv', { header: true, skipEmptyLines: true, download: true, complete: function(r) { majorBeatData = r.data; }});
+    }
+
+    async function initDrives() {
+        try {
+            const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/DRIVE_MASTER!A:B?key=${API_KEY}`);
+            const data = await res.json();
+            DRIVE_LIST = (data.values || []).slice(1).filter(row => (row[1] || "").toUpperCase() === "ACTIVE").map(row => row[0]).filter(Boolean);
+        } catch (err) { console.error("Drives API error", err); }
+    }
+
+    async function loadHistory() {
+        try {
+            const res = await fetch(URL_MATRIX);
+            const data = await res.json();
+            historyMap.clear();
+            data.slice(1).forEach(r => {
+                historyMap.add(`${String(r[0] || '').trim()}|${String(r[4] || '').trim()}`);
+            });
+        } catch (err) { console.warn("History data fetch failed.", err); }
+    }
+
+    async function loadLatestCrewData() {
+        try {
+            const res = await fetch(CREW_API);
+            const data = await res.json();
+            const crewMap = {};
+            (data.values || []).slice(1).forEach(row => {
+                const obj = { crewId: row[0]||"", crewName: row[1]||"", hrmsId: row[2]||"", crewType: row[3]||"", empCode: row[4]||"", cliName: row[6]||"", hq: row[7]||"" };
+                if (obj.empCode) crewMap[obj.empCode] = obj;
+            });
+            latestCrewData = Object.values(crewMap);
+        } catch (err) { console.error("Crew Fetch Error", err); }
+    }
+
+    // =========================================================
+    // FORM LOGIC & AUTO-FILL
+    // =========================================================
+    document.getElementById('c_cli_id').addEventListener('input', (e) => {
+        const sanitized = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        e.target.value = sanitized;
+
+        if(cliData[sanitized]) {
+            document.getElementById('c_cli_name').value = cliData[sanitized].name;
+            document.getElementById('c_cli_hq').value = cliData[sanitized].hq;
+            populateDropdown('alp_id', cliAlpData, cliData[sanitized].name, 'ALP ID');
+            populateDropdown('lp_id', lpCliData, cliData[sanitized].name, 'LP ID');
+        } else {
+            document.getElementById('c_cli_name').value = ""; document.getElementById('c_cli_hq').value = "";
+            document.getElementById('alp_id').innerHTML = '<option value="">Select ALP ID</option>'; document.getElementById('lp_id').innerHTML = '<option value="">Select LP ID</option>';
+        }
+    });
+
+    // Abnormality Date Logic
     function checkAbnormalityDate(checkbox) {
         if (checkbox.checked) {
             const dateStr = document.getElementById('c_date').value;
-            if (!dateStr) {
-                alert("Please select a DATE first in Common Details.");
-                checkbox.checked = false;
-                return;
-            }
-
-            const selectedDate = new Date(dateStr);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            selectedDate.setHours(0, 0, 0, 0);
-
-            const diffDays = Math.ceil((today - selectedDate) / (1000 * 60 * 60 * 24));
-
-            if (diffDays > 3) {
-                alert("❌ System Alert: Entry for the Abnormality Daily Report is restricted to the past 2 days. Please select a valid date.");
-                checkbox.checked = false;       // Checkbox tick nahi hoga
-                toggleSection('sec_ab', false); // Section open nahi hoga
-                return;
-            }
+            if (!dateStr) { toast("Please select a DATE first.", "error"); checkbox.checked = false; return; }
+            const diffDays = Math.ceil((new Date().setHours(0,0,0,0) - new Date(dateStr).setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+            if (diffDays > 3) { toast("Abnormality Report restricted to past 3 days.", "error"); checkbox.checked = false; toggleSection('sec_ab', false); return; }
         }
-        // Agar date valid hai ya checkbox uncheck kar rahe hain, toh section khul/band ho jayega
         toggleSection('sec_ab', checkbox.checked);
     }
-
-    // Event listener: Agar user pehle checkbox on kar le, aur BAAD mein date change kare toh auto-close ho jaye
+    
     document.getElementById('c_date').addEventListener('change', function() {
-        const chkAb = document.getElementById('chk_ab');
-        if (chkAb.checked) {
-            const selectedDate = new Date(this.value);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            selectedDate.setHours(0, 0, 0, 0);
-            
-            if (Math.ceil((today - selectedDate) / (1000 * 60 * 60 * 24)) > 3) {
-                alert("❌ You selected an out of range date. Abnormality Report is closing.");
-                chkAb.checked = false;
-                toggleSection('sec_ab', false);
+        if (document.getElementById('chk_ab').checked) {
+            if (Math.ceil((new Date().setHours(0,0,0,0) - new Date(this.value).setHours(0,0,0,0)) / 86400000) > 3) {
+                toast("Out of range date. Abnormality Report closing.", "error");
+                document.getElementById('chk_ab').checked = false; toggleSection('sec_ab', false);
             }
         }
     });
+
+    // Small Helpers
+    setupAutoNil('abCoachingCount', 'abCoachingDetail');
+    setupAutoNil('abMemuCount', 'abMemuDetail');
+    setupAutoNil('abGoodsCount', 'abGoodsDetail');
+
     function setupAutoNil(countId, detailId) {
         document.getElementById(countId).addEventListener('input', function() {
-            let val = parseInt(this.value); 
-            let detailInput = document.getElementById(detailId);
-            if (val > 0 && detailInput.value === 'NIL') detailInput.value = '';
-            else if (val <= 0 || isNaN(val)) detailInput.value = 'NIL';
+            let val = parseInt(this.value); let detailInput = document.getElementById(detailId);
+            if (val > 0 && detailInput.value === 'NIL') detailInput.value = ''; else if (val <= 0 || isNaN(val)) detailInput.value = 'NIL';
         });
     }
 
-    function formatMultipleCrewIDs(inputElement, msgElementId) {
-        let value = inputElement.value.toUpperCase().replace(/[^A-Z0-9,]/g, '');
-        let ids = value.split(',');
-        let lastId = ids[ids.length - 1];
-        if (lastId.length > 8) {
-            document.getElementById(msgElementId).textContent = 'Please Enter Comma after 8 chars.'; 
-            ids[ids.length - 1] = lastId.substring(0, 8);
-        } else if ((lastId.match(/[A-Z]/g) || []).length > 4 || (lastId.match(/[0-9]/g) || []).length > 4) {
-            document.getElementById(msgElementId).textContent = 'Invalid combination.';
-            ids[ids.length - 1] = lastId.slice(0, -1);
-        } else {
-            document.getElementById(msgElementId).textContent = '';
-        }
-        inputElement.value = ids.join(',');
-    }
-
-    function formatAndFillMobileCrew(inputElement) {
-        let sanitized = inputElement.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-        inputElement.value = sanitized;
-        if(crewData[sanitized]) {
-            document.getElementById('mob_crew_name').value = crewData[sanitized].name;
-            document.getElementById('mob_desg').value = crewData[sanitized].desg;
-            document.getElementById('mob_hq').value = crewData[sanitized].hq;
-            document.getElementById('mob_cli_name').value = crewData[sanitized].cli;
-        } else {
-            document.getElementById('mob_crew_name').value = '';
-            document.getElementById('mob_desg').value = '';
-            document.getElementById('mob_hq').value = '';
-            document.getElementById('mob_cli_name').value = '';
-        }
-    }
-
-    function toggleMobileFields() {
-        const val = document.getElementById("mob_usage").value;
-        const reqFields = ["mob_reason", "mob_used_on_run", "mob_personal"];
-        if (val === "YES") {
-            document.getElementById("mob_reason_field").classList.remove("hidden");
-            document.getElementById("mob_used_on_run_field").classList.remove("hidden");
-            document.getElementById("mob_personal_field").classList.remove("hidden");
-            document.getElementById("mob_used_on_run").required = true;
-            document.getElementById("mob_personal").required = true;
-        } else {
-            document.getElementById("mob_reason_field").classList.add("hidden");
-            document.getElementById("mob_used_on_run_field").classList.add("hidden");
-            document.getElementById("mob_personal_field").classList.add("hidden");
-            reqFields.forEach(id => { document.getElementById(id).value = ""; document.getElementById(id).required = false; });
-        }
-    }
-
-    function checkAbnormalities(inputElement) {
-        const driveSection = inputElement.closest('.sd-drive-section');
-        const actionContainer = driveSection.querySelector('.sd-action-container');
-        if (!actionContainer) return;
-        if (inputElement.value.trim().toUpperCase() !== 'NIL') {
-            actionContainer.style.display = 'block';
-        } else {
-            actionContainer.style.display = 'none';
-            driveSection.querySelector('.sd-action-cms').checked = false;
-            driveSection.querySelector('.sd-action-other').checked = false;
-            driveSection.querySelector('.sd-action-other-text').style.display = 'none';
-            driveSection.querySelector('.sd-action-other-text').value = '';
-        }
-    }
-    
-    function toggleSDOther(checkbox) {
-        const driveSection = checkbox.closest('.sd-drive-section');
-        const otherTextInput = driveSection.querySelector('.sd-action-other-text');
-        otherTextInput.style.display = checkbox.checked ? 'block' : 'none';
-        if (!checkbox.checked) otherTextInput.value = '';
-    }
-
-    function toggleODFields() {
-        const isOther = document.getElementById('od_dutyType').value === "OTHER DUTY";
-        document.getElementById('od_extra_group').style.display = isOther ? 'block' : 'none';
-    }
-
-    // --- Helper Functions for New Forms ---
-    function populateDropdown(dropdownId, dataArray, cliName, keyName) {
-        const dropdown = document.getElementById(dropdownId);
-        dropdown.innerHTML = `<option value="">Select ${keyName}</option>`;
-        const filtered = dataArray.filter(item => item['CLI NAME'] === cliName);
-        filtered.forEach(item => {
-            const opt = document.createElement('option');
-            opt.value = item[keyName]; opt.textContent = item[keyName];
-            dropdown.appendChild(opt);
-        });
-    }
-
-    function autoFillAlpDetails(alpId) {
-        const data = cliAlpData.find(item => item['ALP ID'] === alpId);
-        document.getElementById('alp_name').value = data ? data['ALP NAME'] || '' : '';
-        document.getElementById('alp_desg').value = data ? data['DESG'] || '' : '';
-        document.getElementById('alp_hq').value = data ? data['HQ'] || '' : '';
+    function populateDropdown(ddId, arr, cli, key) {
+        const dd = document.getElementById(ddId); dd.innerHTML = `<option value="">Select ${key}</option>`;
+        arr.filter(i => i['CLI NAME'] === cli).forEach(i => { dd.appendChild(new Option(i[key], i[key])); });
     }
 
     function autoFillLpDetails(lpId) {
-        const data = lpCliData.find(item => item['LP ID'] === lpId);
-        document.getElementById('lp_name').value = data ? data['LP NAME'] || '' : '';
-        document.getElementById('lp_desg').value = data ? data['DESG'] || '' : '';
+        const data = lpCliData.find(i => i['LP ID'] === lpId);
+        document.getElementById('lp_name').value = data ? data['LP NAME'] : ""; document.getElementById('lp_desg').value = data ? data['DESG'] : "";
+        const hq = data ? data['HQ'] : ""; document.getElementById('lp_hq').value = hq;
+        const mb = document.getElementById('lp_major_beat'); mb.innerHTML = '<option value="">Select MAJOR BEAT</option>';
+        if (hq) majorBeatData.filter(i => i['HQ'] === hq).forEach(i => mb.appendChild(new Option(i['BEAT'], i['BEAT'])));
+    }
+
+    function autoFillAlpDetails(alpId) {
+        const data = cliAlpData.find(i => i['ALP ID'] === alpId);
+        document.getElementById('alp_name').value = data ? data['ALP NAME'] : ""; document.getElementById('alp_desg').value = data ? data['DESG'] : ""; document.getElementById('alp_hq').value = data ? data['HQ'] : "";
+    }
+
+    function toggleOtherBeat(select, targetId) { const input = document.getElementById(targetId); if(select.value === 'OTHER') { input.classList.remove('hidden'); input.required = true; } else { input.classList.add('hidden'); input.required = false; input.value = ''; } }
+    
+    function handleAmbushTypeChange(sel) { const custom = document.getElementById('amb_custom_type'); if(sel.value === 'Other') { custom.classList.remove('hidden'); custom.required = true; } else { custom.classList.add('hidden'); custom.required = false; custom.value = ''; } }
+
+    function toggleODFields() { document.getElementById('od_extra_group').style.display = (document.getElementById('od_dutyType').value === "OTHER DUTY") ? 'block' : 'none'; }
+
+
+    // =========================================================
+    // SECTION 6: MASS MATRIX LOGIC (DOUBLE FREEZE COLUMNS)
+    // =========================================================
+    function loadCrewDataMaster() {
+        const cliName = document.getElementById('c_cli_name').value.trim();
+        if(!cliName) return toast('Please enter a Valid CLI ID at the top first.', 'error');
+        const filtered = latestCrewData.filter(r => r.cliName?.trim().toLowerCase() === cliName.toLowerCase());
+        if(!filtered.length) return toast('No Crew assigned to this CLI', 'error');
         
-        const hq = data ? data['HQ'] || '' : '';
-        document.getElementById('lp_hq').value = hq;
-        
-        const majorBeatDropdown = document.getElementById('lp_major_beat');
-        majorBeatDropdown.innerHTML = '<option value="">Select MAJOR BEAT</option>';
-        if (hq) {
-            majorBeatData.filter(item => item['HQ'] === hq).forEach(item => {
-                const opt = document.createElement('option');
-                opt.value = item['BEAT']; opt.textContent = item['BEAT'];
-                majorBeatDropdown.appendChild(opt);
-            });
-        }
+        const month = document.getElementById('m_month').value;
+        const year = document.getElementById('m_year').value;
+        generateMatrixTable(filtered, month, year);
+        document.getElementById('tableWrapper').classList.remove('hidden');
+        toast('Matrix Grid generated', 'success');
     }
 
-    function toggleOtherBeat(selectElement, targetInputId) {
-        const input = document.getElementById(targetInputId);
-        if (selectElement.value === 'OTHER') {
-            input.classList.remove('hidden'); input.required = true;
-        } else {
-            input.classList.add('hidden'); input.required = false; input.value = '';
-        }
+    function generateMatrixTable(data, month, year) {
+        const days = new Date(year, month, 0).getDate();
+        // Sticky th for both Crew ID and Name
+        let html = `<thead class="sticky top-0 z-30"><tr>
+                    <th class="sticky-id min-w-[100px] max-w-[100px]">Crew ID</th>
+                    <th class="sticky-name min-w-[200px] max-w-[200px]">Name</th>`;
+        for(let d=1; d<=days; d++) html += `<th class="text-center min-w-[120px] bg-[#e2e8f0]">${String(d).padStart(2,'0')}/${String(month).padStart(2,'0')}</th>`;
+        html += `</tr></thead><tbody>`;
+
+        data.forEach(row => {
+            // Sticky td for both Crew ID and Name
+            html += `<tr data-emp="${row.empCode}">
+                        <td class="sticky-id font-mono text-blue-600 min-w-[100px] max-w-[100px]">${row.crewId}</td>
+                        <td class="sticky-name font-bold truncate min-w-[200px] max-w-[200px]" title="${row.crewName}">${row.crewName}</td>`;
+            for(let d=1; d<=days; d++) {
+                const date = `${String(d).padStart(2,'0')}/${String(month).padStart(2,'0')}/${year}`;
+                let completedCount = 0;
+                DRIVE_LIST.forEach(drive => { if(historyMap.has(`${String(row.empCode).trim()}|${drive}`)) completedCount++; });
+                
+                const totalDrives = DRIVE_LIST.length;
+                const btnClass = completedCount > 0 ? 'bg-emerald-100 text-emerald-700 border border-emerald-300 shadow-sm' : 'bg-white text-blue-500 border border-slate-200 hover:bg-slate-50';
+                
+                // Show X/Y format (e.g., 5/12)
+                const btnText = completedCount > 0 ? `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i>${completedCount}/${totalDrives}` : '+ Add';
+
+                html += `
+                <td class="relative">
+                    <button type="button" onclick="togglePopup(this)" class="w-full py-1.5 px-2 rounded-md text-xs font-bold flex justify-center items-center gap-1 transition-all ${btnClass}">
+                     ${btnText}
+                    </button>
+                    <div class="drive-popup hidden absolute z-50 p-3 mt-1 w-[260px] right-0 sm:left-1/2 sm:-translate-x-1/2">
+                        <div class="text-[10px] text-slate-500 mb-2 uppercase tracking-widest font-black border-b pb-1">Select Drives (${totalDrives} Total)</div>
+                        <div class="flex flex-col gap-1.5 max-h-[250px] overflow-y-auto pr-1">
+                        ${DRIVE_LIST.map(drive => {
+                            const done = historyMap.has(`${String(row.empCode).trim()}|${drive}`);                
+                            return `<label class="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${done ? 'bg-emerald-50 border border-emerald-200' : 'hover:bg-slate-50 border border-transparent'}">
+                                <input type="checkbox" class="checkbox-custom driveCheck" value="${drive}" data-emp="${row.empCode}" data-date="${date}" data-drive="${drive}" data-cliname="${row.cliName}" data-crewid="${row.crewId}" data-crewname="${row.crewName}" data-hq="${row.hq}" data-desg="${row.crewType}" onchange="updateButton(this)">
+                                <div class="flex flex-col"><a href="${DRIVE_PDF_LINKS[drive] || '#'}"
+   target="_blank"
+   class="text-sm font-bold underline flex items-center gap-1 ${done ? 'text-emerald-700' : 'text-blue-600'}">
+
+   <i data-lucide="file-text" class="w-3 h-3"></i>
+
+   ${drive}
+</a>${done ? `<span class="text-[10px] font-bold text-amber-600 mt-0.5">Already Done</span>` : ''}</div>
+                            </label>`;
+                        }).join('')}
+                        </div>
+                    </div>
+                </td>`;
+            }
+            html += `</tr>`;
+        });
+        document.getElementById('tableContainer').innerHTML = `<table class="w-full text-sm">${html}</tbody></table>`;
+        requestAnimationFrame(() => { lucide.createIcons(); });
     }
 
-    function handleAmbushTypeChange(selectElement) {
-        const customDiv = document.getElementById('amb_custom_type');
-        if (selectElement.value === 'Other') {
-            customDiv.classList.remove('hidden'); customDiv.required = true;
-        } else {
-            customDiv.classList.add('hidden'); customDiv.required = false; customDiv.value = '';
+    function togglePopup(btn) { document.querySelectorAll('.drive-popup').forEach(p => { if(p!==btn.nextElementSibling) p.classList.add('hidden'); }); btn.nextElementSibling.classList.toggle('hidden'); }
+    document.addEventListener('click', (e) => { if(!e.target.closest('td.relative')) document.querySelectorAll('.drive-popup').forEach(p => p.classList.add('hidden')); });
+    
+    function updateButton(cb) {
+        const p = cb.closest('td.relative'); 
+        const btn = p.querySelector('button'); 
+        const checkedCount = p.querySelectorAll('.driveCheck:checked').length;
+        const totalDrives = DRIVE_LIST.length;
+
+        if(checkedCount === 0){ 
+            btn.innerHTML = '+ Add'; 
+            btn.className = 'w-full py-1.5 px-2 rounded-md text-xs font-bold flex justify-center items-center gap-1 bg-white text-blue-500 border border-slate-200 hover:bg-slate-50 transition-all'; 
+        } else { 
+            btn.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i>${checkedCount}/${totalDrives}`; 
+            btn.className = 'w-full py-1.5 px-2 rounded-md text-xs font-bold flex justify-center items-center gap-1 bg-emerald-100 text-emerald-700 border border-emerald-300 shadow-sm transition-all'; 
         }
+        requestAnimationFrame(() => { lucide.createIcons({ root: btn }); });
     }
 
-
-    // === 3. MASTER SUBMIT LOGIC ===
-    async function processMasterSubmit() {
+    // =========================================================
+    // SUBMIT TO CLOUD (FIXED CORS ISSUE)
+    // =========================================================
+    async function processUnifiedSubmit() {
         const form = document.getElementById('masterForm');
-        if (!form.checkValidity()) { form.reportValidity(); return; }
+        if(!form.checkValidity()) { form.reportValidity(); return; }
 
         const c_cli_id = document.getElementById('c_cli_id').value;
         const c_cli_name = document.getElementById('c_cli_name').value;
         const c_cli_hq = document.getElementById('c_cli_hq').value;
         const c_date = document.getElementById('c_date').value;
 
-        const doAb = document.getElementById('chk_ab').checked;
-        const doLp = document.getElementById('chk_lp').checked;
-        const doAlp = document.getElementById('chk_alp').checked;
-        const doNfp = document.getElementById('chk_nfp').checked;
-        const doAmbush = document.getElementById('chk_ambush').checked;
-        const doMob = document.getElementById('chk_mob').checked;
-        const doOd = document.getElementById('chk_od').checked;
-        const doSd = document.getElementById('chk_sd').checked;
-
-        if(!doAb && !doLp && !doAlp && !doNfp && !doAmbush && !doMob && !doOd && !doSd) {
-            alert("Please select at least one report to submit."); return;
-        }
-
-        // --- Custom Validation ---
-
-        // Derive doMs (Micro Sleep) state dynamically from SD section
-        const msCrewInput = document.getElementById('ms_crew_id') ? document.getElementById('ms_crew_id').value.trim() : "";
-        const doMs = doSd && msCrewInput !== "";
-
-        if (doMs) {
-            let msCrewIDs = msCrewInput.split(',').map(id => id.trim()).filter(id => id !== "");
-            for (const id of msCrewIDs) {
-                if (id.length > 8 || !/[A-Z]/.test(id) || !/[0-9]/.test(id)) { alert(`Micro Sleep Error: Invalid Crew ID "${id}".`); return; }
-            }
-            if (document.getElementById('ms_vcd').value === "" || document.getElementById('ms_loc').value === "") {
-                alert("Micro Sleep Error: Please select VCD and Location.");
-                return;
-            }
-        }
-
-        if (doSd) {
-            let totalCrew = doMs ? 1 : 0; // Treat filled Micro Sleep as valid SD entry
-            let sdError = false;
-            document.querySelectorAll('.sd-crew-input').forEach(input => {
-                if(input.value.trim() !== "") {
-                    totalCrew++;
-                    const section = input.closest('.sd-drive-section');
-                    const loc = (section.querySelector('.sd-loc') || section.querySelector('.sd-loc-text')).value;
-                    if(!loc.trim()) { sdError = true; alert("Safety Drive Error: Please select/enter Location for the filled crew."); }
-                }
-            });
-            if(sdError) return;
-            if(totalCrew === 0) { alert("Safety Drive Error: Please enter at least one Crew ID in Permanent Safety Drives section."); return; }
-        }
-
-        if (doMob) {
-            const mobCrewInput = document.getElementById('mob_crew_id').value;
-            if(mobCrewInput && !crewData[mobCrewInput]) {
-                alert("Mobile Inspection Error: The entered Crew ID does not exist in the database!"); return;
-            }
-        }
+        // Check which sections are selected for submission
+        // 0: Abnormality, 1: LP, 2: ALP, 3: Ambush, 4: Other Duties, 5: Matrix
+        const checks = ['chk_ab','chk_lp','chk_alp','chk_ambush','chk_od','chk_matrix'].map(id => document.getElementById(id).checked);
+        
+        if(!checks.includes(true)) return toast("Please select at least one section to submit.", "error");
 
         const btn = document.getElementById('masterSubmitBtn');
-        btn.disabled = true; btn.textContent = 'Submitting Data to Servers...';
+        const origText = btn.innerHTML;
+        btn.disabled = true; 
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> SYNCING TO CLOUD...';
+        btn.classList.replace('bg-blue-600', 'bg-slate-400');
+        btn.classList.replace('hover:bg-blue-700', 'hover:bg-slate-500');
+        requestAnimationFrame(() => { lucide.createIcons(); });
 
         let promises = [];
 
-        // --- A. Abnormality Request ---
-        if (doAb) {
-            let fd = new FormData();
-            fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name);
-            fd.append("CLI LOBBY", c_cli_hq); fd.append("DATE", c_date);
+        // 1. ABNORMALITY (ADDED no-cors)
+        if (checks[0]) {
+            let fd = new FormData(); fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name); fd.append("CLI LOBBY", c_cli_hq); fd.append("DATE", c_date);
             document.querySelectorAll('#sec_ab [data-name]').forEach(el => fd.append(el.getAttribute('data-name'), el.value));
-            promises.push(fetch(URL_AB, { method: 'POST', body: fd }));
+            promises.push(fetch(URL_AB, { method: 'POST', mode: 'no-cors', body: fd }));
         }
-
-        // --- B. Micro Sleep Request ---
-        if (doMs) {
-            const vcd = document.getElementById('ms_vcd').value;
-            const loc = document.getElementById('ms_loc').value;
-            msCrewInput.split(',').map(id => id.trim()).filter(id => id !== "").forEach(id => {
-                let jsonData = {
-                    date: c_date, cli_id: c_cli_id, cli_name: c_cli_name, cli_hq: c_cli_hq,
-                    crew_id: id, vcd_counselling: vcd, micro_counselling: loc,
-                    crew_name: crewData[id] ? crewData[id].name : "Not Found",
-                    desg: crewData[id] ? crewData[id].desg : "N/A", hq: crewData[id] ? crewData[id].hq : "N/A"
-                };
-                promises.push(fetch(URL_MS, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(jsonData) }));
-            });
-        }
-
-        // --- C. LP Footplate Request ---
-        if (doLp) {
-            let fd = new FormData();
-            fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name);
-            fd.append("LP ID", document.getElementById('lp_id').value);
-            fd.append("LP NAME", document.getElementById('lp_name').value);
-            fd.append("DESG", document.getElementById('lp_desg').value);
-            fd.append("HQ", document.getElementById('lp_hq').value);
-            fd.append("MAJOR BEAT", document.getElementById('lp_major_beat').value);
-            
-            const beatVal = document.getElementById('lp_beat').value;
-            if(beatVal === 'OTHER') {
-                fd.append("BEAT_OTHER", "OTHER");
-                fd.append("BEAT", document.getElementById('lp_other_beat').value);
-            } else {
-                fd.append("BEAT", beatVal);
-            }
-            fd.append("LOCO NUMBER", document.getElementById('lp_loco').value);
-            fd.append("TRAIN NUMBER", document.getElementById('lp_train').value);
-            fd.append("DATE", c_date);
-            fd.append("FROM TIME", document.getElementById('lp_from').value);
-            fd.append("TO TIME", document.getElementById('lp_to').value);
+        
+        // 2. LP
+        if (checks[1]) {
+            let fd = new FormData(); fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name); fd.append("LP ID", document.getElementById('lp_id').value); fd.append("LP NAME", document.getElementById('lp_name').value); fd.append("DESG", document.getElementById('lp_desg').value); fd.append("HQ", document.getElementById('lp_hq').value); fd.append("MAJOR BEAT", document.getElementById('lp_major_beat').value);
+            const bv = document.getElementById('lp_beat').value; if(bv==='OTHER'){ fd.append("BEAT_OTHER","OTHER"); fd.append("BEAT",document.getElementById('lp_other_beat').value); }else{ fd.append("BEAT",bv); }
+            fd.append("LOCO NUMBER", document.getElementById('lp_loco').value); fd.append("TRAIN NUMBER", document.getElementById('lp_train').value); fd.append("DATE", c_date); fd.append("FROM TIME", document.getElementById('lp_from').value); fd.append("TO TIME", document.getElementById('lp_to').value);
             promises.push(fetch(URL_LP, { method: 'POST', mode: 'no-cors', body: fd }));
         }
 
-        // --- D. ALP Footplate Request ---
-        if (doAlp) {
-            let fd = new FormData();
-            fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name);
-            fd.append("ALP ID", document.getElementById('alp_id').value);
-            fd.append("ALP NAME", document.getElementById('alp_name').value);
-            fd.append("DESG", document.getElementById('alp_desg').value);
-            fd.append("HQ", document.getElementById('alp_hq').value);
-            
-            const beatVal = document.getElementById('alp_beat').value;
-            if(beatVal === 'OTHER') {
-                fd.append("BEAT_OTHER", "OTHER");
-                fd.append("BEAT", document.getElementById('alp_other_beat').value);
-            } else {
-                fd.append("BEAT", beatVal);
-            }
-            fd.append("DATE", c_date); 
+        // 3. ALP
+        if (checks[2]) {
+            let fd = new FormData(); fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name); fd.append("ALP ID", document.getElementById('alp_id').value); fd.append("ALP NAME", document.getElementById('alp_name').value); fd.append("DESG", document.getElementById('alp_desg').value); fd.append("HQ", document.getElementById('alp_hq').value);
+            const bv = document.getElementById('alp_beat').value; if(bv==='OTHER'){ fd.append("BEAT_OTHER","OTHER"); fd.append("BEAT",document.getElementById('alp_other_beat').value); }else{ fd.append("BEAT",bv); }
+            fd.append("DATE", c_date);
             promises.push(fetch(URL_ALP, { method: 'POST', mode: 'no-cors', body: fd }));
         }
 
-        // --- E. Night Footplate Request ---
-        if (doNfp) {
-            let fd = new FormData();
-            fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name);
-            fd.append("CLI LOBBY", c_cli_hq); fd.append("DATE", c_date);
-            document.querySelectorAll('#sec_nfp [data-name]').forEach(el => fd.append(el.getAttribute('data-name'), el.value));
-            promises.push(fetch(URL_NFP, { method: 'POST', body: fd }));
-        }
-
-        // --- F. Ambush Form Request ---
-        if (doAmbush) {
-            let fd = new FormData();
-            fd.append("cliId", c_cli_id); fd.append("cliName", c_cli_name); fd.append("cliHQ", c_cli_hq);
-            fd.append("analysisMonth", document.getElementById('amb_month').value);
-            fd.append("dateOfAmbush", document.getElementById('amb_date').value);
-            fd.append("dateOfEntry", document.getElementById('amb_entry').value);
-            
-            const ambType = document.getElementById('amb_type').value;
-            fd.append("typeOfAmbush", ambType === "Other" ? document.getElementById('amb_custom_type').value : ambType);
-            fd.append("abnormalities", document.getElementById('amb_abnormalities').value);
-            
-            const ts = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-            fd.append('timestamp', ts);
-            fd.append('submissionId', `${ts}-${Math.random().toString(36).substr(2, 9)}`);
+        // 4. AMBUSH
+        if (checks[3]) {
+            let fd = new FormData(); fd.append("cliId", c_cli_id); fd.append("cliName", c_cli_name); fd.append("cliHQ", c_cli_hq); fd.append("analysisMonth", document.getElementById('amb_month').value); fd.append("dateOfAmbush", document.getElementById('amb_date').value); fd.append("dateOfEntry", document.getElementById('amb_entry').value);
+            const at = document.getElementById('amb_type').value; fd.append("typeOfAmbush", at==="Other"?document.getElementById('amb_custom_type').value:at); fd.append("abnormalities", document.getElementById('amb_abnormalities').value);
+            const ts = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }); fd.append('timestamp', ts); fd.append('submissionId', `${ts}-${Math.random().toString(36).substr(2, 9)}`);
             promises.push(fetch(URL_AMBUSH, { method: 'POST', mode: 'no-cors', body: fd }));
         }
 
-        // --- G. Mobile Ambush Request ---
-        if (doMob) {
-            let fd = new FormData();
-            fd.append("crew_id", document.getElementById('mob_crew_id').value);
-            document.querySelectorAll('#sec_mob [data-name]').forEach(el => fd.append(el.getAttribute('data-name'), el.value));
-            promises.push(fetch(URL_MOB, { method: 'POST', body: fd }));
+        // 5. OTHER DUTY (ADDED no-cors)
+        if (checks[4]) {
+            let fd = new FormData(); fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name); fd.append("CLI LOBBY", c_cli_hq); fd.append("DATE", c_date); fd.append("FROM TIME", document.getElementById('od_fromTime').value); fd.append("TO TIME", document.getElementById('od_toTime').value);
+            let dt = document.getElementById('od_dutyType').value; if(dt==="OTHER DUTY") dt=`${document.getElementById('od_desc').value} (${document.getElementById('od_subType').value})`;
+            fd.append("DUTY TYPE", dt);
+            promises.push(fetch(URL_OD, { method: 'POST', mode: 'no-cors', body: fd }));
         }
 
-        // --- H. Other Duties Request ---
-        if (doOd) {
-            let fd = new FormData();
-            fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name);
-            fd.append("CLI LOBBY", c_cli_hq); fd.append("DATE", c_date);
-            fd.append("FROM TIME", document.getElementById('od_fromTime').value);
-            fd.append("TO TIME", document.getElementById('od_toTime').value);
-
-            let dType = document.getElementById('od_dutyType').value;
-            if(dType === "OTHER DUTY") {
-                const subType = document.getElementById('od_subType').value;
-                const desc = document.getElementById('od_desc').value;
-                dType = `${desc} (${subType})`;
-            }
-            fd.append("DUTY TYPE", dType);
-            promises.push(fetch(URL_OD, { method: 'POST', body: fd }));
-        }
-
-        // --- I. Safety Drive Request (Standard Drives) ---
-        if (doSd) {
-            document.querySelectorAll('.sd-crew-input').forEach(inputField => {
-                let crewIDsString = inputField.value.trim();
-                if (crewIDsString === "") return;
-                const section = inputField.closest('.sd-drive-section');
-                const locVal = (section.querySelector('.sd-loc') || section.querySelector('.sd-loc-text')).value;
-                const remVal = section.querySelector('.sd-remark') ? section.querySelector('.sd-remark').value : "";
-                const abnVal = section.querySelector('.sd-abn') ? section.querySelector('.sd-abn').value : "NIL";
-
-                let actStr = "";
-                if (abnVal.toUpperCase() !== 'NIL') {
-                    let actions = [];
-                    if (section.querySelector('.sd-action-cms')?.checked) actions.push("Reported in CMS");
-                    if (section.querySelector('.sd-action-other')?.checked) actions.push("Other: " + section.querySelector('.sd-action-other-text').value);
-                    actStr = actions.join(', ');
+        // 6. MASS MATRIX (ADDED no-cors)
+        if (checks[5]) {
+            let matrixData = [];
+            document.querySelectorAll('.driveCheck:checked').forEach(cb => {
+                if (!historyMap.has(`${String(cb.dataset.emp).trim()}|${String(cb.dataset.drive).trim()}`)) {
+                    matrixData.push({ empCode: cb.dataset.emp, crewId: cb.dataset.crewid, crewName: cb.dataset.crewname, date: cb.dataset.date, drive: cb.dataset.drive, cliName: cb.dataset.cliname, hq: cb.dataset.hq, desg: cb.dataset.desg });
                 }
-
-                crewIDsString.split(',').filter(id => id.trim() !== "").forEach(crewID => {
-                    crewID = crewID.trim();
-                    let jsonData = {
-                        date: c_date, cli_id: c_cli_id, cli_name: c_cli_name, cli_hq: c_cli_hq,
-                        drive_name: inputField.dataset.driveName, counselling_location: locVal,
-                        remark: remVal, abnormalities: abnVal, action_taken: actStr, crew_id: crewID,
-                        crew_name: crewData[crewID] ? crewData[crewID].name : "Not Found",
-                        desg: crewData[crewID] ? crewData[crewID].desg : "N/A",
-                        hq: crewData[crewID] ? crewData[crewID].hq : "N/A", timestamp: new Date().toISOString()
-                    };
-                    promises.push(fetch(URL_SD, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(jsonData) }));
-                });
             });
+            if(matrixData.length > 0) {
+                promises.push(fetch(URL_MATRIX, { 
+                    method: 'POST', 
+                    mode: 'no-cors', // Bypasses CORS 
+                    body: JSON.stringify(matrixData), 
+                    headers: { 'Content-Type': 'text/plain' } 
+                }));
+            }
         }
 
-        // Execute all requests concurrently
-        Promise.all(promises).then(() => {
-            alert("✅ Data submission successful. All selected reports have been updated in the database.");
-            location.reload(); 
-        }).catch(err => {
-            console.error(err);
-            alert("❌ Kuch submit karne mein problem aayi, network connection check karein.");
-        }).finally(() => {
-            btn.disabled = false; btn.textContent = 'SUBMIT ALL SELECTED REPORTS';
-        });
+        if(promises.length === 0) { 
+            toast("No new data to submit.", "info"); 
+            btn.disabled = false; 
+            btn.innerHTML = origText; 
+            btn.classList.replace('bg-slate-400', 'bg-blue-600');
+            btn.classList.replace('hover:bg-slate-500', 'hover:bg-blue-700');
+            return; 
+        }
+
+        try {
+            await Promise.all(promises);
+            toast('✅ ALL DATA SYNCED SUCCESSFULLY!', 'success');
+            setTimeout(() => location.reload(), 2000);
+        } catch(e) { 
+            toast('Error in submission network', 'error'); 
+            console.error(e);
+            btn.disabled = false; 
+            btn.innerHTML = origText; 
+            btn.classList.replace('bg-slate-400', 'bg-blue-600');
+            btn.classList.replace('hover:bg-slate-500', 'hover:bg-blue-700');
+        }
     }
 </script>
 </body>
