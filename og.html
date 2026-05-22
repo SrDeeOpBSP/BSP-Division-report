@@ -546,7 +546,7 @@
         // Sticky th for both Crew ID and Name
         let html = `<thead class="sticky top-0 z-30"><tr>
                    <th class="sticky-id min-w-[75px] max-w-[75px] text-[10px]">Crew ID</th>
-                    <th class="min-w-[140px] max-w-[140px]">Name</th>`;
+                    <th class="min-w-[180px] max-w-[180px] text-[11px]">Name</th>`;
         for(let d=1; d<=days; d++) html += `<th class="text-center min-w-[70px] text-[10px] px-1 bg-[#e2e8f0]">${String(d).padStart(2,'0')}/${String(month).padStart(2,'0')}</th>`;
         html += `</tr></thead><tbody>`;
 
@@ -554,7 +554,7 @@
             // Sticky td for both Crew ID and Name
             html += `<tr data-emp="${row.empCode}">
                         <td class="sticky-id font-mono text-blue-600 min-w-[75px] max-w-[75px] text-[10px]">${row.crewId}</td>
-                        <td class="font-bold truncate min-w-[140px] max-w-[140px]" title="${row.crewName}">${row.crewName}</td>`;
+                        <td class="font-semibold truncate min-w-[190px] max-w-[190px] text-[10px]" title="${row.crewName}">${row.crewName}</td>`;
             for(let d=1; d<=days; d++) {
                 const date = `${String(d).padStart(2,'0')}/${String(month).padStart(2,'0')}/${year}`;
                 let completedCount = 0;
