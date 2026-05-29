@@ -345,13 +345,17 @@
         .hidden { display: none !important; }
 
         /* --- UPDATED HUB MATRIX STYLES (FIT TO SCREEN & WHITE BORDERS) --- */
-        .matrix-container { 
-            width: 100%;
-            overflow-x: hidden; /* Scrollbar removed */
-            border: 1px solid #ffffff; /* Solid White Border */
-            border-radius: 10px; 
-            background: rgba(0,0,0,0.2);
-        }
+.matrix-container {
+    width: 100%;
+    max-height: 75vh;
+
+    overflow-y: auto;
+    overflow-x: auto;
+
+    border: 1px solid #ffffff;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.2);
+}
 
         .matrix-table { 
             width: 100%; 
@@ -368,27 +372,42 @@
             white-space: nowrap;
         }
 
-        .matrix-table th { 
-            background: #040c18; 
-            color: var(--neon-blue); 
-            font-weight: 600;
-            border-bottom: 2px solid #ffffff; /* Solid White Header Border */
-        }
+ .matrix-table th {
+    background: #040c18;
+    color: var(--neon-blue);
+    font-weight: 600;
+
+    position: sticky;
+    top: 0;
+    z-index: 20;
+
+    border-bottom: 2px solid #ffffff;
+}
 
         /* First Column (Names) */
-        .matrix-table th:first-child, 
-        .matrix-table td:first-child { 
-            width: 210px; 
-            text-align: left; 
-            padding-left: 8px; 
-            font-weight: 600; 
-            background: #0d1b2a; 
-            z-index: 4;
-            text-overflow: ellipsis;
-            border-right: 2px solid #ffffff !important; 
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3); 
-        }
+ .matrix-table th:first-child,
+.matrix-table td:first-child {
+    width: 210px;
+    text-align: left;
+    padding-left: 8px;
+    font-weight: 600;
+    background: #0d1b2a;
 
+    position: sticky;
+    left: 0;
+
+    z-index: 15;
+
+    text-overflow: ellipsis;
+    border-right: 2px solid #ffffff !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+.matrix-table th:first-child {
+    top: 0;
+    left: 0;
+    z-index: 30;
+    background: #040c18;
+}
         .matrix-table tbody tr:hover td:first-child { 
             color: var(--neon-blue); 
             text-shadow: 0 0 5px var(--neon-blue); 
