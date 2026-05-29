@@ -277,9 +277,18 @@
                         <select id="m_year" class="modern-input border-emerald-300 focus:border-emerald-500 appearance-none"><option value="2026">2026</option><option value="2027">2027</option></select>
                     </div>
                     <div class="col-span-2 md:col-span-2">
-                        <button type="button" onclick="loadCrewDataMaster()" class="w-full py-2.5 px-4 rounded-lg font-bold text-sm bg-emerald-600 hover:bg-emerald-700 text-white transition-all flex justify-center items-center gap-2 shadow-md hover:shadow-lg">
-                            <i data-lucide="search" class="w-4 h-4"></i> Generate Matrix Grid
-                        </button>
+                          <button
+                          type="button"
+                          id="matrixLoadBtn"
+                          onclick="loadCrewDataMaster()"
+                          disabled
+                          class="w-full py-2.5 px-4 rounded-lg font-bold text-sm bg-gray-400 text-white transition-all flex justify-center items-center gap-2 shadow-md cursor-not-allowed">
+
+                          <span id="matrixBtnText">
+                          ⏳ Loading Data...
+                          </span>
+
+                          </button>
                     </div>
                 </div>
 
@@ -351,8 +360,10 @@
 
     // State Vars
     let historyMap = new Set();
+    let latestDateMap = new Map();
     let latestCrewData = [];
     let DRIVE_LIST = [];
+    let dataLoaded = false;
     const DRIVE_PDF_LINKS = {
     "DRIVE FOR FIRE PREVENTION OF ELECTRIC AND DIESEL LOCOMOTIVES": "https://drive.google.com/file/d/107Lwzv7dP1h4tHJNSB1gbBYPqoplzQbh/view?usp=sharing",
 };
@@ -399,12 +410,63 @@
     // =========================================================
     // BOOT & DATA FETCHING
     // =========================================================
-    document.addEventListener('DOMContentLoaded', async () => {
-        document.getElementById('c_date').valueAsDate = new Date();
-        loadCSVs();
-        await Promise.all([ initDrives(), loadHistory(), loadLatestCrewData() ]);
-    });
+document.addEventListener('DOMContentLoaded', async () => {
 
+    document.getElementById('c_date').valueAsDate = new Date();
+
+    loadCSVs();
+
+    const btn =
+    document.getElementById('matrixLoadBtn');
+
+    const btnText =
+    document.getElementById('matrixBtnText');
+
+    try {
+
+        await Promise.all([
+            initDrives(),
+            loadHistory(),
+            loadLatestCrewData()
+        ]);
+
+        dataLoaded = true;
+
+        btn.disabled = false;
+
+        btn.classList.remove(
+            'bg-gray-400',
+            'cursor-not-allowed'
+        );
+
+        btn.classList.add(
+            'bg-emerald-600',
+            'hover:bg-emerald-700'
+        );
+
+        btnText.innerHTML =
+        '<i data-lucide="search" class="w-4 h-4"></i> Generate Matrix Grid';
+
+        lucide.createIcons();
+
+        console.log(
+            "All Matrix Data Loaded"
+        );
+
+    } catch(err) {
+
+        btnText.innerHTML =
+        '❌ Data Load Failed';
+
+        console.error(err);
+
+        toast(
+            'Data loading failed',
+            'error'
+        );
+    }
+
+});
     function loadCSVs() {
         Papa.parse('CLIMICRO.csv', { download: true, header: false, skipEmptyLines: true, complete: function(results) {
             let correctedData = [];
@@ -429,15 +491,58 @@
             DRIVE_LIST = (data.values || []).slice(1).filter(row => (row[1] || "").toUpperCase() === "ACTIVE").map(row => row[0]).filter(Boolean);
         } catch (err) { console.error("Drives API error", err); }
     }
+function normalizeDate(dateStr) {
+
+    if (!dateStr) return '';
+
+    dateStr = String(dateStr).trim();
+
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+        return dateStr;
+    }
+
+    if (dateStr.includes('T')) {
+
+        const parts = dateStr.split('T')[0].split('-');
+
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+
+    return dateStr;
+}
 
     async function loadHistory() {
         try {
             const res = await fetch(URL_MATRIX);
             const data = await res.json();
             historyMap.clear();
-            data.slice(1).forEach(r => {
-                historyMap.add(`${String(r[0] || '').trim()}|${String(r[4] || '').trim()}`);
-            });
+data.slice(1).forEach(r => {
+    console.log("ROW DATA =", r);
+
+    const emp = String(r[0] || '').trim();
+    const drive = String(r[4] || '').trim();
+    const dt = normalizeDate(r[3]);  // Column D
+
+    const key = `${emp}|${drive}`;
+
+    historyMap.add(key);
+
+    if (!latestDateMap.has(key)) {
+        latestDateMap.set(key, dt);
+    } else {
+        const oldDate = latestDateMap.get(key);
+
+        const oldParts = oldDate.split('/');
+        const newParts = dt.split('/');
+
+        const oldObj = new Date(oldParts[2], oldParts[1]-1, oldParts[0]);
+        const newObj = new Date(newParts[2], newParts[1]-1, newParts[0]);
+
+        if (newObj > oldObj) {
+            latestDateMap.set(key, dt);
+        }
+    }
+});
         } catch (err) { console.warn("History data fetch failed.", err); }
     }
 
@@ -533,6 +638,13 @@
     // SECTION 6: MASS MATRIX LOGIC (DOUBLE FREEZE COLUMNS)
     // =========================================================
     function loadCrewDataMaster() {
+        if(!dataLoaded){
+        toast(
+            "Please wait, data is still loading...",
+            "error"
+        );
+        return;
+    }
         const cliName = document.getElementById('c_cli_name').value.trim();
         if(!cliName) return toast('Please enter a Valid CLI ID at the top first.', 'error');
         const filtered = latestCrewData.filter(r => r.cliName?.trim().toLowerCase() === cliName.toLowerCase());
@@ -579,7 +691,9 @@
                         <div class="text-[10px] text-slate-500 mb-2 uppercase tracking-widest font-black border-b pb-1">Select Drives (${totalDrives} Total)</div>
                         <div class="flex flex-col gap-1.5 max-h-[250px] overflow-y-auto pr-1">
                         ${DRIVE_LIST.map(drive => {
-                            const done = historyMap.has(`${String(row.empCode).trim()}|${drive}`);                
+                            const done = historyMap.has(`${String(row.empCode).trim()}|${drive}`); 
+                            const key = `${String(row.empCode).trim()}|${drive}`;
+                            const latestDate = latestDateMap.get(key) || '';               
                             return `<label class="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${done ? 'bg-emerald-50 border border-emerald-200' : 'hover:bg-slate-50 border border-transparent'}">
                                 <input type="checkbox" class="checkbox-custom driveCheck" value="${drive}" data-emp="${row.empCode}" data-date="${date}" data-drive="${drive}" data-cliname="${row.cliName}" data-crewid="${row.crewId}" data-crewname="${row.crewName}" data-hq="${row.hq}" data-desg="${row.crewType}" onchange="updateButton(this)">
 <div class="flex flex-col">
@@ -600,7 +714,11 @@ ${DRIVE_PDF_LINKS[drive] ? `
 </span>
 `}
 
-${done ? `<span class="text-[10px] font-bold text-amber-600 mt-0.5">Already Done</span>` : ''}
+${done ? `
+<span class="text-[10px] font-bold text-amber-600 mt-0.5">
+Already Done (${latestDate})
+</span>
+` : ''}
 
 </div>
                             </label>`;
