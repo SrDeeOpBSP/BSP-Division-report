@@ -723,7 +723,6 @@
     const URL_MATRIX = "https://script.google.com/macros/s/AKfycbxbmRynNgDQdLFK28-vizuV-aSWOXt3aYLUwjnvCS9e3R7JHidy5Ob9qTM9AVyOfE_S/exec";
     const URL_AB = "https://script.google.com/macros/s/AKfycbzTpR-XJHKJQUT0MnEjOTuh6iH9amkUDoI1pnZ29WdoAH8bDEJaAihhMGlhC4D9Yb5CUA/exec";
     const URL_OD = "https://script.google.com/macros/s/AKfycbzD319B272QFM5HK-3ejkl41n3zm1r_0F6bc9ZzJE1Z_6Tc-4wge65Ip16uQe9eDUmrUw/exec";
-    const URL_AMBUSH = "https://script.google.com/macros/s/AKfycbwU2c8h2LTTYzaKBIpxpLHVnMLwXURE00TOGok9xPwEVBsuiL9oDD-gJ1yCHdO-eL7r/exec";
     const URL_ALP = "https://script.google.com/macros/s/AKfycbwxnVSd3eGB4SvHVz2IINLEat031qB4xvNKbe8BcdPyg5BQpL0xkbQuAyu_B-fTdIqB0A/exec";
     const URL_LP = "https://script.google.com/macros/s/AKfycbxbHiwAGtuvUh_0M3eGX3gQZ1SGA96ffn9Tw93aKGZbU-8fMtArUmpqzGgfI-CqSOyG/exec";
 
@@ -1156,7 +1155,7 @@ Already Done (${latestDate})
 
         // Check which sections are selected for submission
         // 0: Abnormality, 1: LP, 2: ALP, 3: Ambush, 4: Other Duties, 5: Matrix
-        const checks = ['chk_ab','chk_lp','chk_alp','chk_ambush','chk_od','chk_matrix'].map(id => document.getElementById(id).checked);
+        const checks = ['chk_ab','chk_lp','chk_alp','chk_od','chk_matrix'].map(id => document.getElementById(id).checked);
         
         if(!checks.includes(true)) return toast("Please select at least one section to submit.", "error");
 
@@ -1191,14 +1190,6 @@ Already Done (${latestDate})
             const bv = document.getElementById('alp_beat').value; if(bv==='OTHER'){ fd.append("BEAT_OTHER","OTHER"); fd.append("BEAT",document.getElementById('alp_other_beat').value); }else{ fd.append("BEAT",bv); }
             fd.append("DATE", c_date);
             promises.push(fetch(URL_ALP, { method: 'POST', mode: 'no-cors', body: fd }));
-        }
-
-        // 4. AMBUSH
-        if (checks[3]) {
-            let fd = new FormData(); fd.append("cliId", c_cli_id); fd.append("cliName", c_cli_name); fd.append("cliHQ", c_cli_hq); fd.append("analysisMonth", document.getElementById('amb_month').value); fd.append("dateOfAmbush", document.getElementById('amb_date').value); fd.append("dateOfEntry", document.getElementById('amb_entry').value);
-            const at = document.getElementById('amb_type').value; fd.append("typeOfAmbush", at==="Other"?document.getElementById('amb_custom_type').value:at); fd.append("abnormalities", document.getElementById('amb_abnormalities').value);
-            const ts = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }); fd.append('timestamp', ts); fd.append('submissionId', `${ts}-${Math.random().toString(36).substr(2, 9)}`);
-            promises.push(fetch(URL_AMBUSH, { method: 'POST', mode: 'no-cors', body: fd }));
         }
 
         // 5. OTHER DUTY (ADDED no-cors)
@@ -1252,4 +1243,3 @@ Already Done (${latestDate})
 </script>
 </body>
 </html>
-
