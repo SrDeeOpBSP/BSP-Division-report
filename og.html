@@ -103,68 +103,447 @@
         <div class="clean-card overflow-hidden">
             <label class="section-header">
                 <input type="checkbox" id="chk_ab" class="checkbox-custom" onchange="checkAbnormalityDate(this)">
-                <span class="font-bold text-slate-700 text-lg">1. ABNORMALITY DAILY REPORT</span>
+                <span class="font-bold text-slate-700 text-lg">1. DAILY REPORT's & ABNORMALITIES</span>
             </label>
             <div id="sec_ab" class="section-body hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                <div><label class="modern-label">ANY FOOTPLATE DONE AS PER TLC</label><select data-name="ANY FOOTPLATE DONE AS PER TLC" class="modern-input req-ab"><option value="" disabled selected>Select</option><option value="YES">YES</option><option value="NO">NO</option></select></div>
-                <div><label class="modern-label">FOOTPLATE DURING WEE HOURS</label><input type="number" data-name="FOOTPLATE DURING WEE HOURS" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">ABNORMALITIES ON FP DURING WEE HOURS</label><input type="number" data-name="ABNORMALITIES ON FOOTPLATE DURING WEE HOURS" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">FOOTPLATE DURING NIGHT HOURS</label><input type="number" data-name="FOOTPLATE DURING NIGHT HOURS" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">ABNORMALITIES ON FOOTPLATE DURING NIGHT HOURS</label><input type="number" data-name="ABNORMALITIES ON FOOTPLATE DURING NIGHT HOURS" value="0" min="0" class="modern-input req-ab"></div>
+                <!-- FOOTPLATE ENTRIES -->
+<div class="lg:col-span-3 mt-4">
+    <h3 class="font-bold text-xl text-blue-700 border-b-2 border-blue-300 pb-2">
+        FOOTPLATE ENTRIES
+    </h3>
+</div>
+
+<div>
+    <label class="modern-label">ANY FOOTPLATE DONE AS PER TLC</label>
+    <select data-name="ANY FOOTPLATE DONE AS PER TLC" class="modern-input req-ab">
+        <option value="" disabled selected>Select</option>
+        <option value="YES">YES</option>
+        <option value="NO">NO</option>
+    </select>
+</div>
+
+<div>
+    <label class="modern-label">FOOTPLATE DURING WEE HOURS</label>
+    <input type="number" data-name="FOOTPLATE DURING WEE HOURS" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITIES ON FOOTPLATE DURING WEE HOURS</label>
+    <input type="number" data-name="ABNORMALITIES ON FOOTPLATE DURING WEE HOURS" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">FOOTPLATE DURING NIGHT HOURS</label>
+    <input type="number" data-name="FOOTPLATE DURING NIGHT HOURS" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITIES ON FOOTPLATE DURING NIGHT HOURS</label>
+    <input type="number" data-name="ABNORMALITIES ON FOOTPLATE DURING NIGHT HOURS" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">FOOTPLATE EXCLUDING WEE HOURS</label>
+    <input type="number" data-name="FOOTPLATE EXCLUDING WEE HOURS" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITIES ON FOOTPLATE EXCLUDING WEE HOURS</label>
+    <input type="number" data-name="ABNORMALITIES ON FOOTPLATE EXCLUDING WEE HOURS" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">FOOT PLATE DONE IN COACHING</label>
+    <input type="number" data-name="FOOT PLATE DONE IN COACHING" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITY COUNT DURING FOOTPLATE IN COACHING</label>
+    <input type="number" id="abCoachingCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN COACHING" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div class="lg:col-span-2">
+    <label class="modern-label">ABNORMALITY DETAIL DURING FOOTPLATE IN COACHING</label>
+    <textarea id="abCoachingDetail" data-name="ABNORMALITY DETAIL DURING FOOTPLATE IN COACHING" class="modern-input">NIL</textarea>
+</div>
+
+<div>
+    <label class="modern-label">FOOT PLATE DONE IN MEMU</label>
+    <input type="number" data-name="FOOT PLATE DONE IN MEMU" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITY COUNT DURING FOOTPLATE IN MEMU</label>
+    <input type="number" id="abMemuCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN MEMU" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div class="lg:col-span-2">
+    <label class="modern-label">ABNORMALITY DETAIL DURING FOOTPLATE IN MEMU</label>
+    <textarea id="abMemuDetail" data-name="ABNORMALITY DETAIL DURING FOOTPLATE IN MEMU" class="modern-input">NIL</textarea>
+</div>
+
+<div>
+    <label class="modern-label">FOOT PLATE DONE IN GOODS TRAIN</label>
+    <input type="number" data-name="FOOT PLATE DONE IN GOODS TRAIN" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN</label>
+    <input type="number" id="abGoodsCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div class="lg:col-span-2">
+    <label class="modern-label">ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN</label>
+    <textarea id="abGoodsDetail" data-name="ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN" class="modern-input">NIL</textarea>
+</div>
+
+<div>
+    <label class="modern-label">FOOTPLATE DONE WITH GROUP LP ON DATE</label>
+    <input type="number" data-name="FOOTPLATE DONE WITH GROUP LP ON DATE" value="0" min="0" class="modern-input">
+</div>
+
+<div>
+    <label class="modern-label">FOOTPLATE DONE WITH GROUP ALP ON DATE</label>
+    <input type="number" data-name="FOOTPLATE DONE WITH GROUP ALP ON DATE" value="0" min="0" class="modern-input">
+</div>
+
+<div>
+    <label class="modern-label">FOOTPLATE DONE WITH GROUP LPS ON DATE</label>
+    <input type="number" data-name="FOOTPLATE DONE WITH GROUP LPS ON DATE" value="0" min="0" class="modern-input">
+</div>
+
+<div>
+    <label class="modern-label">SPECIAL FOOTPLATE(IMPROVING DRIVING/BRAKING TECHNIQUES LIKE HANDLING)</label>
+    <input type="number" data-name="SPECIAL FOOTPLATE(IMPROVING DRIVING/BRAKING TECHNIQUES LIKE HANDLING)" value="0" min="0" class="modern-input req-ab">
+</div>
+<!-- AMBUSH ENTRIES -->
+<div class="lg:col-span-3 mt-6">
+    <h3 class="font-bold text-xl text-red-700 border-b-2 border-red-300 pb-2">
+        AMBUSH ENTRIES
+    </h3>
+</div>
                 
-                <div><label class="modern-label">FOOTPLATE EXCLUDING WEE HOURS</label><input type="number" data-name="FOOTPLATE EXCLUDING WEE HOURS" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">ABN ON FP EXCLUDING WEE HOURS</label><input type="number" data-name="ABNORMALITIES ON FOOTPLATE EXCLUDING WEE HOURS" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">FOOT PLATE DONE IN COACHING</label><input type="number" data-name="FOOT PLATE DONE IN COACHING" value="0" min="0" class="modern-input req-ab"></div>
-                
-                <div><label class="modern-label">ABN COUNT DURING FP IN COACHING</label><input type="number" id="abCoachingCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN COACHING" value="0" min="0" class="modern-input req-ab"></div>
-                <div class="lg:col-span-2"><label class="modern-label">ABN DETAIL DURING FP IN COACHING</label><textarea id="abCoachingDetail" data-name="ABNORMALITY DETAIL DURING FOOTPLATE IN COACHING" class="modern-input">NIL</textarea></div>
-                
-                <div><label class="modern-label">FOOT PLATE DONE IN MEMU</label><input type="number" data-name="FOOT PLATE DONE IN MEMU" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">ABN COUNT DURING FP IN MEMU</label><input type="number" id="abMemuCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN MEMU" value="0" min="0" class="modern-input req-ab"></div>
-                <div class="lg:col-span-2"><label class="modern-label">ABN DETAIL DURING FP IN MEMU</label><textarea id="abMemuDetail" data-name="ABNORMALITY DETAIL DURING FOOTPLATE IN MEMU" class="modern-input">NIL</textarea></div>
-                
-                <div><label class="modern-label">FOOT PLATE DONE IN GOODS TRAIN</label><input type="number" data-name="FOOT PLATE DONE IN GOODS TRAIN" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">ABN COUNT DURING FP IN GOODS TRAIN</label><input type="number" id="abGoodsCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN" value="0" min="0" class="modern-input req-ab"></div>
-                <div class="lg:col-span-2"><label class="modern-label">ABN DETAIL DURING FP IN GOODS TRAIN</label><textarea id="abGoodsDetail" data-name="ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN" class="modern-input">NIL</textarea></div>
-                
-                <div><label class="modern-label">FP DONE WITH GROUP LP ON DATE</label><input type="number" data-name="FOOTPLATE DONE WITH GROUP LP ON DATE" value="0" min="0" class="modern-input"></div>
-                <div><label class="modern-label">FP DONE WITH GROUP ALP ON DATE</label><input type="number" data-name="FOOTPLATE DONE WITH GROUP ALP ON DATE" value="0" min="0" class="modern-input"></div>
-                <div><label class="modern-label">FOOTPLATE DONE WITH GROUP LPS ON DATE</label><input type="number" data-name="FOOTPLATE DONE WITH GROUP LPS ON DATE" value="0" min="0" class="modern-input"></div>
-                <div><label class="modern-label">SPECIAL FP (IMPROVING TECHNIQUES)</label><input type="number" data-name="SPECIAL FOOTPLATE(IMPROVING DRIVING/BRAKING TECHNIQUES LIKE HANDLING)" value="0" min="0" class="modern-input req-ab"></div>
-                
-                <div><label class="modern-label">AUTO AND IB AMBUSH (NO OF TRAINS)</label><input type="number" data-name="AUTO AND IB AMBUSH(NO OF TRAINS)" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">ABNORMALITIES ON AUTO/IB AMBUSH</label><input type="number" data-name="ABNORMALITIES ON AUTO AND IB AMBUSH" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">LEVEL CROSSING AMBUSH (NO OF TRAINS)</label><input type="number" data-name="LEVEL CROSSING AMBUSH(NO OF TRAINS)" value="0" min="0" class="modern-input req-ab"></div>
-                
-                <div><label class="modern-label">ABN ON LEVEL CROSSING AMBUSH</label><input type="number" data-name="ABNORMALITIES ON LEVEL CROSSING AMBUSH" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">CD ZONES AMBUSH (NO OF TRAINS)</label><input type="number" data-name="CD ZONES AMBUSH(NO OF TRAINS)" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">ABNBORMALITIES ON CD ZONES AMBUSH</label><input type="number" data-name="ABNBORMALITIES ON CD ZONES AMBUSH" value="0" min="0" class="modern-input req-ab"></div>
-                
-                <div><label class="modern-label">BA AMBUSH (NO OF CREWS)</label><input type="number" data-name="BA AMBUSH(NO OF CREWS)" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">ABNORMALITIES ON BA AMBUSH</label><input type="number" data-name="ABNORMALITIES ON BA AMBUSH" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">SPEED GUN CHECKING AUTO AT ON (TRAINS)</label><input type="number" data-name="SPEED GUN CHECKING AUTO AT ON (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab"></div>
-                
-                <div><label class="modern-label">ABN ON SPEED GUN AUTO AT ON</label><input type="number" data-name="ABNORMALITIES ON SPEED GUN CHECKING AUTO AT ON" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">SPEED GUN CHECKING PASSING AT YELLOW</label><input type="number" data-name="SPEED GUN CHECKING PASSING AT YELLOW (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">ABN ON SPEED GUN PASSING AT YELLOW</label><input type="number" data-name="ABNORMALITIES ON SPEED GUN CHECKING PASSING AT YELLOW" value="0" min="0" class="modern-input req-ab"></div>
-                
-                <div><label class="modern-label">COUNSELLING AT LOBBY CONCERNED TO SAFETY</label><input type="number" data-name="COUNCELLING AT LOBBY CONCERNED TO SAFETY(NO OF CREWS)" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">SHUNTING PROCEDURE (GR 5.13)</label><input type="number" data-name="SHUNTING PROCEDURE & RULES INVOLVED AS PER GR 5.13" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">COUNSELLING FOR SPAD PREVENTION</label><input type="number" data-name="COUNSELLING FOR SPAD PREVENTION" value="0" min="0" class="modern-input req-ab"></div>
-                
-                <div><label class="modern-label">LONG HOURS DUTY OF CREW</label><input type="number" data-name="LONG HOURS DUTY OF CREW" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">FAMILY/SAFETY SEMINAR</label><input type="number" data-name="FAMILY/SAFETY SEMINAR" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">RUNNING ROOM INSPECTION</label><input type="number" data-name="RUNNING ROOM INSPECTION" value="0" min="0" class="modern-input req-ab"></div>
-                
-                <div><label class="modern-label">ABNORMALITIES ON RUNNING ROOM INSPECTION</label><input type="number" data-name="ABNORMALITIES ON RUNNING ROOM INSPECTION" value="0" min="0" class="modern-input req-ab"></div>
-                <div class="lg:col-span-2"><label class="modern-label">ABNORMALITY DETAIL DURING RUNNING ROOM INSPECTION</label><textarea id="abRrDetail" data-name="ABNORMALITY DETAIL DURING RUNNING ROOM INSPECTION" class="modern-input">NIL</textarea></div>
-                
-                <div><label class="modern-label">LOBBY INSPECTION</label><input type="number" data-name="LOBBY INSPECTION" value="0" min="0" class="modern-input req-ab"></div>
-                <div><label class="modern-label">ABNORMALITIES ON LOBBY INSPECTION</label><input type="number" data-name="ABNORMALITIES ON LOBBY INSPECTION" value="0" min="0" class="modern-input req-ab"></div>
-                <div class="lg:col-span-2"><label class="modern-label">ABNORMALITY DETAIL DURING LOBBY INSPECTION</label><textarea id="abLobbyDetail" data-name="ABNORMALITY DETAIL DURING LOBBY INSPECTION" class="modern-input">NIL</textarea></div>
-                
-                <div class="lg:col-span-3"><label class="modern-label">ABNORMALITIES DESCRIPTION IN DETAILS (ALL FIELDS)</label><textarea data-name="ABNORMALITIES DESCRIPTION RELATED ABOVE ALL FIELD IN DETAILS" class="modern-input"></textarea></div>
-            </div>
+               <!-- AUTO AMBUSH -->
+<div>
+    <label class="modern-label">AUTO AMBUSH (NO OF TRAINS)</label>
+    <input type="number" data-name="AUTO AMBUSH (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITIES ON AUTO AMBUSH</label>
+    <input type="number" data-name="ABNORMALITIES ON AUTO AMBUSH" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div class="lg:col-span-2">
+    <label class="modern-label">ABNORMALITIES DETAIL ON AUTO AMBUSH</label>
+    <textarea data-name="ABNORMALITIES DETAIL ON AUTO AMBUSH" class="modern-input">NIL</textarea>
+</div>
+
+<!-- IB AMBUSH -->
+<div>
+    <label class="modern-label">IB AMBUSH (NO OF TRAINS)</label>
+    <input type="number" data-name="IB AMBUSH (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITIES ON IB AMBUSH</label>
+    <input type="number" data-name="ABNORMALITIES ON IB AMBUSH" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div class="lg:col-span-2">
+    <label class="modern-label">ABNORMALITIES DETAIL ON IB AMBUSH</label>
+    <textarea data-name="ABNORMALITIES DETAIL ON IB AMBUSH" class="modern-input">NIL</textarea>
+</div>
+
+<!-- LEVEL CROSSING -->
+<div>
+    <label class="modern-label">LEVEL CROSSING AMBUSH(NO OF TRAINS)</label>
+    <input type="number" data-name="LEVEL CROSSING AMBUSH(NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITIES ON LEVEL CROSSING AMBUSH</label>
+    <input type="number" data-name="ABNORMALITIES ON LEVEL CROSSING AMBUSH" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div class="lg:col-span-2">
+    <label class="modern-label">ABNORMALITIES DETAIL ON LEVEL CROSSING AMBUSH</label>
+    <textarea data-name="ABNORMALITIES DETAIL ON LEVEL CROSSING AMBUSH" class="modern-input">NIL</textarea>
+</div>
+
+<!-- CD ZONES -->
+<div>
+    <label class="modern-label">CCD ZONES AMBUSH(NO OF TRAINS)</label>
+    <input type="number" data-name="CD ZONES AMBUSH(NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNBORMALITIES ON CD ZONES AMBUSH</label>
+    <input type="number" data-name="ABNBORMALITIES ON CD ZONES AMBUSH" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div class="lg:col-span-2">
+    <label class="modern-label">ABNORMALITIES DETAIL ON CD ZONES AMBUSH</label>
+    <textarea data-name="ABNORMALITIES DETAIL ON CD ZONES AMBUSH" class="modern-input">NIL</textarea>
+</div>
+
+<!-- BA AMBUSH -->
+<div>
+    <label class="modern-label">BA AMBUSH(NO OF CREWS)</label>
+    <input type="number" data-name="BA AMBUSH(NO OF CREWS)" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITIES ON BA AMBUSH</label>
+    <input type="number" data-name="ABNORMALITIES ON BA AMBUSH" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div class="lg:col-span-2">
+    <label class="modern-label">ABNORMALITIES DETAIL ON BA AMBUSH</label>
+    <textarea data-name="ABNORMALITIES DETAIL ON BA AMBUSH" class="modern-input">NIL</textarea>
+</div>
+
+<!-- BPT/BFT -->
+<div>
+    <label class="modern-label">BPT/BFT AMBUSH (NO OF TRAINS)</label>
+    <input type="number" data-name="BPT/BFT AMBUSH (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITIES ON BPT/BFT AMBUSH</label>
+    <input type="number" data-name="ABNORMALITIES ON BPT/BFT AMBUSH" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div class="lg:col-span-2">
+    <label class="modern-label">ABNORMALITIES DETAIL ON BPT/BFT AMBUSH</label>
+    <textarea data-name="ABNORMALITIES DETAIL ON BPT/BFT AMBUSH" class="modern-input">NIL</textarea>
+</div>
+
+<!-- BPC -->
+<div>
+    <label class="modern-label">BPC AMBUSH (NO OF TRAINS)</label>
+    <input type="number" data-name="BPC AMBUSH (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITIES ON BPC AMBUSH</label>
+    <input type="number" data-name="ABNORMALITIES ON BPC AMBUSH" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div class="lg:col-span-2">
+    <label class="modern-label">ABNORMALITIES DETAIL ON BPC AMBUSH</label>
+    <textarea data-name="ABNORMALITIES DETAIL ON BPC AMBUSH" class="modern-input">NIL</textarea>
+</div>
+
+<!-- SPEED GUN -->
+<div>
+    <label class="modern-label">SPEED GUN CHECKING AUTO AT ON (NO OF TRAINS)</label>
+    <input type="number" data-name="SPEED GUN CHECKING AUTO AT ON (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITIES ON SPEED GUN CHECKING AUTO AT ON</label>
+    <input type="number" data-name="ABNORMALITIES ON SPEED GUN CHECKING AUTO AT ON" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">SPEED GUN CHECKING PASSING AT YELLOW (NO OF TRAINS)</label>
+    <input type="number" data-name="SPEED GUN CHECKING PASSING AT YELLOW (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITIES ON SPEED GUN CHECKING PASSING AT YELLOW</label>
+    <input type="number" data-name="ABNORMALITIES ON SPEED GUN CHECKING PASSING AT YELLOW" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<!-- FSD -->
+<div>
+    <label class="modern-label">FSD ROUTE SETTING AMBUSH (NO OF CREW)</label>
+    <input type="number" data-name="FSD ROUTE SETTING AMBUSH (NO OF CREW)" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABN ON FSD ROUTE SETTING AMBUSH</label>
+    <input type="number" data-name="ABN ON FSD ROUTE SETTING AMBUSH" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<!-- SHUNTING -->
+<div>
+    <label class="modern-label">SHUNTING AMBUSH (NO OF TRAINS)</label>
+    <input type="number" data-name="SHUNTING AMBUSH (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITY ON SHUNTING AMBUSH</label>
+    <input type="number" data-name="ABNORMALITY ON SHUNTING AMBUSH" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<!-- CREW MOBILE -->
+<div>
+    <label class="modern-label">CREW MOBILE AMBUSH</label>
+    <input type="number" data-name="CREW MOBILE AMBUSH" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITY ON CREW MOBILE AMBUSH</label>
+    <input type="number" data-name="ABNORMALITY ON CREW MOBILE AMBUSH" value="0" min="0" class="modern-input req-ab">
+</div>
+   <!-- COUNSELLING ENTRIES -->
+<div class="lg:col-span-3 mt-6">
+    <h3 class="font-bold text-xl text-green-700 border-b-2 border-green-300 pb-2">
+        COUNSELLING ENTRIES
+    </h3>
+</div>
+
+<div>
+    <label class="modern-label">COUNCELLING AT LOBBY CONCERNED TO SAFETY(NO OF CREWS)</label>
+    <input type="number" data-name="COUNCELLING AT LOBBY CONCERNED TO SAFETY(NO OF CREWS)" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">SHUNTING PROCEDURE & RULES INVOLVED AS PER GR 5.13</label>
+    <input type="number" data-name="SHUNTING PROCEDURE & RULES INVOLVED AS PER GR 5.13" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">COUNSELLING FOR SPAD PREVENTION</label>
+    <input type="number" data-name="COUNSELLING FOR SPAD PREVENTION" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">LONG HOURS DUTY OF CREW</label>
+    <input type="number" data-name="LONG HOURS DUTY OF CREW" value="0" min="0" class="modern-input req-ab">
+</div>             
+<!-- INSPECTION & SEMINAR ENTRIES -->
+<div class="lg:col-span-3 mt-6">
+    <h3 class="font-bold text-xl text-purple-700 border-b-2 border-purple-300 pb-2">
+        INSPECTION & SEMINAR ENTRIES
+    </h3>
+</div>
+
+<div>
+    <label class="modern-label">FAMILY SEMINAR</label>
+    <input type="number" data-name="FAMILY SEMINAR" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">SAFETY SEMINAR</label>
+    <input type="number" data-name="SAFETY SEMINAR" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<!-- COACHING CLEANLINESS -->
+
+<div>
+    <label class="modern-label">COACHING CLEANLINESS INSPECTION</label>
+    <input type="number" data-name="COACHING CLEANLINESS INSPECTION" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITIES ON COACHING CLEANLINESS INSPECTION</label>
+    <input type="number" data-name="ABNORMALITIES ON COACHING CLEANLINESS INSPECTION" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div class="lg:col-span-2">
+    <label class="modern-label">ABNORMALITY DETAIL DURING COACHING CLEANLINESS INSPECTION</label>
+    <textarea data-name="ABNORMALITY DETAIL DURING COACHING CLEANLINESS INSPECTION" class="modern-input">NIL</textarea>
+</div>
+
+<!-- NIGHT STABLING -->
+
+<div>
+    <label class="modern-label">NIGHT STABLING INSPECTION</label>
+    <input type="number" data-name="NIGHT STABLING INSPECTION" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITIES ON NIGHT STABLING INSPECTION</label>
+    <input type="number" data-name="ABNORMALITIES ON NIGHT STABLING INSPECTION" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div class="lg:col-span-2">
+    <label class="modern-label">ABNORMALITY DETAIL DURING NIGHT STABLING INSPECTION</label>
+    <textarea data-name="ABNORMALITY DETAIL DURING NIGHT STABLING INSPECTION" class="modern-input">NIL</textarea>
+</div>
+
+<!-- STABLE LOAD -->
+
+<div>
+    <label class="modern-label">STABLE LOAD INSPECTION</label>
+    <input type="number" data-name="STABLE LOAD INSPECTION" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITIES ON STABLE LOAD INSPECTION</label>
+    <input type="number" data-name="ABNORMALITIES ON STABLE LOAD INSPECTION" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div class="lg:col-span-2">
+    <label class="modern-label">ABNORMALITY DETAIL DURING STABLE LOAD INSPECTION</label>
+    <textarea data-name="ABNORMALITY DETAIL DURING STABLE LOAD INSPECTION" class="modern-input">NIL</textarea>
+</div>
+
+<!-- SAND GOOMTY -->
+
+<div>
+    <label class="modern-label">SAND GOOMTY INSPECTION</label>
+    <input type="number" data-name="SAND GOOMTY INSPECTION" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITIES ON SAND GOOMTY INSPECTION</label>
+    <input type="number" data-name="ABNORMALITIES ON SAND GOOMTY INSPECTION" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div class="lg:col-span-2">
+    <label class="modern-label">ABNORMALITY DETAIL DURING SAND GOOMTY INSPECTION</label>
+    <textarea data-name="ABNORMALITY DETAIL DURING SAND GOOMTY INSPECTION" class="modern-input">NIL</textarea>
+</div>
+
+<!-- RUNNING ROOM -->
+
+<div>
+    <label class="modern-label">RUNNING ROOM INSPECTION</label>
+    <input type="number" data-name="RUNNING ROOM INSPECTION" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITIES ON RUNNING ROOM INSPECTION</label>
+    <input type="number" data-name="ABNORMALITIES ON RUNNING ROOM INSPECTION" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div class="lg:col-span-2">
+    <label class="modern-label">ABNORMALITY DETAIL DURING RUNNING ROOM INSPECTION</label>
+    <textarea data-name="ABNORMALITY DETAIL DURING RUNNING ROOM INSPECTION" class="modern-input">NIL</textarea>
+</div>
+
+<!-- LOBBY -->
+
+<div>
+    <label class="modern-label">LOBBY INSPECTION</label>
+    <input type="number" data-name="LOBBY INSPECTION" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div>
+    <label class="modern-label">ABNORMALITIES ON LOBBY INSPECTION</label>
+    <input type="number" data-name="ABNORMALITIES ON LOBBY INSPECTION" value="0" min="0" class="modern-input req-ab">
+</div>
+
+<div class="lg:col-span-2">
+    <label class="modern-label">ABNORMALITY DETAIL DURING LOBBY INSPECTION</label>
+    <textarea data-name="ABNORMALITY DETAIL DURING LOBBY INSPECTION" class="modern-input">NIL</textarea>
+</div>
+
+<!-- FINAL REMARK -->
+
+<div class="lg:col-span-3 mt-4">
+    <label class="modern-label font-bold text-red-700">
+        ABNORMALITIES DESCRIPTION RELATED ABOVE ALL FIELD IN DETAILS
+    </label>
+    <textarea
+        data-name="ABNORMALITIES DESCRIPTION RELATED ABOVE ALL FIELD IN DETAILS"
+        rows="5"
+        class="modern-input"></textarea>
+</div>
         </div>
 
         <div class="clean-card overflow-hidden">
@@ -212,30 +591,10 @@
                 </div>
             </div>
         </div>
-
-        <div class="clean-card overflow-hidden">
-            <label class="section-header">
-                <input type="checkbox" id="chk_ambush" class="checkbox-custom" onchange="toggleSection('sec_ambush', this.checked)">
-                <span class="font-bold text-slate-700 text-lg">4. AMBUSH & INSPECTION</span>
-            </label>
-            <div id="sec_ambush" class="section-body hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                <div><label class="modern-label">Analysis Month</label><input type="month" id="amb_month" class="modern-input req-ambush"></div>
-                <div><label class="modern-label">Date of Ambush</label><input type="date" id="amb_date" class="modern-input req-ambush"></div>
-                <div><label class="modern-label">Date of Entry</label><input type="date" id="amb_entry" class="modern-input req-ambush"></div>
-                <div class="md:col-span-2 lg:col-span-3"><label class="modern-label">Type of Ambush</label>
-                    <select id="amb_type" class="modern-input req-ambush" onchange="handleAmbushTypeChange(this)">
-                        <option value="">Select Type of Ambush</option><option value="Auto Ambush">Auto Ambush</option><option value="IB Ambush">IB Ambush</option><option value="BA Ambush">BA Ambush</option><option value="Random BA Ambush">Random BA Ambush</option><option value="BPT & BFT Ambush">BPT & BFT Ambush</option><option value="BPC Ambush">BPC Ambush</option><option value="SPAD Counselling">SPAD Counselling</option><option value="Safety Drive">Safety Drive</option><option value="Safety Seminar">Safety Seminar</option><option value="Family Seminar">Family Seminar</option><option value="Station Inspection">Station Inspection</option><option value="Surprise Crew Cabin Inspection">Surprise Crew Cabin Inspection</option><option value="Level Crossing Ambush">Level Crossing Ambush</option><option value="NIGHT STABLING INSPECTION">NIGHT STABLING INSPECTION</option><option value="STABLE LOAD INSPECTION">STABLE LOAD INSPECTION</option><option value="SAND GOOMTY INSPECTION">SAND GOOMTY INSPECTION</option><option value="SHUNTING AMBUSH">SHUNTING AMBUSH</option><option value="COACHING CLEANLINESS INSPECTION">COACHING CLEANLINESS INSPECTION</option><option value="FSD ROUTE SETTING AMBUSH">FSD ROUTE SETTING AMBUSH</option><option value="Other">Other</option>
-                    </select>
-                    <input type="text" id="amb_custom_type" class="modern-input hidden mt-2" placeholder="Type Custom Ambush Here">
-                </div>
-                <div class="md:col-span-2 lg:col-span-3"><label class="modern-label">Abnormalities (Describe in Detail)</label><textarea id="amb_abnormalities" class="modern-input req-ambush"></textarea></div>
-            </div>
-        </div>
-
         <div class="clean-card overflow-hidden">
             <label class="section-header">
                 <input type="checkbox" id="chk_od" class="checkbox-custom" onchange="toggleSection('sec_od', this.checked)">
-                <span class="font-bold text-slate-700 text-lg">5. OTHER DUTIES</span>
+                <span class="font-bold text-slate-700 text-lg">4. OTHER DUTIES</span>
             </label>
             <div id="sec_od" class="section-body hidden grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div class="md:col-span-2"><label class="modern-label">DUTY TYPE</label>
@@ -256,7 +615,7 @@
             <label class="section-header bg-emerald-50 hover:bg-emerald-100 border-b border-emerald-200">
                 <input type="checkbox" id="chk_matrix" class="checkbox-custom" onchange="toggleSection('sec_matrix', this.checked)">
                 <span class="font-bold text-emerald-700 text-lg flex items-center gap-2">
-                    <i data-lucide="grid"></i> 6. MASS CREW COUNSELLING MATRIX
+                    <i data-lucide="grid"></i> 5. MASS CREW COUNSELLING MATRIX
                 </span>
             </label>
             <div id="sec_matrix" class="section-body hidden space-y-5 bg-emerald-50/30">
@@ -304,11 +663,12 @@
             <label class="section-header bg-blue-50 hover:bg-blue-100 border-b border-blue-200">
                 <input type="checkbox" id="chk_links" class="checkbox-custom" onchange="toggleSection('sec_links', this.checked)">
                 <span class="font-bold text-blue-700 text-lg flex items-center gap-2">
-                    <i data-lucide="link"></i> 7. ONGOING SAFETY DRIVE & IMPORTANT LINKS
+                    <i data-lucide="link"></i> 6. ONGOING SAFETY DRIVE & IMPORTANT LINKS
                 </span>
             </label>
             <div id="sec_links" class="section-body hidden bg-blue-50/30">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">Sanding Arrangement Checking</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/1QRQP5bibto7qAGoN-t_ekxci2gNmttfOb_a6NYApVZU/edit?usp=sharing" target="_blank" class="btn-link btn-drive w-full">Google Sheet</a></div></div>
                      <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">Checking of the efficiency of Walkie-Talkie communication in long haul trains covering all types of terrain from 28.05.2026 to 11.06.2026</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/16rhvi1pRkWkk61SNQasIa4YrEeGtEVOGY7DwrPiB5s4/edit?usp=sharing" target="_blank" class="btn-link btn-drive flex-1">Google Sheet</a><a href="https://drive.google.com/file/d/10cXOdwNdO-7qwfRo9lQJJBanBV1YPj3G/view?usp=sharing" target="_blank" class="btn-link btn-pdf w-1/3">View PDF</a></div></div>
                     <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">Surprise checks of  Stabled Coaches to Prevent Fire incidents from 23.05.2026 to 07.06.2026 (15 days)</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/19Yp9SBzvEyP0XyZC6EaBj6Nvhv32xn9nUn-qhedV6T4/edit?usp=sharing" target="_blank" class="btn-link btn-drive flex-1">Google Sheet</a><a href="https://drive.google.com/file/d/1NiInpmN9IDhOvK6jV3opu1WBKCa9ypfn/view?usp=sharing" target="_blank" class="btn-link btn-pdf w-1/3">View PDF</a></div></div>
                     <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">रेलवे की विभिन्न स्थापनाओं एवं ट्रेनों में आग की घटनाओं की रोकथाम हेतु 15 दिनों का संरक्षा अभियान (21.05.26 to 05.06.26 )</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/1qKYI-JIKkkx2AecFiDAULrcDK9EtWSas6kxfzwSnX0Q/edit?usp=sharing" target="_blank" class="btn-link btn-drive flex-1">Google Sheet</a><a href="https://drive.google.com/file/d/1EbEJMCS9Nhx21ruX_qQz4GUEAs0hLP9_/view?usp=sharing" target="_blank" class="btn-link btn-pdf w-1/3">View PDF</a></div></div>
@@ -883,3 +1243,4 @@ Already Done (${latestDate})
 </script>
 </body>
 </html>
+
