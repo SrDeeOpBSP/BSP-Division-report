@@ -309,8 +309,7 @@
             </label>
             <div id="sec_links" class="section-body hidden bg-blue-50/30">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">Sanding Arrangement Checking</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/1QRQP5bibto7qAGoN-t_ekxci2gNmttfOb_a6NYApVZU/edit?usp=sharing" target="_blank" class="btn-link btn-drive w-full">Google Sheet</a></div></div>
-                    <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">Checking of the efficiency of Walkie-Talkie communication in long haul trains covering all types of terrain from 28.05.2026 to 11.06.2026</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/16rhvi1pRkWkk61SNQasIa4YrEeGtEVOGY7DwrPiB5s4/edit?usp=sharing" target="_blank" class="btn-link btn-drive flex-1">Google Sheet</a><a href="https://drive.google.com/file/d/10cXOdwNdO-7qwfRo9lQJJBanBV1YPj3G/view?usp=sharing" target="_blank" class="btn-link btn-pdf w-1/3">View PDF</a></div></div>
+                     <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">Checking of the efficiency of Walkie-Talkie communication in long haul trains covering all types of terrain from 28.05.2026 to 11.06.2026</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/16rhvi1pRkWkk61SNQasIa4YrEeGtEVOGY7DwrPiB5s4/edit?usp=sharing" target="_blank" class="btn-link btn-drive flex-1">Google Sheet</a><a href="https://drive.google.com/file/d/10cXOdwNdO-7qwfRo9lQJJBanBV1YPj3G/view?usp=sharing" target="_blank" class="btn-link btn-pdf w-1/3">View PDF</a></div></div>
                     <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">Surprise checks of  Stabled Coaches to Prevent Fire incidents from 23.05.2026 to 07.06.2026 (15 days)</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/19Yp9SBzvEyP0XyZC6EaBj6Nvhv32xn9nUn-qhedV6T4/edit?usp=sharing" target="_blank" class="btn-link btn-drive flex-1">Google Sheet</a><a href="https://drive.google.com/file/d/1NiInpmN9IDhOvK6jV3opu1WBKCa9ypfn/view?usp=sharing" target="_blank" class="btn-link btn-pdf w-1/3">View PDF</a></div></div>
                     <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">रेलवे की विभिन्न स्थापनाओं एवं ट्रेनों में आग की घटनाओं की रोकथाम हेतु 15 दिनों का संरक्षा अभियान (21.05.26 to 05.06.26 )</span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/1qKYI-JIKkkx2AecFiDAULrcDK9EtWSas6kxfzwSnX0Q/edit?usp=sharing" target="_blank" class="btn-link btn-drive flex-1">Google Sheet</a><a href="https://drive.google.com/file/d/1EbEJMCS9Nhx21ruX_qQz4GUEAs0hLP9_/view?usp=sharing" target="_blank" class="btn-link btn-pdf w-1/3">View PDF</a></div></div>
                     <div class="link-card shadow-sm"><span class="text-sm font-semibold text-slate-700">Zonal Safety Drive on stabling/securing/releasing of load/train/rolling stock in the yard for 15 days from 21.05.2026 to 04.06.2026 </span><div class="flex gap-2"><a href="https://docs.google.com/spreadsheets/d/1cEnEhCtqvRPBTQec7ZGgPBQWGNxVIdzTfyV-ZDB8Lao/edit?usp=sharing" target="_blank" class="btn-link btn-drive flex-1">Google Sheet</a><a href="https://drive.google.com/file/d/1zArTwDaEzvLrHVYsctvf5FAOz7juPP38/view?usp=sharing" target="_blank" class="btn-link btn-pdf w-1/3">View PDF</a></div></div>
@@ -498,20 +497,25 @@ function normalizeDate(dateStr) {
 
     dateStr = String(dateStr).trim();
 
+    // Already dd/mm/yyyy
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
         return dateStr;
     }
 
+    // yyyy-mm-dd
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+        const [y,m,d] = dateStr.split('-');
+        return `${d}/${m}/${y}`;
+    }
+
+    // ISO format
     if (dateStr.includes('T')) {
-
-        const parts = dateStr.split('T')[0].split('-');
-
-        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        const [y,m,d] = dateStr.split('T')[0].split('-');
+        return `${d}/${m}/${y}`;
     }
 
     return dateStr;
 }
-
     async function loadHistory() {
         try {
             const res = await fetch(URL_MATRIX);
@@ -522,8 +526,24 @@ data.slice(1).forEach(r => {
 
     const emp = String(r[0] || '').trim();
     const drive = String(r[4] || '').trim();
-    const dt = normalizeDate(r[3]);  // Column D
+let dt = '';
 
+if (r[10]) {
+
+    const d = new Date(r[10]);
+
+    dt =
+        String(d.getDate()).padStart(2, '0') + '/' +
+        String(d.getMonth() + 1).padStart(2, '0') + '/' +
+        d.getFullYear();
+}
+    console.log(
+    "EMP=", emp,
+    "DRIVE=", drive,
+    "REAL DATE=", r[10],
+    "FINAL=", dt
+);
+console.log("RAW=", r[10], "FINAL=", dt);
     const key = `${emp}|${drive}`;
 
     historyMap.add(key);
