@@ -635,14 +635,19 @@
                         <label class="modern-label text-emerald-800">Month</label>
                         <select id="m_month" class="modern-input border-emerald-300 focus:border-emerald-500 appearance-none">
                             <option value="1">January</option><option value="2">February</option><option value="3">March</option>
-                            <option value="4">April</option><option value="5" selected>May</option><option value="6">June</option>
+                            <option value="4">April</option><option value="5">May</option><option value="6">June</option>
                             <option value="7">July</option><option value="8">August</option><option value="9">September</option>
                             <option value="10">October</option><option value="11">November</option><option value="12">December</option>
                         </select>
                     </div>
                     <div>
                         <label class="modern-label text-emerald-800">Year</label>
-                        <select id="m_year" class="modern-input border-emerald-300 focus:border-emerald-500 appearance-none"><option value="2026">2026</option><option value="2027">2027</option></select>
+                        <select id="m_year" class="modern-input border-emerald-300 focus:border-emerald-500 appearance-none"><option value="2025">2025</option>
+<option value="2026">2026</option>
+<option value="2027">2027</option>
+<option value="2028">2028</option>
+<option value="2029">2029</option>
+<option value="2030">2030</option></select>
                     </div>
                     <div class="col-span-2 md:col-span-2">
                           <button
@@ -773,6 +778,14 @@
 document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('c_date').valueAsDate = new Date();
+    // Set current month and year in Matrix
+const now = new Date();
+
+document.getElementById('m_month').value =
+String(now.getMonth() + 1);
+
+document.getElementById('m_year').value =
+String(now.getFullYear());
 
     loadCSVs();
 
@@ -1195,11 +1208,20 @@ Already Done (${latestDate})
         // 6. MASS MATRIX (ADDED no-cors)
         if (checks[4]) {
             let matrixData = [];
-            document.querySelectorAll('.driveCheck:checked').forEach(cb => {
-                if (!historyMap.has(`${String(cb.dataset.emp).trim()}|${String(cb.dataset.drive).trim()}`)) {
-                    matrixData.push({ empCode: cb.dataset.emp, crewId: cb.dataset.crewid, crewName: cb.dataset.crewname, date: cb.dataset.date, drive: cb.dataset.drive, cliName: cb.dataset.cliname, hq: cb.dataset.hq, desg: cb.dataset.desg });
-                }
-            });
+document.querySelectorAll('.driveCheck:checked').forEach(cb => {
+
+    matrixData.push({
+        empCode: cb.dataset.emp,
+        crewId: cb.dataset.crewid,
+        crewName: cb.dataset.crewname,
+        date: cb.dataset.date,
+        drive: cb.dataset.drive,
+        cliName: cb.dataset.cliname,
+        hq: cb.dataset.hq,
+        desg: cb.dataset.desg
+    });
+
+});
             if(matrixData.length > 0) {
                 promises.push(fetch(URL_MATRIX, { 
                     method: 'POST', 
