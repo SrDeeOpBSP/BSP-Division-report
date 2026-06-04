@@ -562,9 +562,10 @@
             </label>
             <div id="sec_lp" class="section-body hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                 <div><label class="modern-label">LP ID</label><select id="lp_id" class="modern-input req-lp font-mono" onchange="autoFillLpDetails(this.value)"><option value="">Select LP ID</option></select></div>
-                <div><label class="modern-label">LP NAME</label><input type="text" id="lp_name" class="modern-input font-semibold" readonly></div>
-                <div><label class="modern-label">DESG</label><input type="text" id="lp_desg" class="modern-input" readonly></div>
-                <div><label class="modern-label">HQ</label><input type="text" id="lp_hq" class="modern-input" readonly></div>
+<div><label class="modern-label">LP NAME</label><input type="text" id="lp_name" class="modern-input font-semibold" readonly></div>
+<div><label class="modern-label">DESG</label><input type="text" id="lp_desg" class="modern-input" readonly></div>
+<div><label class="modern-label">HQ</label><input type="text" id="lp_hq" class="modern-input" readonly></div>
+<div><label class="modern-label">EMP CODE</label><input type="text" id="lp_empcode" class="modern-input font-mono" readonly></div>
                 
                 <div class="md:col-span-2"><label class="modern-label">MAJOR BEAT</label><select id="lp_major_beat" class="modern-input req-lp"><option value="">Select MAJOR BEAT</option></select></div>
                 <div class="md:col-span-2"><label class="modern-label">BEAT</label>
@@ -1008,13 +1009,40 @@ console.log("RAW=", r[10], "FINAL=", dt);
         arr.filter(i => i['CLI NAME'] === cli).forEach(i => { dd.appendChild(new Option(i[key], i[key])); });
     }
 
-    function autoFillLpDetails(lpId) {
-        const data = lpCliData.find(i => i['LP ID'] === lpId);
-        document.getElementById('lp_name').value = data ? data['LP NAME'] : ""; document.getElementById('lp_desg').value = data ? data['DESG'] : "";
-        const hq = data ? data['HQ'] : ""; document.getElementById('lp_hq').value = hq;
-        const mb = document.getElementById('lp_major_beat'); mb.innerHTML = '<option value="">Select MAJOR BEAT</option>';
-        if (hq) majorBeatData.filter(i => i['HQ'] === hq).forEach(i => mb.appendChild(new Option(i['BEAT'], i['BEAT'])));
-    }
+function autoFillLpDetails(lpId) {
+
+    const data =
+        lpCliData.find(i => i['LP ID'] === lpId);
+
+    document.getElementById('lp_name').value =
+        data ? data['LP NAME'] : "";
+
+    document.getElementById('lp_desg').value =
+        data ? data['DESG'] : "";
+
+    const hq =
+        data ? data['HQ'] : "";
+
+    document.getElementById('lp_hq').value = hq;
+
+    document.getElementById('lp_empcode').value =
+        data ? data['EMP CODE'] : "";
+
+    const mb =
+        document.getElementById('lp_major_beat');
+
+    mb.innerHTML =
+        '<option value="">Select MAJOR BEAT</option>';
+
+    if (hq)
+        majorBeatData
+            .filter(i => i['HQ'] === hq)
+            .forEach(i =>
+                mb.appendChild(
+                    new Option(i['BEAT'], i['BEAT'])
+                )
+            );
+}
 
     function autoFillAlpDetails(alpId) {
         const data = cliAlpData.find(i => i['ALP ID'] === alpId);
@@ -1183,7 +1211,7 @@ Already Done (${latestDate})
         
         // 2. LP
         if (checks[1]) {
-            let fd = new FormData(); fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name); fd.append("LP ID", document.getElementById('lp_id').value); fd.append("LP NAME", document.getElementById('lp_name').value); fd.append("DESG", document.getElementById('lp_desg').value); fd.append("HQ", document.getElementById('lp_hq').value); fd.append("MAJOR BEAT", document.getElementById('lp_major_beat').value);
+            let fd = new FormData(); fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name); fd.append("LP ID", document.getElementById('lp_id').value); fd.append("LP NAME", document.getElementById('lp_name').value); fd.append("DESG", document.getElementById('lp_desg').value); fd.append("HQ", document.getElementById('lp_hq').value); fd.append("EMP CODE", document.getElementById('lp_empcode').value); fd.append("MAJOR BEAT", document.getElementById('lp_major_beat').value);
             const bv = document.getElementById('lp_beat').value; if(bv==='OTHER'){ fd.append("BEAT_OTHER","OTHER"); fd.append("BEAT",document.getElementById('lp_other_beat').value); }else{ fd.append("BEAT",bv); }
             fd.append("LOCO NUMBER", document.getElementById('lp_loco').value); fd.append("TRAIN NUMBER", document.getElementById('lp_train').value); fd.append("DATE", c_date); fd.append("FROM TIME", document.getElementById('lp_from').value); fd.append("TO TIME", document.getElementById('lp_to').value);
             promises.push(fetch(URL_LP, { method: 'POST', mode: 'no-cors', body: fd }));
