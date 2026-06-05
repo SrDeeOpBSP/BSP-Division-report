@@ -25,7 +25,13 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
         /* Tables for Matrix */
-        .table-container { width: 100%; overflow-x: auto; border-radius: 0.75rem; border: 1px solid #e2e8f0; }
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+}
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         th { background: #f1f5f9; color: #475569; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 1rem; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
         td { padding: 0.75rem; border-bottom: 1px solid #f1f5f9; background: #ffffff; font-size: 0.85rem; white-space: nowrap; color: #334155; }
@@ -36,7 +42,22 @@
         th.sticky-id, th.sticky-name { background: #e2e8f0 !important; z-index: 20; }
         
         /* Matrix Popup */
-        .drive-popup { background: #ffffff; border: 1px solid #cbd5e1; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); border-radius: 0.75rem; animation: scaleIn 0.2s ease; z-index: 50;}
+        .drive-popup {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.18);
+    border-radius: 12px;
+    animation: scaleIn 0.2s ease;
+    z-index: 9999;
+}
+.drive-popup{
+    resize: both;
+    overflow: auto;
+    min-width: 350px;
+    min-height: 250px;
+    max-width: 90vw;
+    max-height: 80vh;
+}
         @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
         /* Form Inputs */
@@ -651,23 +672,40 @@
 <option value="2030">2030</option></select>
                     </div>
                     <div class="col-span-2 md:col-span-2">
-                          <button
-                          type="button"
-                          id="matrixLoadBtn"
-                          onclick="loadCrewDataMaster()"
-                          disabled
-                          class="w-full py-2.5 px-4 rounded-lg font-bold text-sm bg-gray-400 text-white transition-all flex justify-center items-center gap-2 shadow-md cursor-not-allowed">
+    <button
+        type="button"
+        id="matrixLoadBtn"
+        onclick="loadCrewDataMaster()"
+        disabled
+        class="w-full py-2.5 px-4 rounded-lg font-bold text-sm bg-gray-400 text-white transition-all flex justify-center items-center gap-2 shadow-md cursor-not-allowed">
 
-                          <span id="matrixBtnText">
-                          ⏳ Loading Data...
-                          </span>
+        <span id="matrixBtnText">
+            ⏳ Loading Data...
+        </span>
 
-                          </button>
-                    </div>
-                </div>
+    </button>
+</div>
+
+<div class="col-span-2 md:col-span-4 mt-3">
+    <div class="flex gap-2">
+        <input
+            type="text"
+            id="crewSearch"
+            class="modern-input"
+            placeholder="Enter Crew ID (Example: BSP3144)">
+        
+        <button
+            type="button"
+            onclick="searchCrewMatrix()"
+            class="px-5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold whitespace-nowrap">
+            Search
+        </button>
+    </div>
+</div>
+</div>
 
                 <div id="tableWrapper" class="hidden mt-4">
-                    <div class="table-container max-h-[55vh] shadow-inner bg-white relative">
+                    <div class="table-container max-h-[55vh] shadow-inner bg-white relative overflow-x-auto overflow-y-auto">
                         <div id="tableContainer"></div>
                     </div>
                 </div>
@@ -729,6 +767,8 @@
     let latestCrewData = [];
     let DRIVE_LIST = [];
     let dataLoaded = false;
+    let searchedCrews = [];
+    let selectedDrives = new Set();
     const DRIVE_PDF_LINKS = {
     "DRIVE FOR FIRE PREVENTION OF ELECTRIC AND DIESEL LOCOMOTIVES": "https://drive.google.com/file/d/107Lwzv7dP1h4tHJNSB1gbBYPqoplzQbh/view?usp=sharing",
      "Duties of Crew during No Tension on run.": "https://drive.google.com/file/d/1XbV5AJnmBJMJ0z-T1C3KK2hqJbfzCiaz/view?usp=sharing",   
@@ -1074,11 +1114,82 @@ function autoFillLpDetails(lpId) {
         
         const month = document.getElementById('m_month').value;
         const year = document.getElementById('m_year').value;
+        searchedCrews = [];
         generateMatrixTable(filtered, month, year);
         document.getElementById('tableWrapper').classList.remove('hidden');
         toast('Matrix Grid generated', 'success');
     }
+ function searchCrewMatrix() {
 
+    const keyword =
+        document.getElementById('crewSearch')
+        .value
+        .trim()
+        .toLowerCase();
+
+    if (!keyword) {
+        toast('Enter Crew ID first', 'error');
+        return;
+    }
+
+    const foundCrew =
+        latestCrewData.find(r =>
+            String(r.crewId || '')
+            .toLowerCase() === keyword
+        );
+
+    if (!foundCrew) {
+        toast('Crew not found', 'error');
+        return;
+    }
+
+    // Duplicate add mat karo
+    if (
+        searchedCrews.some(
+            x => x.empCode === foundCrew.empCode
+        )
+    ) {
+        toast('Crew already added', 'info');
+        return;
+    }
+
+    searchedCrews.push(foundCrew);
+
+    const cliName =
+        document.getElementById('c_cli_name')
+        .value
+        .trim();
+
+    const ownCrew =
+        latestCrewData.filter(
+            r =>
+                r.cliName?.trim().toLowerCase() ===
+                cliName.toLowerCase()
+        );
+
+    const finalData = [
+        ...ownCrew,
+        ...searchedCrews
+    ];
+
+    const month =
+        document.getElementById('m_month').value;
+
+    const year =
+        document.getElementById('m_year').value;
+
+    generateMatrixTable(
+        finalData,
+        month,
+        year
+    );
+
+    document
+        .getElementById('tableWrapper')
+        .classList.remove('hidden');
+
+    toast('Crew Added', 'success');
+}
     function generateMatrixTable(data, month, year) {
         const days = new Date(year, month, 0).getDate();
         // Sticky th for both Crew ID and Name
@@ -1109,29 +1220,44 @@ function autoFillLpDetails(lpId) {
                     <button type="button" onclick="togglePopup(this)" class="w-full py-1 px-1 rounded text-[10px] font-bold flex justify-center items-center gap-1 transition-all ${btnClass}">
                      ${btnText}
                     </button>
-                    <div class="drive-popup hidden absolute z-50 p-3 mt-1 w-[260px] right-0 sm:left-1/2 sm:-translate-x-1/2">
-                        <div class="text-[10px] text-slate-500 mb-2 uppercase tracking-widest font-black border-b pb-1">Select Drives (${totalDrives} Total)</div>
-                        <div class="flex flex-col gap-1.5 max-h-[250px] overflow-y-auto pr-1">
+                    <div class="drive-popup hidden fixed z-[99999] p-4 w-[420px] max-w-[90vw]">
+                        <div class="flex justify-between items-center border-b pb-2 mb-2">
+
+    <div class="text-[10px] text-slate-500 uppercase tracking-widest font-black">
+        Select Drives (${totalDrives} Total)
+    </div>
+
+    <button
+        type="button"
+        onclick="closePopup(this)"
+        class="text-red-500 hover:text-red-700 font-bold text-lg leading-none px-2">
+        ✕
+    </button>
+
+</div>
+                        <div class="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-2">
                         ${DRIVE_LIST.map(drive => {
                             const done = historyMap.has(`${String(row.empCode).trim()}|${drive}`); 
                             const key = `${String(row.empCode).trim()}|${drive}`;
                             const latestDate = latestDateMap.get(key) || '';               
                             return `<label class="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${done ? 'bg-emerald-50 border border-emerald-200' : 'hover:bg-slate-50 border border-transparent'}">
-                                <input type="checkbox" class="checkbox-custom driveCheck" value="${drive}" data-emp="${row.empCode}" data-date="${date}" data-drive="${drive}" data-cliname="${row.cliName}" data-crewid="${row.crewId}" data-crewname="${row.crewName}" data-hq="${row.hq}" data-desg="${row.crewType}" onchange="updateButton(this)">
+                               <input type="checkbox"
+class="checkbox-custom driveCheck"
+${selectedDrives.has(`${row.empCode}|${date}|${drive}`) ? 'checked' : ''} value="${drive}" data-emp="${row.empCode}" data-date="${date}" data-drive="${drive}" data-cliname="${row.cliName}" data-crewid="${row.crewId}" data-crewname="${row.crewName}" data-hq="${row.hq}" data-desg="${row.crewType}" onchange="updateButton(this)">
 <div class="flex flex-col">
 
 ${DRIVE_PDF_LINKS[drive] ? `
 <a href="${DRIVE_PDF_LINKS[drive]}"
    target="_blank"
    rel="noopener noreferrer"
-   class="text-sm font-bold underline flex items-center gap-1 ${done ? 'text-emerald-700' : 'text-blue-600'}">
+   class="text-xs font-bold underline flex items-start gap-1 break-words whitespace-normal leading-4 ${done ? 'text-emerald-700' : 'text-blue-600'}">
 
    <i data-lucide="file-text" class="w-3 h-3"></i>
 
    ${drive}
 </a>
 ` : `
-<span class="text-sm font-bold ${done ? 'text-emerald-700' : 'text-slate-700'}">
+<span class="text-xs font-bold break-words whitespace-normal leading-4 ${done ? 'text-emerald-700' : 'text-slate-700'}">
    ${drive}
 </span>
 `}
@@ -1155,10 +1281,77 @@ Already Done (${latestDate})
         requestAnimationFrame(() => { lucide.createIcons(); });
     }
 
-    function togglePopup(btn) { document.querySelectorAll('.drive-popup').forEach(p => { if(p!==btn.nextElementSibling) p.classList.add('hidden'); }); btn.nextElementSibling.classList.toggle('hidden'); }
-    document.addEventListener('click', (e) => { if(!e.target.closest('td.relative')) document.querySelectorAll('.drive-popup').forEach(p => p.classList.add('hidden')); });
-    
+function togglePopup(btn) {
+
+    document.querySelectorAll('.drive-popup').forEach(p => {
+        if (p !== btn.nextElementSibling) {
+            p.classList.add('hidden');
+        }
+    });
+
+    const popup = btn.nextElementSibling;
+
+    popup.classList.remove('hidden');
+
+    const rect = btn.getBoundingClientRect();
+
+    // Width
+    const popupWidth = 450;
+
+    // Height estimate
+    const popupHeight = 500;
+
+    // Horizontal position
+    let left = rect.left;
+
+    if (left + popupWidth > window.innerWidth - 20) {
+        left = window.innerWidth - popupWidth - 20;
+    }
+
+    if (left < 10) {
+        left = 10;
+    }
+
+    // Vertical position
+    let top;
+
+    // Agar upar jagah kam hai toh neeche kholo
+    if (rect.top < popupHeight + 50) {
+        top = rect.bottom + 8;
+    }
+    // Agar neeche jagah kam hai toh upar kholo
+    else if (
+        window.innerHeight - rect.bottom <
+        popupHeight
+    ) {
+        top = rect.top - popupHeight;
+    }
+    // Otherwise neeche kholo
+    else {
+        top = rect.bottom + 8;
+    }
+
+    popup.style.position = 'fixed';
+    popup.style.left = left + 'px';
+    popup.style.top = top + 'px';
+    popup.style.zIndex = '99999';
+}
+function closePopup(btn){
+
+    const popup = btn.closest('.drive-popup');
+
+    popup.classList.add('hidden');
+
+}
     function updateButton(cb) {
+        const key =
+`${cb.dataset.emp}|${cb.dataset.date}|${cb.dataset.drive}`;
+
+if(cb.checked){
+    selectedDrives.add(key);
+}else{
+    selectedDrives.delete(key);
+}
         const p = cb.closest('td.relative'); 
         const btn = p.querySelector('button'); 
         const checkedCount = p.querySelectorAll('.driveCheck:checked').length;
@@ -1238,16 +1431,18 @@ Already Done (${latestDate})
             let matrixData = [];
 document.querySelectorAll('.driveCheck:checked').forEach(cb => {
 
-    matrixData.push({
-        empCode: cb.dataset.emp,
-        crewId: cb.dataset.crewid,
-        crewName: cb.dataset.crewname,
-        date: cb.dataset.date,
-        drive: cb.dataset.drive,
-        cliName: cb.dataset.cliname,
-        hq: cb.dataset.hq,
-        desg: cb.dataset.desg
-    });
+matrixData.push({
+    empCode: cb.dataset.emp,
+    crewId: cb.dataset.crewid,
+    crewName: cb.dataset.crewname,
+    date: cb.dataset.date,
+    drive: cb.dataset.drive,
+
+    cliName: document.getElementById('c_cli_name').value,
+
+    hq: cb.dataset.hq,
+    desg: cb.dataset.desg
+});
 
 });
             if(matrixData.length > 0) {
