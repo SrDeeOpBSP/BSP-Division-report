@@ -703,6 +703,10 @@
                 <i class="fas fa-calendar-times"></i>
                 <h3>E2E PENDING</h3>
             </div>
+            <div class="option-card" onclick="generateLast90DaysSummary()">
+    <i class="fas fa-table"></i>
+    <h3>LAST 90 DAYS OVERDUE SUMMARY</h3>
+</div>
         </div>
 
         <div id="fp-inputs" class="hidden" style="text-align: center; margin-bottom: 30px;">
@@ -1244,11 +1248,14 @@
         let allData = [];
         let endToEndData = [];
         let mobileAmbushData = [];
+        window.overdueCrewMap = {};
         
         // SPM Data Vars
         let spmSanketData = [];
         let spmManualData = [];
         let spmCvvrsData = [];
+        let oaLastCliStats = null;
+        let oaTableDisplayMode = 'times'; // Default 'times' show karega
 
         let uniqueCLIs = new Set();
         let currentMode = ''; 
@@ -1266,6 +1273,7 @@
         let isDataLoaded = false; // Flag to track status
         let cliMasterData = {}; // CLI.csv ke data ke liye
         let e2eReportData = []; // Pending LPs list ke liye
+        let overdue90SummaryData = [];
         // Start fetching as soon as the page loads
 
 
@@ -1276,24 +1284,26 @@
 
        async function preloadAllData() {
     try {
-        fetch('CLI.csv').then(res => res.text()).then(csvText => {
-                    const rows = csvText.split('\n');
-                    const uniqueNames = new Set();
-                    rows.forEach((row, index) => {
-                        if (index > 0 && row.trim()) {
-                            const cols = row.split(',');
-                            const cliName = cols[0]?.trim(); const lpId = cols[1]?.trim();
-                            const lpName = cols[2]?.trim(); const desg = cols[3]?.trim(); const hq = cols[4]?.trim();
-                            if (!cliMasterData[cliName]) cliMasterData[cliName] = [];
-                            cliMasterData[cliName].push({ cliName, lpId, lpName, desg, hq });
-                            uniqueNames.add(cliName);
-                        }
-                    });
-                    const sel = document.getElementById('e2e-cli-name');
-                    Array.from(uniqueNames).sort().forEach(name => {
-                        sel.appendChild(new Option(name, name));
-                    });
-                }).catch(e => console.warn("CLI.csv missing or failed to load.", e));
+      fetch('CLI.csv').then(res => res.text()).then(csvText => {
+            const rows = csvText.split('\n');
+            const uniqueNames = new Set();
+            rows.forEach((row, index) => {
+                if (index > 0 && row.trim()) {
+                    const cols = row.split(',');
+                    const cliName = cols[0]?.trim(); const lpId = cols[1]?.trim();
+                    const lpName = cols[2]?.trim(); const desg = cols[3]?.trim(); const hq = cols[4]?.trim();
+                    const empCode = cols[5]?.trim(); // <-- NAYA: Column F se EMP CODE liya
+                    
+                    if (!cliMasterData[cliName]) cliMasterData[cliName] = [];
+                    cliMasterData[cliName].push({ cliName, lpId, lpName, desg, hq, empCode });
+                    uniqueNames.add(cliName);
+                }
+            });
+            const sel = document.getElementById('e2e-cli-name');
+            Array.from(uniqueNames).sort().forEach(name => {
+                sel.appendChild(new Option(name, name));
+            });
+        }).catch(e => console.warn("CLI.csv missing or failed to load.", e));
         await Promise.all([
             fetchData(),         
             fetchOtherDutyData(), 
@@ -1311,8 +1321,8 @@
 }
         // COLUMN MAPS
         const COLS = { NAME: 0, LOBBY: 1, DATE: 2, WEE: 3, NO_WEE: 5, GRP_LP: 32, GRP_ALP: 33, COACHING: 52, MEMU: 55, GOODS: 58, ANY_FP_TLC: 62 };
-        const COLS_OA = { AUTO_IB: 8, LC_AMBUSH: 10, CD_ZONES: 12, BA_AMBUSH: 14, SPEED_AUTO: 16, SPEED_YELLOW: 45 };
-        const COLS_INSP = { FAMILY: 26, RUNNING: 27, LOBBY: 29 }; // AA=26, AB=27, AD=29
+        const COLS_OA = { AUTO: 8, IB: 20, LC_AMBUSH: 10, CD_ZONES: 12, BA_AMBUSH: 14, SPEED_AUTO: 16, SPEED_YELLOW: 45, BPT_BFT: 37, BPC: 40, FSD_ROUTE: 43, SHUNTING: 47, MOBILE: 49 };
+        const COLS_INSP = { FAMILY: 26, RUNNING: 27, LOBBY: 29, SAFETY: 51, COACHING: 68, NIGHT_STABLING: 71, STABLE_LOAD: 74, SAND: 77 };
         const catNames = {
             wee: "WEE HOURS", noWee: "EXCL WEE HOURS", grpLP: "GROUP LP", 
             grpALP: "GROUP ALP", coaching: "COACHING", memu: "MEMU", 
@@ -1483,7 +1493,7 @@ function closeModule(moduleName) {
     } catch (e) { console.error("Err Extra Insp", e); }
 }
      async function fetchData() {
-            const urlMain = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A2:BK?key=${API_KEY}`;
+            const urlMain = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A2:CB?key=${API_KEY}`;
             // NAYA: Range A2:G ki jagah A2:Z kar di gayi hai taaki Grade (Col H) aur aage ka data fetch ho sake
             const urlE2E = `https://sheets.googleapis.com/v4/spreadsheets/${E2E_SHEET_ID}/values/${E2E_SHEET_NAME}!A2:Z?key=${API_KEY}`; 
 
@@ -1739,7 +1749,7 @@ function closeModule(moduleName) {
         }
 
         async function fetchOtherAmbushData() {
-            const urlMain = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A2:AT?key=${API_KEY}`;
+            const urlMain = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A2:BK?key=${API_KEY}`;
             const urlMobile = `https://sheets.googleapis.com/v4/spreadsheets/${MOBILE_SHEET_ID}/values/${MOBILE_SHEET_NAME}!A2:P?key=${API_KEY}`;
             try {
                 const [resMain, resMobile] = await Promise.all([ fetch(urlMain), fetch(urlMobile) ]);
@@ -1787,27 +1797,33 @@ function closeModule(moduleName) {
             let cliStats = {};
 
             // Naya Helper: Initialize objects easily
-            const initOAStats = (lobby) => ({ 
-                lobby: lobby||'-', 
-                auto:0, aCt:0, lc:0, lCt:0, cd:0, cCt:0, ba:0, bCt:0, 
-                speedOn:0, sOnCt:0, speedYellow:0, sYelCt:0, mobile:0, mCt:0 
-            });
+const initOAStats = (lobby) => ({ 
+    lobby: lobby||'-', 
+    auto:0, aCt:0, ib:0, ibCt:0, lc:0, lCt:0, cd:0, cCt:0, ba:0, bCt:0, 
+    speedOn:0, sOnCt:0, speedYellow:0, sYelCt:0, mobile:0, mCt:0,
+    bpt:0, bptCt:0, bpc:0, bpcCt:0, fsd:0, fsdCt:0, shunt:0, shuntCt:0 
+});
 
-            // Main Sheet
-            allData.forEach(row => {
-                const rowName = row[COLS.NAME] ? row[COLS.NAME].trim() : null;
-                if (rowName && row[COLS.DATE] && row[COLS.DATE].startsWith(mainPrefix)) {
-                    if (!cliStats[rowName]) cliStats[rowName] = initOAStats(row[COLS.LOBBY]);
-                    
-                    // Value > 0 hogi tabhi count (Ct) badhega
-                    const aVal = safeInt(row[COLS_OA.AUTO_IB]); if(aVal > 0) { cliStats[rowName].auto += aVal; cliStats[rowName].aCt++; }
-                    const lVal = safeInt(row[COLS_OA.LC_AMBUSH]); if(lVal > 0) { cliStats[rowName].lc += lVal; cliStats[rowName].lCt++; }
-                    const cVal = safeInt(row[COLS_OA.CD_ZONES]); if(cVal > 0) { cliStats[rowName].cd += cVal; cliStats[rowName].cCt++; }
-                    const bVal = safeInt(row[COLS_OA.BA_AMBUSH]); if(bVal > 0) { cliStats[rowName].ba += bVal; cliStats[rowName].bCt++; }
-                    const sOnVal = safeInt(row[COLS_OA.SPEED_AUTO]); if(sOnVal > 0) { cliStats[rowName].speedOn += sOnVal; cliStats[rowName].sOnCt++; }
-                    const sYelVal = safeInt(row[COLS_OA.SPEED_YELLOW]); if(sYelVal > 0) { cliStats[rowName].speedYellow += sYelVal; cliStats[rowName].sYelCt++; }
-                }
-            });
+// Main Sheet
+allData.forEach(row => {
+    const rowName = row[COLS.NAME] ? row[COLS.NAME].trim() : null;
+    if (rowName && row[COLS.DATE] && row[COLS.DATE].startsWith(mainPrefix)) {
+        if (!cliStats[rowName]) cliStats[rowName] = initOAStats(row[COLS.LOBBY]);
+        
+        const aVal = safeInt(row[COLS_OA.AUTO]); if(aVal > 0) { cliStats[rowName].auto += aVal; cliStats[rowName].aCt++; }
+        const ibVal = safeInt(row[COLS_OA.IB]); if(ibVal > 0) { cliStats[rowName].ib += ibVal; cliStats[rowName].ibCt++; }
+        const lVal = safeInt(row[COLS_OA.LC_AMBUSH]); if(lVal > 0) { cliStats[rowName].lc += lVal; cliStats[rowName].lCt++; }
+        const cVal = safeInt(row[COLS_OA.CD_ZONES]); if(cVal > 0) { cliStats[rowName].cd += cVal; cliStats[rowName].cCt++; }
+        const bVal = safeInt(row[COLS_OA.BA_AMBUSH]); if(bVal > 0) { cliStats[rowName].ba += bVal; cliStats[rowName].bCt++; }
+        const sOnVal = safeInt(row[COLS_OA.SPEED_AUTO]); if(sOnVal > 0) { cliStats[rowName].speedOn += sOnVal; cliStats[rowName].sOnCt++; }
+        const sYelVal = safeInt(row[COLS_OA.SPEED_YELLOW]); if(sYelVal > 0) { cliStats[rowName].speedYellow += sYelVal; cliStats[rowName].sYelCt++; }
+        const bptVal = safeInt(row[COLS_OA.BPT_BFT]); if(bptVal > 0) { cliStats[rowName].bpt += bptVal; cliStats[rowName].bptCt++; }
+        const bpcVal = safeInt(row[COLS_OA.BPC]); if(bpcVal > 0) { cliStats[rowName].bpc += bpcVal; cliStats[rowName].bpcCt++; }
+        const fsdVal = safeInt(row[COLS_OA.FSD_ROUTE]); if(fsdVal > 0) { cliStats[rowName].fsd += fsdVal; cliStats[rowName].fsdCt++; }
+        const shuntVal = safeInt(row[COLS_OA.SHUNTING]); if(shuntVal > 0) { cliStats[rowName].shunt += shuntVal; cliStats[rowName].shuntCt++; }
+        const mobVal = safeInt(row[COLS_OA.MOBILE]); if(mobVal > 0) { cliStats[rowName].mobile += mobVal; cliStats[rowName].mCt++; }
+    }
+});
 
             // Mobile Sheet
             mobileAmbushData.forEach(row => {
@@ -1836,6 +1852,12 @@ function closeModule(moduleName) {
                     grand.speedOn += s.speedOn; grand.sOnCt += s.sOnCt;
                     grand.speedYellow += s.speedYellow; grand.sYelCt += s.sYelCt;
                     grand.mobile += s.mobile; grand.mCt += s.mCt;
+                    // Existing grand values ke sath inko add karein
+                    grand.ib += s.ib; grand.ibCt += s.ibCt;
+                    grand.bpt += s.bpt; grand.bptCt += s.bptCt;
+                    grand.bpc += s.bpc; grand.bpcCt += s.bpcCt;
+                    grand.fsd += s.fsd; grand.fsdCt += s.fsdCt;
+                    grand.shunt += s.shunt; grand.shuntCt += s.shuntCt;
                 });
                 renderOAChartAndTable(grand, `Division Ambush Summary - ${month}/${year}`);
                 renderOADetailedTable(cliStats);
@@ -2166,24 +2188,37 @@ function renderChart(dataValues, title) {
         }
     });
 }
-       function renderOAChartAndTable(data, title) {
+function renderOAChartAndTable(data, title) {
             const ctx = document.getElementById('oaChart').getContext('2d');
             if (oaChartInstance) oaChartInstance.destroy();
-            const values = [data.auto, data.lc, data.cd, data.ba, data.speedOn, data.speedYellow, data.mobile];
             
-            const totalSum = values.reduce((a,b)=>a+b, 0);
-            const totalCount = data.aCt + data.lCt + data.cCt + data.bCt + data.sOnCt + data.sYelCt + data.mCt;
+            // Sabhi values array mein
+            const values = [data.auto, data.ib, data.lc, data.cd, data.ba, data.speedOn, data.speedYellow, data.mobile, data.bpt, data.bpc, data.fsd, data.shunt];
+            const totalSum = values.reduce((a,b) => a+b, 0);
+            const totalCount = data.aCt + data.ibCt + data.lCt + data.cCt + data.bCt + data.sOnCt + data.sYelCt + data.mCt + data.bptCt + data.bpcCt + data.fsdCt + data.shuntCt;
 
             oaChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Auto/IB', 'L-Crossing', 'CD Zones', 'BA Ambush', 'Speed(ON)', 'Speed(Yel)', 'Mobile'],
-                    datasets: [{ label: 'Sum (Total)', data: values, backgroundColor: ['rgba(0, 242, 255, 0.7)', 'rgba(188, 19, 254, 0.7)', 'rgba(255, 0, 128, 0.7)', 'rgba(255, 255, 0, 0.7)', 'rgba(0, 255, 136, 0.7)', 'rgba(255, 136, 0, 0.7)','rgba(255, 255, 255, 0.7)'], borderColor: '#fff', borderWidth: 1, borderRadius: 5 }]
+                    labels: ['Auto', 'IB', 'L-Crossing', 'CD Zones', 'BA Ambush', 'Speed(ON)', 'Speed(Yel)', 'Mobile', 'BPT/BFT', 'BPC', 'FSD', 'Shunting'],
+                    datasets: [{ 
+                        label: 'Sum (Total)', 
+                        data: values, 
+                        backgroundColor: ['#00f2ff', '#bc13fe', '#ff0080', '#e0ff00', '#00ff88', '#ff8800', '#fff', '#00f2ff', '#bc13fe', '#ff0080', '#e0ff00', '#00ff88'], 
+                        borderColor: '#fff', 
+                        borderWidth: 1, 
+                        borderRadius: 5 
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: title, color: '#fff', font: { size: 18 } } }, scales: { y: { beginAtZero: true, ticks: { color: '#a0aab8' }, grid: { color: 'rgba(255,255,255,0.1)' } }, x: { ticks: { color: '#a0aab8' }, grid: { display: false } } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false }, title: { display: true, text: title, color: '#fff', font: { size: 18 } } }, 
+                    scales: { y: { beginAtZero: true, ticks: { color: '#a0aab8' }, grid: { color: 'rgba(255,255,255,0.1)' } }, x: { ticks: { color: '#a0aab8' }, grid: { display: false } } } 
+                }
             });
 
-            // Table UI me column add kiya 'TIMES'
+            // Side Table ka HTML block
             const html = `
             <table class="summary-card-table">
                 <thead>
@@ -2194,57 +2229,109 @@ function renderChart(dataValues, title) {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>AUTO AND IB AMBUSH</td><td>${data.aCt}</td><td>${data.auto}</td></tr>
+                    <tr><td>AUTO AMBUSH</td><td>${data.aCt}</td><td>${data.auto}</td></tr>
+                    <tr><td>IB AMBUSH</td><td>${data.ibCt}</td><td>${data.ib}</td></tr>
                     <tr><td>LEVEL CROSSING AMBUSH</td><td>${data.lCt}</td><td>${data.lc}</td></tr>
                     <tr><td>CD ZONES AMBUSH</td><td>${data.cCt}</td><td>${data.cd}</td></tr>
                     <tr><td>BA AMBUSH</td><td>${data.bCt}</td><td>${data.ba}</td></tr>
                     <tr><td>SPEED GUN CHECKING (ON)</td><td>${data.sOnCt}</td><td>${data.speedOn}</td></tr>
                     <tr><td>SPEED GUN CHECKING (YELLOW)</td><td>${data.sYelCt}</td><td>${data.speedYellow}</td></tr>
                     <tr><td>MOBILE AMBUSH</td><td>${data.mCt}</td><td>${data.mobile}</td></tr>
+                    <tr><td>BPT/BFT AMBUSH</td><td>${data.bptCt}</td><td>${data.bpt}</td></tr>
+                    <tr><td>BPC AMBUSH</td><td>${data.bpcCt}</td><td>${data.bpc}</td></tr>
+                    <tr><td>FSD ROUTE SETTING</td><td>${data.fsdCt}</td><td>${data.fsd}</td></tr>
+                    <tr><td>SHUNTING AMBUSH</td><td>${data.shuntCt}</td><td>${data.shunt}</td></tr>
                     <tr style="font-weight:bold; color:var(--neon-blue); border-top:2px solid #555">
                         <td>TOTAL</td><td>${totalCount}</td><td>${totalSum}</td>
                     </tr>
                 </tbody>
             </table>`;
+            
             document.getElementById('oa-side-data').innerHTML = html;
         }
-        function renderOADetailedTable(cliStats) {
+      function renderOADetailedTable(cliStats) {
+            // Data ko save karna taaki toggle karte waqt kaam aaye
+            if (cliStats) {
+                oaLastCliStats = cliStats; 
+            } else {
+                cliStats = oaLastCliStats;
+            }
+            if (!cliStats) return;
+
             document.getElementById('oa-bottom-box').classList.remove('hidden');
             let rows = '';
+            
             Object.entries(cliStats).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([name, d]) => {
-                const totalSum = d.auto + d.lc + d.cd + d.ba + d.speedOn + d.speedYellow + d.mobile;
-                const totalTimes = d.aCt + d.lCt + d.cCt + d.bCt + d.sOnCt + d.sYelCt + d.mCt;
+                const totalSum = d.auto + d.ib + d.lc + d.cd + d.ba + d.speedOn + d.speedYellow + d.mobile + d.bpt + d.bpc + d.fsd + d.shunt;
+                const totalTimes = d.aCt + d.ibCt + d.lCt + d.cCt + d.bCt + d.sOnCt + d.sYelCt + d.mCt + d.bptCt + d.bpcCt + d.fsdCt + d.shuntCt;
                 
+                // Button click par value decide karne ka logic
+                const getVal = (times, sum) => oaTableDisplayMode === 'times' ? times : sum;
+
                 rows += `<tr>
                     <td>${name}</td><td>${d.lobby}</td>
-                    <td title="${d.aCt} times, ${d.auto} sum">${d.aCt} / ${d.auto}</td>
-                    <td title="${d.lCt} times, ${d.lc} sum">${d.lCt} / ${d.lc}</td>
-                    <td title="${d.cCt} times, ${d.cd} sum">${d.cCt} / ${d.cd}</td>
-                    <td title="${d.bCt} times, ${d.ba} sum">${d.bCt} / ${d.ba}</td>
-                    <td title="${d.sOnCt} times, ${d.speedOn} sum">${d.sOnCt} / ${d.speedOn}</td>
-                    <td title="${d.sYelCt} times, ${d.speedYellow} sum">${d.sYelCt} / ${d.speedYellow}</td>
-                    <td title="${d.mCt} times, ${d.mobile} sum">${d.mCt} / ${d.mobile}</td>
-                    <td style="font-weight:bold; color:var(--neon-blue)">${totalTimes} / ${totalSum}</td>
+                    <td>${getVal(d.aCt, d.auto)}</td>
+                    <td>${getVal(d.ibCt, d.ib)}</td>
+                    <td>${getVal(d.lCt, d.lc)}</td>
+                    <td>${getVal(d.cCt, d.cd)}</td>
+                    <td>${getVal(d.bCt, d.ba)}</td>
+                    <td>${getVal(d.sOnCt, d.speedOn)}</td>
+                    <td>${getVal(d.sYelCt, d.speedYellow)}</td>
+                    <td>${getVal(d.mCt, d.mobile)}</td>
+                    <td>${getVal(d.bptCt, d.bpt)}</td>
+                    <td>${getVal(d.bpcCt, d.bpc)}</td>
+                    <td>${getVal(d.fsdCt, d.fsd)}</td>
+                    <td>${getVal(d.shuntCt, d.shunt)}</td>
+                    <td style="font-weight:bold; color:var(--neon-blue)">${getVal(totalTimes, totalSum)}</td>
                 </tr>`;
             });
             
-            document.getElementById('oa-bottom-data').innerHTML = `
-            <table class="summary-card-table">
+            // Buttons CSS UI
+            const btnActive = "background: var(--neon-blue); color: #000; box-shadow: 0 0 10px rgba(0,242,255,0.5);";
+            const btnInactive = "background: rgba(0,242,255,0.05); color: var(--neon-blue);";
+            
+            const controlsHtml = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; gap: 10px;">
+                    <button class="action-btn" style="padding: 8px 15px; font-size: 0.8rem; border: 1px solid var(--neon-blue); border-radius: 20px; ${oaTableDisplayMode === 'times' ? btnActive : btnInactive}" onclick="setOATableMode('times')">
+                        <i class="fas fa-hashtag"></i> NUMBER OF TIMES
+                    </button>
+                    <button class="action-btn" style="padding: 8px 15px; font-size: 0.8rem; border: 1px solid var(--neon-blue); border-radius: 20px; ${oaTableDisplayMode === 'sum' ? btnActive : btnInactive}" onclick="setOATableMode('sum')">
+                        <i class="fas fa-plus-circle"></i> NUMBER OF COUNTS (SUM)
+                    </button>
+                </div>
+                <button class="action-btn" style="padding: 8px 15px; font-size: 0.8rem; background: linear-gradient(45deg, #00b894, #00ff88); color: #000; border-radius: 20px;" onclick="downloadOAExcel()">
+                    <i class="fas fa-file-csv"></i> DOWNLOAD EXCEL
+                </button>
+            </div>`;
+
+            // Table Heading dynamically badlega Times ya Sum ke hisaab se
+            const headingSuffix = oaTableDisplayMode === 'times' ? "(Times)" : "(Sum)";
+
+            document.getElementById('oa-bottom-data').innerHTML = controlsHtml + `
+            <div style="overflow-x:auto;">
+            <table class="summary-card-table" id="oa-export-table">
                 <thead>
                     <tr>
                         <th>CLI NAME</th><th>LOBBY</th>
-                        <th>AUTO/IB<br><span style="font-size:0.7em; color:#a0aab8">(Times/Sum)</span></th>
-                        <th>LC<br><span style="font-size:0.7em; color:#a0aab8">(Times/Sum)</span></th>
-                        <th>CD ZONES<br><span style="font-size:0.7em; color:#a0aab8">(Times/Sum)</span></th>
-                        <th>BA<br><span style="font-size:0.7em; color:#a0aab8">(Times/Sum)</span></th>
-                        <th>SPD(ON)<br><span style="font-size:0.7em; color:#a0aab8">(Times/Sum)</span></th>
-                        <th>SPD(YEL)<br><span style="font-size:0.7em; color:#a0aab8">(Times/Sum)</span></th>
-                        <th>MOBILE<br><span style="font-size:0.7em; color:#a0aab8">(Times/Sum)</span></th>
-                        <th>TOTAL<br><span style="font-size:0.7em; color:#a0aab8">(Times/Sum)</span></th>
+                        <th>AUTO<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
+                        <th>IB<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
+                        <th>LC<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
+                        <th>CD ZONES<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
+                        <th>BA<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
+                        <th>SPD(ON)<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
+                        <th>SPD(YEL)<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
+                        <th>MOBILE<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
+                        <th>BPT/BFT<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
+                        <th>BPC<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
+                        <th>FSD<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
+                        <th>SHUNT<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
+                        <th>TOTAL<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
                     </tr>
                 </thead>
                 <tbody>${rows}</tbody>
-            </table>`;
+            </table>
+            </div>`;
         }
         // --- INSPECTION LOGIC ---
 function resetInspInterface() {
@@ -2273,19 +2360,12 @@ function generateInspectionReport() {
 
     document.getElementById('insp-results').classList.remove('hidden');
 
-    // Helper: Normalize strings for comparison
     const norm = (str) => str ? str.trim().toLowerCase() : "";
     const targetName = norm(nameInput);
 
-    // Stats Object (Holds counts for ALL types)
-    let stats = {
-        family: 0, running: 0, lobby: 0,
-        station: 0, coachClean: 0, stable: 0, sand: 0, crewCab: 0
-    };
+    let stats = { fam: 0, saf: 0, run: 0, lob: 0, cln: 0, nightStb: 0, stb: 0, snd: 0 };
+    let cliMap = {}; 
 
-    let cliMap = {}; // For Summary Table
-
-    // --- 1. PROCESS OLD SHEET (Family, Running Room, Lobby) ---
     allData.forEach(row => {
         const rowName = row[COLS.NAME] ? row[COLS.NAME].trim() : "";
         if (!rowName) return;
@@ -2294,124 +2374,77 @@ function generateInspectionReport() {
             let isMatch = (currentInspMode === 'summary') ? true : (norm(rowName) === targetName);
             
             if (isMatch) {
-                // Initialize Map if needed
                 if (!cliMap[rowName]) cliMap[rowName] = { 
                     lobbyName: row[COLS.LOBBY] || '-', 
-                    fam:0, run:0, lob:0, stn:0, cln:0, stb:0, snd:0, crw:0 
+                    fam:0, saf:0, run:0, lob:0, cln:0, nightStb:0, stb:0, snd:0 
                 };
 
-                const f = (safeInt(row[COLS_INSP.FAMILY]) > 0) ? 1 : 0;
+                const f = safeInt(row[COLS_INSP.FAMILY]);
+                const s = safeInt(row[COLS_INSP.SAFETY]);
                 const r = safeInt(row[COLS_INSP.RUNNING]);
                 const l = safeInt(row[COLS_INSP.LOBBY]);
+                const c = safeInt(row[COLS_INSP.COACHING]);
+                const ns = safeInt(row[COLS_INSP.NIGHT_STABLING]);
+                const stb = safeInt(row[COLS_INSP.STABLE_LOAD]);
+                const snd = safeInt(row[COLS_INSP.SAND]);
 
-                // Update Stats
-                stats.family += f; stats.running += r; stats.lobby += l;
+                stats.fam += f; stats.saf += s; stats.run += r; stats.lob += l;
+                stats.cln += c; stats.nightStb += ns; stats.stb += stb; stats.snd += snd;
                 
-                // Update Map
-                cliMap[rowName].fam += f; cliMap[rowName].run += r; cliMap[rowName].lob += l;
+                cliMap[rowName].fam += f; cliMap[rowName].saf += s; cliMap[rowName].run += r; cliMap[rowName].lob += l;
+                cliMap[rowName].cln += c; cliMap[rowName].nightStb += ns; cliMap[rowName].stb += stb; cliMap[rowName].snd += snd;
             }
         }
     });
 
-    // --- 2. PROCESS NEW SHEET (Station, Coaching, Stable, Sand, Crew) ---
-    // Col A (0) = Timestamp, Col B (1) = CLI Name, Col G (6) = Type
-    if (extraInspData && extraInspData.length > 0) {
-        extraInspData.forEach(row => {
-            const rowName = row[1] ? row[1].trim() : "";
-            const ts = row[0];
-            const type = row[6] ? row[6].toLowerCase() : "";
-
-            if (!rowName || !ts) return;
-
-            // Parse Date: "18/2/2026, 12:46:36 pm" -> need 2/2026
-            const datePart = ts.split(',')[0].trim(); // "18/2/2026"
-            const dParts = datePart.split('/'); // [18, 2, 2026]
-            
-            if (dParts.length === 3) {
-                const m = parseInt(dParts[1]);
-                const y = dParts[2];
-
-                if (y === year && m === parseInt(month)) {
-                    let isMatch = (currentInspMode === 'summary') ? true : (norm(rowName) === targetName);
-
-                    if (isMatch) {
-                        // Ensure CLI is in map (might be only in new sheet)
-                        if (!cliMap[rowName]) cliMap[rowName] = { 
-                            lobbyName: 'Unknown', 
-                            fam:0, run:0, lob:0, stn:0, cln:0, stb:0, snd:0, crw:0 
-                        };
-
-                        // Check Types and Increment
-                        if (type.includes('station inspection')) { 
-                            stats.station++; cliMap[rowName].stn++; 
-                        }
-                        else if (type.includes('coaching cleanliness')) { 
-                            stats.coachClean++; cliMap[rowName].cln++; 
-                        }
-                        else if (type.includes('stable load')) { 
-                            stats.stable++; cliMap[rowName].stb++; 
-                        }
-                        else if (type.includes('sand goomty')) { 
-                            stats.sand++; cliMap[rowName].snd++; 
-                        }
-                        else if (type.includes('surprise crew cabin')) { 
-                            stats.crewCab++; cliMap[rowName].crw++; 
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // --- RENDER OUTPUTS ---
     const chartTitle = (currentInspMode === 'search') ? `${nameInput} - ${month}/${year}` : `Inspection Summary - ${month}/${year}`;
-    
     renderInspectionChart(stats, chartTitle);
 
-    // Render Side Table (Updated with new types)
-    const total = stats.family + stats.running + stats.lobby + stats.station + stats.coachClean + stats.stable + stats.sand + stats.crewCab;
+    const total = stats.fam + stats.saf + stats.run + stats.lob + stats.cln + stats.nightStb + stats.stb + stats.snd;
     
     document.getElementById('insp-side-data').innerHTML = `
         <table class="summary-card-table">
             <thead><tr><th>INSPECTION TYPE</th><th>COUNT</th></tr></thead>
             <tbody>
-                <tr><td>FAMILY/SAFETY SEMINAR</td><td>${stats.family}</td></tr>
-                <tr><td>RUNNING ROOM INSP</td><td>${stats.running}</td></tr>
-                <tr><td>LOBBY INSPECTION</td><td>${stats.lobby}</td></tr>
-                
-                <tr><td>STATION INSPECTION</td><td>${stats.station}</td></tr>
-                <tr><td>COACHING CLEANLINESS</td><td>${stats.coachClean}</td></tr>
-                <tr><td>STABLE LOAD INSP</td><td>${stats.stable}</td></tr>
-                <tr><td>SAND GOOMTY INSP</td><td>${stats.sand}</td></tr>
-                <tr><td>SURPRISE CREW CABIN</td><td>${stats.crewCab}</td></tr>
-                
+                <tr><td>FAMILY SEMINAR</td><td>${stats.fam}</td></tr>
+                <tr><td>SAFETY SEMINAR</td><td>${stats.saf}</td></tr>
+                <tr><td>RUNNING ROOM INSP</td><td>${stats.run}</td></tr>
+                <tr><td>LOBBY INSPECTION</td><td>${stats.lob}</td></tr>
+                <tr><td>COACHING CLEANLINESS</td><td>${stats.cln}</td></tr>
+                <tr><td>NIGHT STABLING INSP</td><td>${stats.nightStb}</td></tr>
+                <tr><td>STABLE LOAD INSP</td><td>${stats.stb}</td></tr>
+                <tr><td>SAND GOOMTY INSP</td><td>${stats.snd}</td></tr>
                 <tr style="font-weight:bold; color:var(--neon-blue); border-top:2px solid #555"><td>TOTAL</td><td>${total}</td></tr>
             </tbody>
         </table>
     `;
 
-    // Render Bottom Table (Summary Mode)
     if (currentInspMode === 'summary') {
         document.getElementById('insp-bottom-box').classList.remove('hidden');
         let rows = '';
         Object.entries(cliMap).sort((a,b) => a[0].localeCompare(b[0])).forEach(([cName, d]) => {
-            const rowTotal = d.fam + d.run + d.lob + d.stn + d.cln + d.stb + d.snd + d.crw;
+            const rowTotal = d.fam + d.saf + d.run + d.lob + d.cln + d.nightStb + d.stb + d.snd;
             rows += `<tr>
-                <td>${cName}</td>
-                <td>${d.fam}</td><td>${d.run}</td><td>${d.lob}</td>
-                <td>${d.stn}</td><td>${d.cln}</td><td>${d.stb}</td><td>${d.snd}</td><td>${d.crw}</td>
+                <td>${cName}</td><td>${d.lobbyName}</td>
+                <td>${d.fam}</td><td>${d.saf}</td><td>${d.run}</td><td>${d.lob}</td>
+                <td>${d.cln}</td><td>${d.nightStb}</td><td>${d.stb}</td><td>${d.snd}</td>
                 <td style="font-weight:bold; color:var(--neon-blue)">${rowTotal}</td>
             </tr>`;
         });
 
         document.getElementById('insp-bottom-data').innerHTML = `
-            <table class="summary-card-table">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+                <button class="action-btn" style="padding: 8px 15px; font-size: 0.8rem; background: linear-gradient(45deg, #00b894, #00ff88); color: #000; border-radius: 20px;" onclick="downloadInspExcel()">
+                    <i class="fas fa-file-csv"></i> DOWNLOAD EXCEL
+                </button>
+            </div>
+            <table class="summary-card-table" id="insp-export-table">
                 <thead>
                     <tr>
-                        <th>CLI NAME</th>
-                        <th title="Family/Safety">FAM/SAF</th><th title="Running Room">RR</th><th title="Lobby">LOB</th>
-                        <th title="Station">STN</th><th title="Coaching Cleanliness">COACHING</th><th title="Stable Load">STABLE</th><th title="Sand Goomty">SAND</th><th title="Crew Cabin">CREW CAB</th>
-                        <th>TOT</th>
+                        <th>CLI NAME</th><th>LOBBY</th>
+                        <th>FAMILY</th><th>SAFETY</th><th>RUN RM</th><th>LOBBY</th>
+                        <th>COACHING</th><th>NGHT STB</th><th>STAB LD</th><th>SAND</th>
+                        <th>TOTAL</th>
                     </tr>
                 </thead>
                 <tbody>${rows}</tbody>
@@ -2429,42 +2462,21 @@ function renderInspectionChart(data, title) {
     inspChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
-            // Updated Labels
-            labels: [
-                'Family/Safety', 'Running Room', 'Lobby', 
-                'Station', 'Coach Clean', 'Stable Load', 'Sand Goomty', 'Crew Cabin'
-            ],
+            labels: ['Family', 'Safety', 'Running Rm', 'Lobby', 'Coaching', 'Night Stb', 'Stable Ld', 'Sand'],
             datasets: [{
                 label: 'Count',
-                data: [
-                    data.family, data.running, data.lobby,
-                    data.station, data.coachClean, data.stable, data.sand, data.crewCab
-                ],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.7)',  // Red
-                    'rgba(54, 162, 235, 0.7)',  // Blue
-                    'rgba(255, 206, 86, 0.7)',  // Yellow
-                    'rgba(75, 192, 192, 0.7)',  // Teal (New)
-                    'rgba(153, 102, 255, 0.7)', // Purple (New)
-                    'rgba(255, 159, 64, 0.7)',  // Orange (New)
-                    'rgba(231, 233, 237, 0.7)', // Grey (New)
-                    'rgba(255, 0, 255, 0.7)'    // Magenta (New)
-                ],
+                data: [data.fam, data.saf, data.run, data.lob, data.cln, data.nightStb, data.stb, data.snd],
+                backgroundColor: ['#ff6384', '#ff9f40', '#36a2eb', '#ffce56', '#9966ff', '#4bc0c0', '#e7e9ed', '#ff00ff'],
                 borderColor: '#fff',
-                borderWidth: 1
+                borderWidth: 1,
+                borderRadius: 5
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                title: { display: true, text: title, color: '#fff', font: { size: 18 } }
-            },
-            scales: {
-                y: { beginAtZero: true, ticks: { color: '#a0aab8' }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                x: { ticks: { color: '#a0aab8', font: { size: 10 } }, grid: { display: false } }
-            }
+            plugins: { legend: { display: false }, title: { display: true, text: title, color: '#fff', font: { size: 18 } } },
+            scales: { y: { beginAtZero: true, ticks: { color: '#a0aab8' }, grid: { color: 'rgba(255,255,255,0.1)' } }, x: { ticks: { color: '#a0aab8', font: { size: 10 } }, grid: { display: false } } }
         }
     });
 }
@@ -2730,29 +2742,22 @@ function openPersonalDashboard(name, year, month) {
         }
     });
     if(endToEndData) endToEndData.forEach(r => { if(r[0] && normalize(r[0])===targetName && r[6]?.startsWith(datePrefix)) fpStats.e2e++; });
-
-    // 2. AMBUSH
-    let ambStats = { auto: 0, lc: 0, cd: 0, ba: 0, speedOn: 0, speedYellow: 0, mobile: 0 };
+// 2. AMBUSH
+    let ambStats = { auto: 0, ib: 0, lc: 0, cd: 0, ba: 0, speedOn: 0, speedYellow: 0, mobile: 0, bpt: 0, bpc: 0, fsd: 0, shunt: 0 };
     allData.forEach(r => {
         if (normalize(r[COLS.NAME]) === targetName && r[COLS.DATE]?.startsWith(datePrefix)) {
-            ambStats.auto += safeInt(r[COLS_OA.AUTO_IB]); ambStats.lc += safeInt(r[COLS_OA.LC_AMBUSH]);
-            ambStats.cd += safeInt(r[COLS_OA.CD_ZONES]); ambStats.ba += safeInt(r[COLS_OA.BA_AMBUSH]);
-            ambStats.speedOn += safeInt(r[COLS_OA.SPEED_AUTO]); ambStats.speedYellow += safeInt(r[COLS_OA.SPEED_YELLOW]);
-        }
-    });
-    if(mobileAmbushData) mobileAmbushData.forEach(r => {
-        let sName = normalize(r[15]);
-        if(sName && (sName.includes(targetName) || targetName.includes(sName))) {
-            const ts = r[0]; 
-            if(ts) {
-                let parts = ts.split(' ')[0].trim().split(/[\/\-]/);
-                let d, m, y;
-                if(parts.length===3) {
-                    if(parts[0].length===4) { y=parseInt(parts[0]); m=parseInt(parts[1]); }
-                    else { m=parseInt(parts[0]); y=parseInt(parts[2]); } // MM/DD/YYYY
-                    if(y===parseInt(year) && m===parseInt(month)) ambStats.mobile++;
-                }
-            }
+            ambStats.auto += safeInt(r[COLS_OA.AUTO]); 
+            ambStats.ib += safeInt(r[COLS_OA.IB]); 
+            ambStats.lc += safeInt(r[COLS_OA.LC_AMBUSH]);
+            ambStats.cd += safeInt(r[COLS_OA.CD_ZONES]); 
+            ambStats.ba += safeInt(r[COLS_OA.BA_AMBUSH]);
+            ambStats.speedOn += safeInt(r[COLS_OA.SPEED_AUTO]); 
+            ambStats.speedYellow += safeInt(r[COLS_OA.SPEED_YELLOW]);
+            ambStats.bpt += safeInt(r[COLS_OA.BPT_BFT]);
+            ambStats.bpc += safeInt(r[COLS_OA.BPC]);
+            ambStats.fsd += safeInt(r[COLS_OA.FSD_ROUTE]);
+            ambStats.shunt += safeInt(r[COLS_OA.SHUNTING]);
+            ambStats.mobile += safeInt(r[COLS_OA.MOBILE]);
         }
     });
 
@@ -2775,26 +2780,18 @@ function openPersonalDashboard(name, year, month) {
     if(spmManualData) spmManualData.forEach(r => procSPM(r,'M',0,3,'DMY'));
     if(spmCvvrsData) spmCvvrsData.forEach(r => procSPM(r,'C',0,3,'DMY'));
 
-    // 4. INSPECTION
-    let inspStats = { fam:0, run:0, lob:0, stn:0, cln:0, stb:0, snd:0, crw:0 };
+ // 4. INSPECTION
+    let inspStats = { fam:0, saf:0, run:0, lob:0, cln:0, nightStb:0, stb:0, snd:0 };
     allData.forEach(r => {
         if (normalize(r[COLS.NAME]) === targetName && r[COLS.DATE]?.startsWith(datePrefix)) {
-            if(safeInt(r[COLS_INSP.FAMILY])>0) inspStats.fam++;
+            inspStats.fam += safeInt(r[COLS_INSP.FAMILY]);
+            inspStats.saf += safeInt(r[COLS_INSP.SAFETY]);
             inspStats.run += safeInt(r[COLS_INSP.RUNNING]);
             inspStats.lob += safeInt(r[COLS_INSP.LOBBY]);
-        }
-    });
-    if(extraInspData) extraInspData.forEach(r => {
-        const rn = r[1]?normalize(r[1]):"", ts=r[0], ty=r[6]?r[6].toLowerCase():"";
-        if(rn===targetName && ts) {
-            let parts = ts.split(',')[0].trim().split('/');
-            if(parts.length===3 && parts[2]==year && parseInt(parts[1])==month) {
-                if(ty.includes('station')) inspStats.stn++;
-                else if(ty.includes('coaching')) inspStats.cln++;
-                else if(ty.includes('stable')) inspStats.stb++;
-                else if(ty.includes('sand')) inspStats.snd++;
-                else if(ty.includes('surprise')) inspStats.crw++;
-            }
+            inspStats.cln += safeInt(r[COLS_INSP.COACHING]);
+            inspStats.nightStb += safeInt(r[COLS_INSP.NIGHT_STABLING]);
+            inspStats.stb += safeInt(r[COLS_INSP.STABLE_LOAD]);
+            inspStats.snd += safeInt(r[COLS_INSP.SAND]);
         }
     });
 
@@ -2893,14 +2890,20 @@ function renderPersonalCharts(fp, amb, spm, insp, drv, couns) {
         }, options: commonOpt
     });
 
-    // 2. AMBUSH
+// 2. AMBUSH
     if(pdChartAmbush) pdChartAmbush.destroy();
     pdChartAmbush = new Chart(document.getElementById('pd-chart-ambush'), {
         type: 'doughnut', plugins: plugins,
         data: {
-            labels: ['Auto', 'LC', 'CD', 'BA', 'Spd(ON)', 'Spd(Y)', 'Mobile'],
-            datasets: [{ data: [amb.auto, amb.lc, amb.cd, amb.ba, amb.speedOn, amb.speedYellow, amb.mobile], backgroundColor: ['#00f2ff', '#bc13fe', '#ff0080', '#e0ff00', '#00ff88', '#ff8800', '#fff'], borderWidth: 0, borderColor: '#040c18' }]
-        }, options: { ...commonOpt, scales: {}, plugins: { legend: { position:'right', labels:{color:'#fff', boxWidth:10} } } }
+            labels: ['Auto', 'IB', 'L-Crossing', 'CD Zones', 'BA Ambush', 'Speed(ON)', 'Speed(Yel)', 'Mobile', 'BPT/BFT', 'BPC', 'FSD', 'Shunting'],
+            datasets: [{ 
+                data: [amb.auto, amb.ib, amb.lc, amb.cd, amb.ba, amb.speedOn, amb.speedYellow, amb.mobile, amb.bpt, amb.bpc, amb.fsd, amb.shunt], 
+                backgroundColor: ['#00f2ff', '#bc13fe', '#ff0080', '#e0ff00', '#00ff88', '#ff8800', '#fff', '#a0aab8', '#00f2ff', '#bc13fe', '#ff0080', '#e0ff00'], 
+                borderWidth: 0, 
+                borderColor: '#040c18' 
+            }]
+        }, 
+        options: { ...commonOpt, scales: {}, plugins: { legend: { position:'right', labels:{color:'#fff', boxWidth:10} } } }
     });
 
     // 3. SPM
@@ -2911,13 +2914,13 @@ function renderPersonalCharts(fp, amb, spm, insp, drv, couns) {
         options: commonOpt
     });
 
-    // 4. INSPECTION
+// 4. INSPECTION
     if(pdChartInsp) pdChartInsp.destroy();
     pdChartInsp = new Chart(document.getElementById('pd-chart-insp'), {
         type: 'polarArea', plugins: plugins,
         data: {
-            labels: ['Fam', 'RR', 'Lob', 'Stn', 'Cln', 'Stb', 'Snd', 'Crew'],
-            datasets: [{ data: [insp.fam, insp.run, insp.lob, insp.stn, insp.cln, insp.stb, insp.snd, insp.crw], backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40', '#c9cbcf', '#ff00ff'], borderWidth: 0 }]
+            labels: ['Fam', 'Saf', 'Run', 'Lob', 'Cln', 'N.Stb', 'Stb', 'Snd'],
+            datasets: [{ data: [insp.fam, insp.saf, insp.run, insp.lob, insp.cln, insp.nightStb, insp.stb, insp.snd], backgroundColor: ['#ff6384', '#ff9f40', '#36a2eb', '#ffce56', '#9966ff', '#4bc0c0', '#e7e9ed', '#ff00ff'], borderWidth: 0 }]
         }, options: { ...commonOpt, scales: { r: { grid: { color:'rgba(255,255,255,0.1)' }, ticks: { display: false } } }, plugins: { legend: { position:'right', labels:{color:'#fff', boxWidth:10} } } }
     });
 
@@ -3835,6 +3838,286 @@ function showE2eTable() {
             `;
             document.getElementById('e2e-table-container').classList.remove('hidden');
         }
+function generateLast90DaysSummary() {
+    const today = new Date();
+    today.setHours(23, 59, 59, 999); 
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(today.getDate() - 90);
+    ninetyDaysAgo.setHours(0, 0, 0, 0);
+
+    window.overdueCrewMap = {}; 
+    
+    // NAYA LOGIC: CSV ke liye globally perfect format yahi se set karenge
+    window.last90CsvData = [["CLI NAME", "HQ", "DESG", "TOTAL CREW", "FP DONE (LAST 90 DAYS)", "OVERDUE", "TOTAL OVERDUE"]];
+
+    const parseDateSafely = (dStr) => {
+        if (!dStr) return new Date(NaN);
+        let d = dStr.toString().trim().split(' ')[0]; 
+        let pts = d.split(/[-/]/); 
+        if (pts.length === 3) {
+            if (pts[0].length === 4) return new Date(`${pts[0]}-${pts[1].padStart(2,'0')}-${pts[2].padStart(2,'0')}T00:00:00`);
+            if (pts[2].length === 4) return new Date(`${pts[2]}-${pts[1].padStart(2,'0')}-${pts[0].padStart(2,'0')}T00:00:00`);
+        }
+        return new Date(dStr); 
+    };
+
+    let downloadBtnHTML = `
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+        <button class="action-btn" style="padding: 8px 15px; font-size: 0.8rem; background: linear-gradient(45deg, #00b894, #00ff88); color: #000; border-radius: 20px;" onclick="downloadLast90Excel()">
+            <i class="fas fa-file-csv"></i> DOWNLOAD EXCEL
+        </button>
+    </div>`;
+
+    const thStyle = "text-align: center; vertical-align: middle; border: 1px solid rgba(255,255,255,0.1); padding: 10px; background: rgba(0, 242, 255, 0.05);";
+
+    let html = downloadBtnHTML + `
+    <div class="bottom-panel" style="padding: 10px;">
+    <table class="summary-card-table" style="border-collapse: collapse; width: 100%;">
+    <thead>
+        <tr>
+            <th style="${thStyle} text-align: left;">CLI NAME</th>
+            <th style="${thStyle}">HQ</th>
+            <th style="${thStyle}">DESG</th>
+            <th style="${thStyle}">TOTAL CREW</th>
+            <th style="${thStyle}">FP DONE (LAST 90 DAYS)</th>
+            <th style="${thStyle}">OVERDUE</th>
+            <th style="${thStyle}">TOTAL OVERDUE</th>
+        </tr>
+    </thead>
+    <tbody>
+    `;
+
+    // Grand Totals ke variables
+    let grandTotalCrew = 0;
+    let grandTotalDone = 0;
+    let grandTotalOverdue = 0;
+
+    Object.keys(cliMasterData).sort().forEach(cliName => {
+        const crewList = cliMasterData[cliName];
+        let hqCount = {};
+        crewList.forEach(c => { hqCount[c.hq] = (hqCount[c.hq] || 0) + 1; });
+        let majorityHQ = Object.keys(hqCount).sort((a,b)=>hqCount[b]-hqCount[a])[0] || '';
+
+        let cliRows = [];
+        let cliTotalOverdue = 0;
+
+        ['LPG','LPP','LPM'].forEach(desg => {
+            const desgCrew = crewList.filter(x => x.desg === desg);
+            const crewCount = desgCrew.length;
+
+            if (crewCount === 0) return;
+
+            let completed90 = 0;
+            let pendingCrew = [];
+
+            desgCrew.forEach(lp => {
+                const targetEmp = (lp.empCode || '').toString().trim().toUpperCase();
+                if (!targetEmp) return;
+
+                const hasRecentFP = endToEndData.some(r => {
+                    const sheetEmp = (r[14] || '').toString().trim().toUpperCase(); 
+                    if (sheetEmp !== targetEmp) return false;
+                    const fpDate = parseDateSafely(r[6]); 
+                    return !isNaN(fpDate) && fpDate >= ninetyDaysAgo && fpDate <= today;
+                });
+
+                if(hasRecentFP){
+                    completed90++;
+                } else {
+                    pendingCrew.push(lp);
+                }
+            });
+
+            const overdue = crewCount - completed90;
+            cliTotalOverdue += overdue;
+            
+            // Grand total ko update karna
+            grandTotalCrew += crewCount;
+            grandTotalDone += completed90;
+            grandTotalOverdue += overdue;
+
+            const mapKey = `${cliName}_${desg}`.replace(/\s+/g, '_');
+            window.overdueCrewMap[mapKey] = pendingCrew;
+
+            cliRows.push({ desg, crewCount, completed90, overdue, mapKey });
+        });
+
+        const rowCount = cliRows.length;
+        if (rowCount > 0) {
+            cliRows.forEach((r, index) => {
+                const isLastRow = (index === rowCount - 1);
+                const btmBorder = isLastRow ? '2px solid #555' : '1px solid rgba(255,255,255,0.1)';
+                const tdStyle = `text-align: center; vertical-align: middle; border: 1px solid rgba(255,255,255,0.1); border-bottom: ${btmBorder}; padding: 8px;`;
+
+                // --- PUSH ROW INTO CSV DIRECTLY ---
+                window.last90CsvData.push([
+                    `"${cliName}"`, `"${majorityHQ}"`, `"${r.desg}"`, 
+                    r.crewCount, r.completed90, r.overdue, 
+                    (index === 0 ? cliTotalOverdue : "") // Total overdue sirf pehli baar
+                ]);
+
+                html += `<tr>`;
+                
+                if (index === 0) {
+                    html += `<td rowspan="${rowCount}" style="text-align: left; vertical-align: middle; border: 1px solid rgba(255,255,255,0.1); border-bottom: 2px solid #555; padding: 8px; font-weight: bold; color: var(--neon-blue);">${cliName}</td>`;
+                    html += `<td rowspan="${rowCount}" style="text-align: center; vertical-align: middle; border: 1px solid rgba(255,255,255,0.1); border-bottom: 2px solid #555; padding: 8px;">${majorityHQ}</td>`;
+                }
+
+                html += `<td style="${tdStyle}">${r.desg}</td>`;
+                html += `<td style="${tdStyle}">${r.crewCount}</td>`;
+                html += `<td style="${tdStyle} color: #00ff88;">${r.completed90}</td>`;
+
+                let overdueCell = r.overdue > 0
+                    ? `<span style="cursor: pointer; text-decoration: underline; color: #ff5252;" onclick="showOverdueCrewModal('${r.mapKey}', '${cliName}', '${r.desg}')" title="Click to view Driver details">${r.overdue} <i class="fas fa-hand-pointer" style="font-size:0.7rem;"></i></span>`
+                    : `<span style="color: #ff5252;">${r.overdue}</span>`;
+                
+                html += `<td style="${tdStyle} font-weight: bold;">${overdueCell}</td>`;
+
+                if (index === 0) {
+                    html += `<td rowspan="${rowCount}" style="text-align: center; vertical-align: middle; border: 1px solid rgba(255,255,255,0.1); border-bottom: 2px solid #555; padding: 8px; font-weight: bold; font-size: 1.1rem; color: #ff9999;">${cliTotalOverdue}</td>`;
+                }
+
+                html += `</tr>`;
+            });
+        }
+    });
+
+    // --- ADD GRAND TOTAL ROW ---
+    html += `
+        <tr style="background: rgba(0, 242, 255, 0.1); font-weight: bold; color: var(--neon-blue); border-top: 2px solid var(--neon-blue);">
+            <td colspan="3" style="text-align: right; padding: 10px; border: 1px solid rgba(255,255,255,0.1);">GRAND TOTAL</td>
+            <td style="text-align: center; padding: 10px; border: 1px solid rgba(255,255,255,0.1);">${grandTotalCrew}</td>
+            <td style="text-align: center; padding: 10px; border: 1px solid rgba(255,255,255,0.1); color: #00ff88;">${grandTotalDone}</td>
+            <td style="text-align: center; padding: 10px; border: 1px solid rgba(255,255,255,0.1); color: #ff5252;">${grandTotalOverdue}</td>
+            <td style="text-align: center; padding: 10px; border: 1px solid rgba(255,255,255,0.1); color: #ff9999;">${grandTotalOverdue}</td>
+        </tr>
+    `;
+    
+    // Grand Total Push in CSV
+    window.last90CsvData.push([
+        `"GRAND TOTAL"`, `""`, `""`, grandTotalCrew, grandTotalDone, grandTotalOverdue, grandTotalOverdue
+    ]);
+
+    html += `
+    </tbody>
+    </table>
+    </div>
+    `;
+
+    document.getElementById('e2e-results').classList.remove('hidden');
+    document.getElementById('e2e-summary').innerHTML = '<h2 style="color:var(--neon-blue)">LAST 90 DAYS OVERDUE SUMMARY</h2>';
+    document.getElementById('e2e-table-container').innerHTML = html;
+    document.getElementById('e2e-table-container').classList.remove('hidden');
+}
+// Function to switch between 'Times' and 'Sum'
+function setOATableMode(mode) {
+    oaTableDisplayMode = mode;
+    if (oaLastCliStats) {
+        renderOADetailedTable(oaLastCliStats); // Table ko dobara render karega
+    }
+}
+
+// Function to download table as Excel (CSV)
+function downloadOAExcel() {
+    let table = document.getElementById("oa-export-table");
+    if (!table) return;
+    
+    let csv = [];
+    let rows = table.querySelectorAll("tr");
+    
+    for (let i = 0; i < rows.length; i++) {
+        let row = [], cols = rows[i].querySelectorAll("td, th");
+        for (let j = 0; j < cols.length; j++) {
+            // Text se extra spaces aur line-breaks hatayein
+            let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+            // Quotes ko escape karein
+            data = data.replace(/"/g, '""');
+            row.push('"' + data + '"');
+        }
+        csv.push(row.join(","));
+    }
+    
+    let csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+    let downloadLink = document.createElement("a");
+    // Download format: Ambush_Report_TIMES.csv ya SUM.csv
+    downloadLink.download = "Ambush_Report_" + oaTableDisplayMode.toUpperCase() + ".csv";
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+function downloadInspExcel() {
+    let table = document.getElementById("insp-export-table");
+    if (!table) return;
+    let csv = [];
+    let rows = table.querySelectorAll("tr");
+    for (let i = 0; i < rows.length; i++) {
+        let row = [], cols = rows[i].querySelectorAll("td, th");
+        for (let j = 0; j < cols.length; j++) {
+            let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+            data = data.replace(/"/g, '""');
+            row.push('"' + data + '"');
+        }
+        csv.push(row.join(","));
+    }
+    let csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+    let downloadLink = document.createElement("a");
+    downloadLink.download = "Inspection_Report.csv";
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+// EXCEL DOWNLOAD FUNCTION FOR LAST 90 DAYS (Fixed Format)
+function downloadLast90Excel() {
+    // Ab DOM se HTML read karne ki jagah seedhe saved array se CSV banegi
+    if (!window.last90CsvData || window.last90CsvData.length === 0) return;
+    
+    let csvContent = window.last90CsvData.map(e => e.join(",")).join("\n");
+    let csvFile = new Blob([csvContent], {type: "text/csv"});
+    let downloadLink = document.createElement("a");
+    downloadLink.download = "Last_90_Days_Overdue_Report.csv";
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+// OVERDUE DRIVER DETAILS MODAL FUNCTION
+function showOverdueCrewModal(mapKey, cliName, desg) {
+    const crewList = window.overdueCrewMap[mapKey];
+    if (!crewList || crewList.length === 0) return;
+
+    document.getElementById('date-modal-title').innerHTML = `<i class="fas fa-users"></i> PENDING DRIVERS: ${cliName} (${desg})`;
+
+    let listHtml = `<table class="summary-card-table" style="font-size: 0.85rem; width: 100%; border-collapse: collapse; text-align: center;">
+        <thead>
+            <tr>
+                <th style="border: 1px solid #555; padding: 8px; color: var(--neon-blue);">EMP CODE</th>
+                <th style="border: 1px solid #555; padding: 8px; color: var(--neon-blue);">LP ID</th>
+                <th style="border: 1px solid #555; padding: 8px; color: var(--neon-blue);">NAME</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    crewList.forEach(c => {
+        listHtml += `<tr>
+            <td style="border: 1px solid rgba(255,255,255,0.1); padding: 8px;">${c.empCode || '-'}</td>
+            <td style="border: 1px solid rgba(255,255,255,0.1); padding: 8px; font-weight: bold;">${c.lpId || '-'}</td>
+            <td style="border: 1px solid rgba(255,255,255,0.1); padding: 8px;">${c.lpName || '-'}</td>
+        </tr>`;
+    });
+
+    listHtml += `</tbody></table>`;
+
+    // Reusing the existing date-modal logic to show this table
+    document.getElementById('date-modal-list').innerHTML = listHtml;
+    document.querySelector('.date-modal-content').style.width = '600px'; 
+    document.querySelector('.date-modal-content').style.maxWidth = '90vw';
+    document.getElementById('date-details-modal').style.display = 'flex';
+}
 </script>
     </script>
 </body>
