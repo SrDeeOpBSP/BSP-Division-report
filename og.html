@@ -982,28 +982,30 @@ async function loadLatestCrewData() {
             const data = await res.json();
             const crewMap = {};
             
-            // Helper function: Date compare karne ke liye usko time value mein convert karega
+            // Helper function: Date compare karne ke liye
             const getTimestamp = (dateStr) => {
                 if (!dateStr) return 0;
-                let d = String(dateStr).trim().split(" ")[0]; // Agar time bhi hai toh ignore karenge
+                let d = String(dateStr).trim().split(" ")[0]; 
                 
                 if (d.includes("/")) {
                     let p = d.split("/");
-                    // Assuming DD/MM/YYYY format
                     if (p[2] && p[2].length === 4) return new Date(p[2], p[1]-1, p[0]).getTime();
                 } else if (d.includes("-")) {
                     let p = d.split("-");
-                    // Assuming YYYY-MM-DD format
                     if (p[0] && p[0].length === 4) return new Date(p[0], p[1]-1, p[2]).getTime();
-                    // Assuming DD-MM-YYYY format
                     if (p[2] && p[2].length === 4) return new Date(p[2], p[1]-1, p[0]).getTime();
                 }
-                return new Date(dateStr).getTime() || 0; // Fallback
+                return new Date(dateStr).getTime() || 0; 
             };
 
             (data.values || []).slice(1).forEach(row => {
                 const empCode = row[4] || "";
-                if (!empCode) return; // Bina Emp Code ke aage nahi badhenge
+                const crewStatus = row[11] || ""; // Column L = Crew Status (Index 11)
+                
+                // FILTER: Agar Emp Code nahi hai YA Crew Status "ACTIVE" nahi hai, toh chhod do
+                if (!empCode || crewStatus.trim().toUpperCase() !== "ACTIVE") {
+                    return; 
+                }
                 
                 const updateDateStr = row[8] || ""; // Column I = Update Date (Index 8)
                 const currentTimestamp = getTimestamp(updateDateStr);
@@ -1016,22 +1018,20 @@ async function loadLatestCrewData() {
                     empCode: empCode, 
                     cliName: row[6]||"", 
                     hq: row[7]||"",
-                    timestamp: currentTimestamp // Compare karne ke liye store kiya
+                    timestamp: currentTimestamp 
                 };
 
-                // Agar yeh empCode pehle se map mein hai, toh date compare karo
+                // Date compare karke sirf latest active entry ko save karo
                 if (crewMap[empCode]) {
-                    // Agar nayi row ki date purani wali se badi ya barabar hai, tabhi update karo
                     if (currentTimestamp >= crewMap[empCode].timestamp) {
                         crewMap[empCode] = obj;
                     }
                 } else {
-                    // Agar pehli baar mila hai, toh directly add kar do
                     crewMap[empCode] = obj;
                 }
             });
             
-            // Map se saari latest values nikal kar array mein daal do
+            // Map se final active aur latest list nikal lo
             latestCrewData = Object.values(crewMap);
             
         } catch (err) { 
