@@ -776,8 +776,6 @@
     
     // CSV Vars
     let cliData = {};
-    let cliAlpData = [];
-    let lpCliData = [];
     let majorBeatData = [];
 
     // =========================================================
@@ -892,9 +890,6 @@ String(now.getFullYear());
             }
             correctedData.forEach(row => { if (row.length >= 3) cliData[row[0].trim().toUpperCase()] = { name: row[1].trim(), hq: row[2].trim() }; });
         }});
-
-        Papa.parse('CLIALP.csv', { header: true, skipEmptyLines: true, download: true, complete: function(r) { cliAlpData = r.data; }});
-        Papa.parse('CLI.csv', { header: true, skipEmptyLines: true, download: true, complete: function(r) { lpCliData = r.data; }});
         Papa.parse('BEAT.csv', { header: true, skipEmptyLines: true, download: true, complete: function(r) { majorBeatData = r.data; }});
     }
 
@@ -981,31 +976,97 @@ console.log("RAW=", r[10], "FINAL=", dt);
         } catch (err) { console.warn("History data fetch failed.", err); }
     }
 
-    async function loadLatestCrewData() {
+async function loadLatestCrewData() {
         try {
             const res = await fetch(CREW_API);
             const data = await res.json();
             const crewMap = {};
-            (data.values || []).slice(1).forEach(row => {
-                const obj = { crewId: row[0]||"", crewName: row[1]||"", hrmsId: row[2]||"", crewType: row[3]||"", empCode: row[4]||"", cliName: row[6]||"", hq: row[7]||"" };
-                if (obj.empCode) crewMap[obj.empCode] = obj;
-            });
-            latestCrewData = Object.values(crewMap);
-        } catch (err) { console.error("Crew Fetch Error", err); }
-    }
+            
+            // Helper function: Date compare karne ke liye usko time value mein convert karega
+            const getTimestamp = (dateStr) => {
+                if (!dateStr) return 0;
+                let d = String(dateStr).trim().split(" ")[0]; // Agar time bhi hai toh ignore karenge
+                
+                if (d.includes("/")) {
+                    let p = d.split("/");
+                    // Assuming DD/MM/YYYY format
+                    if (p[2] && p[2].length === 4) return new Date(p[2], p[1]-1, p[0]).getTime();
+                } else if (d.includes("-")) {
+                    let p = d.split("-");
+                    // Assuming YYYY-MM-DD format
+                    if (p[0] && p[0].length === 4) return new Date(p[0], p[1]-1, p[2]).getTime();
+                    // Assuming DD-MM-YYYY format
+                    if (p[2] && p[2].length === 4) return new Date(p[2], p[1]-1, p[0]).getTime();
+                }
+                return new Date(dateStr).getTime() || 0; // Fallback
+            };
 
+            (data.values || []).slice(1).forEach(row => {
+                const empCode = row[4] || "";
+                if (!empCode) return; // Bina Emp Code ke aage nahi badhenge
+                
+                const updateDateStr = row[8] || ""; // Column I = Update Date (Index 8)
+                const currentTimestamp = getTimestamp(updateDateStr);
+                
+                const obj = { 
+                    crewId: row[0]||"", 
+                    crewName: row[1]||"", 
+                    hrmsId: row[2]||"", 
+                    crewType: row[3]||"", 
+                    empCode: empCode, 
+                    cliName: row[6]||"", 
+                    hq: row[7]||"",
+                    timestamp: currentTimestamp // Compare karne ke liye store kiya
+                };
+
+                // Agar yeh empCode pehle se map mein hai, toh date compare karo
+                if (crewMap[empCode]) {
+                    // Agar nayi row ki date purani wali se badi ya barabar hai, tabhi update karo
+                    if (currentTimestamp >= crewMap[empCode].timestamp) {
+                        crewMap[empCode] = obj;
+                    }
+                } else {
+                    // Agar pehli baar mila hai, toh directly add kar do
+                    crewMap[empCode] = obj;
+                }
+            });
+            
+            // Map se saari latest values nikal kar array mein daal do
+            latestCrewData = Object.values(crewMap);
+            
+        } catch (err) { 
+            console.error("Crew Fetch Error", err); 
+        }
+    }
     // =========================================================
     // FORM LOGIC & AUTO-FILL
     // =========================================================
-    document.getElementById('c_cli_id').addEventListener('input', (e) => {
+document.getElementById('c_cli_id').addEventListener('input', (e) => {
         const sanitized = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
         e.target.value = sanitized;
 
         if(cliData[sanitized]) {
-            document.getElementById('c_cli_name').value = cliData[sanitized].name;
+            const currentCliName = cliData[sanitized].name;
+            document.getElementById('c_cli_name').value = currentCliName;
             document.getElementById('c_cli_hq').value = cliData[sanitized].hq;
-            populateDropdown('alp_id', cliAlpData, cliData[sanitized].name, 'ALP ID');
-            populateDropdown('lp_id', lpCliData, cliData[sanitized].name, 'LP ID');
+            
+            // Fetch relevant crews for this CLI from Google Sheet Data
+            const myCrews = latestCrewData.filter(c => c.cliName && c.cliName.trim().toUpperCase() === currentCliName.toUpperCase());
+            
+            // Filter for LP & ALP
+            const lpCrews = myCrews.filter(c => ["LPG", "LPP", "LPM"].includes(c.crewType));
+            const alpCrews = myCrews.filter(c => ["ALP", "SALP"].includes(c.crewType));
+
+            // Populate LP Dropdown
+            const lpSelect = document.getElementById('lp_id');
+            lpSelect.innerHTML = '<option value="">Select LP ID</option>';
+            lpCrews.forEach(c => lpSelect.appendChild(new Option(`${c.crewId} (${c.crewName})`, c.crewId)));
+
+            // Populate ALP Dropdown
+            const alpSelect = document.getElementById('alp_id');
+            alpSelect.innerHTML = '<option value="">Select ALP ID</option>';
+            alpCrews.forEach(c => alpSelect.appendChild(new Option(`${c.crewId} (${c.crewName})`, c.crewId)));
+
         } else {
             document.getElementById('c_cli_name').value = ""; document.getElementById('c_cli_hq').value = "";
             document.getElementById('alp_id').innerHTML = '<option value="">Select ALP ID</option>'; document.getElementById('lp_id').innerHTML = '<option value="">Select LP ID</option>';
@@ -1050,44 +1111,30 @@ console.log("RAW=", r[10], "FINAL=", dt);
     }
 
 function autoFillLpDetails(lpId) {
+    const data = latestCrewData.find(i => i.crewId === lpId);
 
-    const data =
-        lpCliData.find(i => i['LP ID'] === lpId);
-
-    document.getElementById('lp_name').value =
-        data ? data['LP NAME'] : "";
-
-    document.getElementById('lp_desg').value =
-        data ? data['DESG'] : "";
-
-    const hq =
-        data ? data['HQ'] : "";
-
+    document.getElementById('lp_name').value = data ? data.crewName : "";
+    document.getElementById('lp_desg').value = data ? data.crewType : "";
+    const hq = data ? data.hq : "";
     document.getElementById('lp_hq').value = hq;
+    document.getElementById('lp_empcode').value = data ? data.empCode : "";
 
-    document.getElementById('lp_empcode').value =
-        data ? data['EMP CODE'] : "";
+    const mb = document.getElementById('lp_major_beat');
+    mb.innerHTML = '<option value="">Select MAJOR BEAT</option>';
 
-    const mb =
-        document.getElementById('lp_major_beat');
-
-    mb.innerHTML =
-        '<option value="">Select MAJOR BEAT</option>';
-
-    if (hq)
+    if (hq) {
         majorBeatData
             .filter(i => i['HQ'] === hq)
-            .forEach(i =>
-                mb.appendChild(
-                    new Option(i['BEAT'], i['BEAT'])
-                )
-            );
+            .forEach(i => mb.appendChild(new Option(i['BEAT'], i['BEAT'])));
+    }
 }
 
-    function autoFillAlpDetails(alpId) {
-        const data = cliAlpData.find(i => i['ALP ID'] === alpId);
-        document.getElementById('alp_name').value = data ? data['ALP NAME'] : ""; document.getElementById('alp_desg').value = data ? data['DESG'] : ""; document.getElementById('alp_hq').value = data ? data['HQ'] : "";
-    }
+function autoFillAlpDetails(alpId) {
+    const data = latestCrewData.find(i => i.crewId === alpId);
+    document.getElementById('alp_name').value = data ? data.crewName : "";
+    document.getElementById('alp_desg').value = data ? data.crewType : "";
+    document.getElementById('alp_hq').value = data ? data.hq : "";
+}
 
     function toggleOtherBeat(select, targetId) { const input = document.getElementById(targetId); if(select.value === 'OTHER') { input.classList.remove('hidden'); input.required = true; } else { input.classList.add('hidden'); input.required = false; input.value = ''; } }
     
