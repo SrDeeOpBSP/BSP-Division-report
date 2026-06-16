@@ -1356,7 +1356,6 @@ Already Done (${latestDate})
     }
 
 function togglePopup(btn) {
-
     document.querySelectorAll('.drive-popup').forEach(p => {
         if (p !== btn.nextElementSibling) {
             p.classList.add('hidden');
@@ -1364,51 +1363,46 @@ function togglePopup(btn) {
     });
 
     const popup = btn.nextElementSibling;
-
     popup.classList.remove('hidden');
 
-    const rect = btn.getBoundingClientRect();
+    // Mobile viewport detection
+    const isMobile = window.innerWidth < 768;
 
-    // Width
-    const popupWidth = 450;
+    if (isMobile) {
+        // Mobile me center layout modal banayenge taaki text screen se bahar na kate
+        popup.style.position = 'fixed';
+        popup.style.top = '50%';
+        popup.style.left = '50%';
+        popup.style.transform = 'translate(-50%, -50%)';
+        popup.style.width = '92vw';
+        popup.style.maxWidth = '380px';
+        popup.style.height = 'auto';
+        popup.style.maxHeight = '80vh';
+        popup.style.zIndex = '99999';
+    } else {
+        // Desktop floating dynamic positioning logic
+        const rect = btn.getBoundingClientRect();
+        const popupWidth = 420;
+        const popupHeight = 450;
+        
+        let left = rect.left;
+        if (left + popupWidth > window.innerWidth - 20) {
+            left = window.innerWidth - popupWidth - 20;
+        }
+        if (left < 10) left = 10;
 
-    // Height estimate
-    const popupHeight = 500;
+        let top = rect.bottom + 8;
+        if (window.innerHeight - rect.bottom < popupHeight && rect.top > popupHeight + 50) {
+            top = rect.top - popupHeight;
+        }
 
-    // Horizontal position
-    let left = rect.left;
-
-    if (left + popupWidth > window.innerWidth - 20) {
-        left = window.innerWidth - popupWidth - 20;
+        popup.style.position = 'fixed';
+        popup.style.transform = 'none';
+        popup.style.width = popupWidth + 'px';
+        popup.style.left = left + 'px';
+        popup.style.top = top + 'px';
+        popup.style.zIndex = '99999';
     }
-
-    if (left < 10) {
-        left = 10;
-    }
-
-    // Vertical position
-    let top;
-
-    // Agar upar jagah kam hai toh neeche kholo
-    if (rect.top < popupHeight + 50) {
-        top = rect.bottom + 8;
-    }
-    // Agar neeche jagah kam hai toh upar kholo
-    else if (
-        window.innerHeight - rect.bottom <
-        popupHeight
-    ) {
-        top = rect.top - popupHeight;
-    }
-    // Otherwise neeche kholo
-    else {
-        top = rect.bottom + 8;
-    }
-
-    popup.style.position = 'fixed';
-    popup.style.left = left + 'px';
-    popup.style.top = top + 'px';
-    popup.style.zIndex = '99999';
 }
 function closePopup(btn){
 
