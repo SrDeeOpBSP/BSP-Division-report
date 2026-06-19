@@ -1224,9 +1224,9 @@
         const OTHER_DUTY_ID = '1mtFaqe5gLIRYeC7wv6sj7DOv42mQvgDYd9EmV33P5yI';
         const OTHER_DUTY_NAME = 'OTHER DUTY';
 
-        // Add these constants
-          const DRIVE_SHEET_ID = '1oklGv3imlcw5IbMbDnVlv800fSqk0D_x3EazHb3UYqk';
-          const DRIVE_SHEET_NAME = 'Sheet1';
+        // Add/Update these constants
+        const DRIVE_SHEET_ID = '1EXYvdvs9OGwgXwvK_DmMpgFQ39nh-g5LWDk0-cZhl0A';
+        const DRIVE_SHEET_NAME = 'DRIVE_HISTORY';
 
           // Ongoing Drives Config
             const DRIVE_ONGOING_SHEET_ID = '1zCQeixFv7KQMSBjl5_-NqwyF5PPsDR6Hr0yeCOpVmtY';
@@ -2826,22 +2826,29 @@ function openPersonalDashboard(name, year, month) {
         }
     });
 
-    // 6. COUNSELLING
-    let cStats = { saf:0, spad:0, d1:0, d2:0, d3:0, d4:0 };
+// 6. COUNSELLING (Personal Dashboard Parsing updated for 9 values)
+    let cStats = { saf:0, spad:0, d1:0, d2:0, d3:0, d4:0, d5:0, d6:0, d7:0, d8:0, d9:0 };
     allData.forEach(r => {
         if(normalize(r[COLS.NAME])===targetName && r[COLS.DATE]?.startsWith(datePrefix)) {
             cStats.saf += safeInt(r[COLS_COUNS.SAFETY]);
             cStats.spad += safeInt(r[COLS_COUNS.SPAD_PREV]);
         }
     });
-    const K1="maximum speed for yy", K2="practical rs application", K3="winter and fog", K4="railway board safety";
+    
     if(driveData) driveData.forEach(r => {
-        if(r[3] && normalize(r[3])===targetName && r[0]) {
-            let p = r[0].split(' ')[0].split('-');
-            if(p.length===3 && p[2]==year && p[1]==month) {
-                let dn = r[5]?r[5].toLowerCase():"";
-                if(dn.includes(K1)) cStats.d1++; else if(dn.includes(K2)) cStats.d2++;
-                else if(dn.includes(K3)) cStats.d3++; else if(dn.includes(K4)) cStats.d4++;
+        if(r[5] && normalize(r[5])===targetName && r[3]) {
+            let parts = r[3].split(' ')[0].split('/');
+            if(parts.length===3 && parts[2]==year && parts[1]==month) {
+                let dn = r[4]?r[4].toLowerCase():"";
+                if(dn.includes("mandatory a9 & sa9")) cStats.d1++; 
+                else if(dn.includes("duties of crew during no tension")) cStats.d2++;
+                else if(dn.includes("fire prevention of electric")) cStats.d3++; 
+                else if(dn.includes("micro sleep counselling")) cStats.d4++;
+                else if(dn.includes("summer and mansoon")) cStats.d5++; // Fixed spelling mistake
+                else if(dn.includes("practical rs application")) cStats.d6++;
+                else if(dn.includes("mobile inspection for this")) cStats.d7++; 
+                else if(dn.includes("maximum speed for yy")) cStats.d8++;
+                else if(dn.includes("railway board safety drive counselling on spad")) cStats.d9++;
             }
         }
     });
@@ -2956,14 +2963,21 @@ function renderPersonalCharts(fp, amb, spm, insp, drv, couns) {
         }
     });
 
-    // 6. CREW COUNSELLING (Pie)
+// 6. CREW COUNSELLING (Doughnut/Pie layout optimized for 11 multi-colors)
     if(window.pdChartCouns instanceof Chart) window.pdChartCouns.destroy();
     window.pdChartCouns = new Chart(document.getElementById('pd-chart-couns'), {
-        type: 'pie', plugins: plugins,
+        type: 'doughnut', plugins: plugins,
         data: {
-            labels: ['Safety', 'SPAD', 'Max Spd', 'Prac RS', 'Winter', 'RB SPAD'],
-            datasets: [{ data: [couns.saf, couns.spad, couns.d1, couns.d2, couns.d3, couns.d4], backgroundColor: ['#00ff88', '#ff0055', '#008cff', '#ffce56', '#bc13fe', '#fff'], borderWidth: 0 }]
-        }, options: { ...commonOpt, scales: {}, plugins: { legend: { position:'right', labels:{color:'#fff', boxWidth:10} } } }
+            labels: ['Safety (Lobby)', 'SPAD Prev', 'A9/SA9', 'No Tension', 'Fire Prev', 'Micro Sleep', 'Summer/Mans', 'Prac RS', 'Mobile Insp', 'Max Speed', 'RB SPAD'],
+            datasets: [{ 
+                data: [couns.saf, couns.spad, couns.d1, couns.d2, couns.d3, couns.d4, couns.d5, couns.d6, couns.d7, couns.d8, couns.d9], 
+                backgroundColor: [
+                    '#00f2ff', '#bc13fe', '#ff0080', '#e0ff00', '#00ff88', '#ff8800', '#e0aaff', '#00b894', '#ff7675', '#74b9ff', '#fdcb10'
+                ], 
+                borderWidth: 0,
+                borderColor: '#040c18'
+            }]
+        }, options: { ...commonOpt, scales: {}, plugins: { legend: { position:'right', labels:{color:'#fff', boxWidth:8, font:{size:8}} } } }
     });
 }
 // --- COUNSELLING MODULE LOGIC ---
@@ -3025,16 +3039,15 @@ function generateCounsellingReport() {
 
     document.getElementById('couns-results').classList.remove('hidden');
 
-    // Stats Object
-    // 1=Safety(S), 2=SPAD Prev(Y), 3=Max Speed, 4=Prac RS App, 5=Winter, 6=RB SPAD
-    let stats = { safety:0, spadPrev:0, drive1:0, drive2:0, drive3:0, drive4:0 };
-    let cliMap = {}; // For Summary
+    // Stats Object with all 9 drive parameters initialized properly
+    let stats = { safety: 0, spadPrev: 0, drive1: 0, drive2: 0, drive3: 0, drive4: 0, drive5: 0, drive6: 0, drive7: 0, drive8: 0, drive9: 0 };
+    let cliMap = {}; 
 
-    // 1. Process Daily Report (Col S & Y)
     const datePrefix = `${year}-${month}`;
     const normalize = (str) => str ? str.toString().toLowerCase().replace(/[^a-z0-9]/g, '') : "";
     const targetName = normalize(nameInput);
 
+    // 1. Process Daily Report (Col S & Y)
     allData.forEach(row => {
         const rName = row[COLS.NAME] ? row[COLS.NAME].trim() : "Unknown";
         const rDate = row[COLS.DATE];
@@ -3046,81 +3059,93 @@ function generateCounsellingReport() {
                 const valSafety = safeInt(row[COLS_COUNS.SAFETY]);
                 const valSpad = safeInt(row[COLS_COUNS.SPAD_PREV]);
 
-                if(currentCounsMode === 'search') {
-                    stats.safety += valSafety;
-                    stats.spadPrev += valSpad;
-                } else {
-                    if(!cliMap[rName]) initCliMap(cliMap, rName, row[COLS.LOBBY]);
+                stats.safety += valSafety;
+                stats.spadPrev += valSpad;
+
+                if (currentCounsMode === 'summary') {
+                    if (!cliMap[rName]) initCliMap(cliMap, rName, row[COLS.LOBBY]);
                     cliMap[rName].safety += valSafety;
                     cliMap[rName].spadPrev += valSpad;
-                    stats.safety += valSafety;
-                    stats.spadPrev += valSpad;
                 }
             }
         }
     });
 
-    // 2. Process Drive Data (Sheet 2)
-    // Drive Name Keywords Updated
-    const D1_KEY = "maximum speed for yy";
-    const D2_KEY = "practical rs application"; // *** CHANGE HERE ***
-    const D3_KEY = "winter and fog";
-    const D4_KEY = "railway board safety drive counselling on spad";
+    /// 2. Process Drive Data (DRIVE_HISTORY)
+    const K1 = "mandatory a9 & sa9 application";
+    const K2 = "duties of crew during no tension";
+    const K3 = "fire prevention of electric";
+    const K4 = "micro sleep counselling";
+    const K5 = "summer and mansoon preparedness"; // 'mansoon' fixed with 'a' as per your sheet data
+    const K6 = "practical rs application during";
+    const K7 = "mobile inspection for this crew";
+    const K8 = "maximum speed for yy and y aspect";
+    const K9 = "railway board safety drive counselling on spad";
 
     driveData.forEach(row => {
-        const ts = row[0];
-        const rName = row[3] ? row[3].trim() : "Unknown";
-        const driveName = row[5] ? row[5].toLowerCase() : "";
+        const drvDateRaw = row[3]; 
+        const rName = row[5] ? row[5].trim() : "Unknown"; 
+        const driveName = row[4] ? row[4].toLowerCase() : ""; 
 
-        if (ts) {
-            let datePart = ts.split(' ')[0];
-            let parts = datePart.split('-');
+        if (drvDateRaw) {
+            let datePart = drvDateRaw.split(' ')[0];
+            let parts = datePart.split('/');
             if (parts.length === 3) {
-                let d = parts[0], m = parts[1], y = parts[2];
+                let d = parts[0], m = parts[1].padStart(2, '0'), y = parts[2];
                 
-                if (y === year && m === month) {
+                if (y === year && m === month.padStart(2, '0')) {
                     let isMatch = (currentCounsMode === 'summary') ? true : (normalize(rName) === targetName);
 
                     if (isMatch) {
-                        let d1=0, d2=0, d3=0, d4=0;
+                        let d1=0, d2=0, d3=0, d4=0, d5=0, d6=0, d7=0, d8=0, d9=0;
 
-                        if (driveName.includes(D1_KEY)) d1 = 1;
-                        else if (driveName.includes(D2_KEY)) d2 = 1; // Count for Practical RS App
-                        else if (driveName.includes(D3_KEY)) d3 = 1;
-                        else if (driveName.includes(D4_KEY)) d4 = 1;
+                        if (driveName.includes(K1)) d1 = 1;
+                        else if (driveName.includes(K2)) d2 = 1;
+                        else if (driveName.includes(K3)) d3 = 1;
+                        else if (driveName.includes(K4)) d4 = 1;
+                        else if (driveName.includes(K5)) d5 = 1; // dynamically matches sheet data
+                        else if (driveName.includes(K6)) d6 = 1;
+                        else if (driveName.includes(K7)) d7 = 1;
+                        else if (driveName.includes(K8)) d8 = 1;
+                        else if (driveName.includes(K9)) d9 = 1;
 
-                        if (currentCounsMode === 'search') {
-                            stats.drive1 += d1; stats.drive2 += d2; stats.drive3 += d3; stats.drive4 += d4;
-                        } else {
+                        stats.drive1 += d1; stats.drive2 += d2; stats.drive3 += d3; stats.drive4 += d4;
+                        stats.drive5 += d5; stats.drive6 += d6; stats.drive7 += d7; stats.drive8 += d8; stats.drive9 += d9;
+
+                        if (currentCounsMode === 'summary') {
                             if (!cliMap[rName]) initCliMap(cliMap, rName, "Unknown");
-                            cliMap[rName].drive1 += d1;
-                            cliMap[rName].drive2 += d2;
-                            cliMap[rName].drive3 += d3;
-                            cliMap[rName].drive4 += d4;
-                            
-                            stats.drive1 += d1; stats.drive2 += d2; stats.drive3 += d3; stats.drive4 += d4;
+                            cliMap[rName].drive1 += d1; cliMap[rName].drive2 += d2; cliMap[rName].drive3 += d3;
+                            cliMap[rName].drive4 += d4; cliMap[rName].drive5 += d5; cliMap[rName].drive6 += d6;
+                            cliMap[rName].drive7 += d7; cliMap[rName].drive8 += d8; cliMap[rName].drive9 += d9;
                         }
                     }
                 }
             }
         }
     });
-
-    // Render Outputs
     const title = (currentCounsMode === 'search') ? `${nameInput} (${month}/${year})` : `Counselling Summary (${month}/${year})`;
     renderCounsChart(stats, title);
     renderCounsSideTable(stats);
 
     if (currentCounsMode === 'summary') {
+        allData.forEach(r => {
+            const nameKey = r[COLS.NAME] ? r[COLS.NAME].trim() : "";
+            if(nameKey && cliMap[nameKey]) { cliMap[nameKey].lobby = r[COLS.LOBBY] || 'Unknown'; }
+        });
         renderCounsBottomTable(cliMap);
     } else {
         document.getElementById('couns-bottom-box').classList.add('hidden');
     }
 }
-
 // Helper to init map
+// Is block ko replace karein jisse saare properties initialize ho sakein
 function initCliMap(map, name, lobby) {
-    map[name] = { lobby: lobby || '-', safety:0, spadPrev:0, drive1:0, drive2:0, drive3:0, drive4:0 };
+    map[name] = { 
+        lobby: lobby || '-', 
+        safety: 0, 
+        spadPrev: 0, 
+        drive1: 0, drive2: 0, drive3: 0, drive4: 0, drive5: 0, drive6: 0, drive7: 0, drive8: 0, drive9: 0 
+    };
 }
 
 function renderCounsChart(s, title) {
@@ -3130,42 +3155,68 @@ function renderCounsChart(s, title) {
     counsChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
-            // *** LABEL CHANGED HERE ***
-            labels: ['Safety (Lobby)', 'SPAD Prev (Daily)', 'Max Speed (YY/Y)', 'Prac RS App', 'Winter/Fog', 'RB SPAD Drive'],
+            labels: ['Safety (Lobby)', 'SPAD Prev', 'A9/SA9', 'No Tension', 'Fire Prev', 'Micro Sleep', 'Summer/Mans', 'Prac RS', 'Mobile Insp', 'Max Speed', 'RB SPAD'],
             datasets: [{
                 label: 'Count/Sum',
-                data: [s.safety, s.spadPrev, s.drive1, s.drive2, s.drive3, s.drive4],
+                data: [s.safety, s.spadPrev, s.drive1, s.drive2, s.drive3, s.drive4, s.drive5, s.drive6, s.drive7, s.drive8, s.drive9],
                 backgroundColor: [
-                    'rgba(0, 255, 136, 0.7)',
-                    'rgba(255, 0, 85, 0.7)',
-                    'rgba(0, 140, 255, 0.7)',
-                    'rgba(255, 206, 86, 0.7)',
-                    'rgba(188, 19, 254, 0.7)',
-                    'rgba(255, 136, 0, 0.7)'
+                    'rgba(0, 242, 255, 0.7)',  // Neon Blue
+                    'rgba(188, 19, 254, 0.7)',  // Purple
+                    'rgba(255, 0, 128, 0.7)',   // Pink/Magenta
+                    'rgba(255, 255, 0, 0.7)',   // Yellow
+                    'rgba(0, 255, 136, 0.7)',   // Bright Green
+                    'rgba(255, 136, 0, 0.7)',   // Orange
+                    'rgba(224, 170, 255, 0.9)', // Light Violet
+                    'rgba(0, 184, 148, 0.7)',   // Mint Green
+                    'rgba(255, 118, 117, 0.7)', // Coral Red
+                    'rgba(116, 185, 255, 0.7)', // Light Blue
+                    'rgba(253, 203, 110, 0.7)'  // Pastel Amber
                 ],
-                borderColor: '#fff', borderWidth: 1
+                borderColor: '#fff', 
+                borderWidth: 1,
+                borderRadius: 4
             }]
         },
         options: {
             responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false }, title: { display: true, text: title, color: '#fff', font: { size: 16 } } },
-            scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' } } }
+            plugins: { 
+                legend: { display: false }, 
+                title: { display: true, text: title, color: '#fff', font: { size: 16 } } 
+            },
+            scales: { 
+                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a0aab8' } },
+                x: { grid: { display: false }, ticks: { color: '#fff', font: { size: 10 } } }
+            }
         }
     });
 }
 
 function renderCounsSideTable(s) {
-    const total = s.safety + s.spadPrev + s.drive1 + s.drive2 + s.drive3 + s.drive4;
+    const total = s.safety + s.spadPrev + s.drive1 + s.drive2 + s.drive3 + s.drive4 + s.drive5 + s.drive6 + s.drive7 + s.drive8 + s.drive9;
     const html = `
         <table class="summary-card-table">
-            <thead><tr><th>COUNSELLING TYPE</th><th>COUNT</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>COUNSELLING TYPE</th>
+                    <th style="text-align:right; padding-right:25px;">COUNT</th>
+                </tr>
+            </thead>
             <tbody>
                 <tr><td>Safety (Lobby) (Sum)</td><td>${s.safety}</td></tr>
                 <tr><td>SPAD Prevention (Sum)</td><td>${s.spadPrev}</td></tr>
-                <tr><td>Max Speed YY/Y (Count)</td><td>${s.drive1}</td></tr>
-                <tr><td>Practical RS App (Count)</td><td>${s.drive2}</td></tr> <tr><td>Winter & Fog (Count)</td><td>${s.drive3}</td></tr>
-                <tr><td>RB SPAD Drive (Count)</td><td>${s.drive4}</td></tr>
-                <tr style="font-weight:bold; color:var(--neon-blue)"><td>TOTAL</td><td>${total}</td></tr>
+                <tr><td>A9 & SA9 Application at Halt</td><td>${s.drive1}</td></tr>
+                <tr><td>No Tension on run</td><td>${s.drive2}</td></tr> 
+                <tr><td>Fire Prevention Drive</td><td>${s.drive3}</td></tr>
+                <tr><td>Micro Sleep Counselling</td><td>${s.drive4}</td></tr>
+                <tr><td>Summer & Monsoon Drive</td><td>${s.drive5}</td></tr>
+                <tr><td>Practical RS Application</td><td>${s.drive6}</td></tr>
+                <tr><td>Mobile Inspection Crew</td><td>${s.drive7}</td></tr>
+                <tr><td>Max Speed YY/Y aspect</td><td>${s.drive8}</td></tr>
+                <tr><td>RB SPAD Drive</td><td>${s.drive9}</td></tr>
+                <tr style="font-weight:bold; color:var(--neon-blue); border-top:2px solid rgba(255,255,255,0.1);">
+                    <td>TOTAL</td>
+                    <td>${total}</td>
+                </tr>
             </tbody>
         </table>`;
     document.getElementById('couns-side-data').innerHTML = html;
@@ -3175,23 +3226,29 @@ function renderCounsBottomTable(map) {
     document.getElementById('couns-bottom-box').classList.remove('hidden');
     let rows = '';
     Object.entries(map).sort((a,b) => a[0].localeCompare(b[0])).forEach(([name, d]) => {
-        const t = d.safety + d.spadPrev + d.drive1 + d.drive2 + d.drive3 + d.drive4;
+        const t = d.safety + d.spadPrev + d.drive1 + d.drive2 + d.drive3 + d.drive4 + d.drive5 + d.drive6 + d.drive7 + d.drive8 + d.drive9;
         rows += `
             <tr>
                 <td>${name}</td><td>${d.lobby}</td>
                 <td>${d.safety}</td><td>${d.spadPrev}</td>
-                <td>${d.drive1}</td><td>${d.drive2}</td><td>${d.drive3}</td><td>${d.drive4}</td>
+                <td>${d.drive1}</td><td>${d.drive2}</td><td>${d.drive3}</td><td>${d.drive4}</td><td>${d.drive5}</td><td>${d.drive6}</td><td>${d.drive7}</td><td>${d.drive8}</td><td>${d.drive9}</td>
                 <td style="font-weight:bold; color:var(--neon-blue)">${t}</td>
             </tr>`;
     });
     
     document.getElementById('couns-bottom-data').innerHTML = `
-        <table class="summary-card-table">
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+            <button class="action-btn" style="padding: 8px 15px; font-size: 0.8rem; background: linear-gradient(45deg, #00b894, #00ff88); color: #000; border-radius: 20px;" onclick="downloadCounsExcel()">
+                <i class="fas fa-file-csv"></i> DOWNLOAD EXCEL
+            </button>
+        </div>
+        <table class="summary-card-table" id="couns-export-table">
             <thead>
                 <tr>
                     <th>CLI NAME</th><th>LOBBY</th>
                     <th>SAFETY</th><th>SPAD PREV</th>
-                    <th>MAX SPD</th><th>PRAC RS</th><th>WINTER</th><th>RB SPAD</th> <th>TOTAL</th>
+                    <th>A9/SA9</th><th>NO TENSION</th><th>FIRE PREV</th><th>MICRO SLEEP</th><th>SUM/MANS</th><th>PRAC RS</th><th>MOBILE INSP</th><th>MAX SPEED</th><th>RB SPAD</th>
+                    <th>TOTAL</th>
                 </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -4117,6 +4174,29 @@ function showOverdueCrewModal(mapKey, cliName, desg) {
     document.querySelector('.date-modal-content').style.width = '600px'; 
     document.querySelector('.date-modal-content').style.maxWidth = '90vw';
     document.getElementById('date-details-modal').style.display = 'flex';
+}
+function downloadCounsExcel() {
+    let table = document.getElementById("couns-export-table");
+    if (!table) return;
+    let csv = [];
+    let rows = table.querySelectorAll("tr");
+    for (let i = 0; i < rows.length; i++) {
+        let row = [], cols = rows[i].querySelectorAll("td, th");
+        for (let j = 0; j < cols.length; j++) {
+            let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+            data = data.replace(/"/g, '""');
+            row.push('"' + data + '"');
+        }
+        csv.push(row.join(","));
+    }
+    let csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+    let downloadLink = document.createElement("a");
+    downloadLink.download = "Crew_Counselling_Report.csv";
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
 }
 </script>
     </script>
