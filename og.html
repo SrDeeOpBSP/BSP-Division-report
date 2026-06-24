@@ -25,13 +25,13 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
         /* Tables for Matrix */
-.table-container {
-    width: 100%;
-    overflow-x: auto;
-    overflow-y: auto;
-    border-radius: 0.75rem;
-    border: 1px solid #e2e8f0;
-}
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: auto;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+        }
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         th { background: #f1f5f9; color: #475569; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 1rem; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
         td { padding: 0.75rem; border-bottom: 1px solid #f1f5f9; background: #ffffff; font-size: 0.85rem; white-space: nowrap; color: #334155; }
@@ -43,24 +43,23 @@
         
         /* Matrix Popup */
         .drive-popup {
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.18);
-    border-radius: 12px;
-    animation: scaleIn 0.2s ease;
-    z-index: 9999;
-}
-.drive-popup{
-    resize: both;
-    overflow: auto;
-    min-width: 350px;
-    min-height: 250px;
-    max-width: 90vw;
-    max-height: 80vh;
-}
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.18);
+            border-radius: 12px;
+            animation: scaleIn 0.2s ease;
+            z-index: 9999;
+        }
+        .drive-popup{
+            resize: both;
+            overflow: auto;
+            min-width: 350px;
+            min-height: 250px;
+            max-width: 90vw;
+            max-height: 80vh;
+        }
         @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-        /* Form Inputs */
         .modern-input { width: 100%; padding: 0.65rem 1rem; border-radius: 0.5rem; background: #f8fafc; border: 1px solid #cbd5e1; color: #1e293b; font-size: 0.85rem; transition: all 0.2s; }
         .modern-input:focus { border-color: #3b82f6; background: #ffffff; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); outline: none; }
         .modern-input[readonly] { background: #e2e8f0; color: #64748b; cursor: not-allowed; border-color: #cbd5e1; }
@@ -79,15 +78,24 @@
         .btn-pdf { background: linear-gradient(45deg, #f59e0b, #d97706); }
         .btn-link:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-        /* Toast */
-        .toast-card { background: #ffffff; border-left: 4px solid #3b82f6; color: #1e293b; border-radius: 0.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); animation: slideIn 0.3s ease forwards; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;}
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        /* Center Modal Validation Style Alert */
+        .center-alert-card {
+            background: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            max-width: 420px;
+            width: 90vw;
+            border: 1px solid #e2e8f0;
+        }
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div class="ambient-bg"></div>
-<div id="toastContainer" class="fixed bottom-6 right-6 z-[99999] flex flex-col gap-3"></div>
+
+<div id="centerAlertContainer" class="fixed inset-0 z-[999999] hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4"></div>
 
 <div class="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
     <header class="clean-card p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -127,478 +135,490 @@
                 <span class="font-bold text-slate-700 text-lg">1. DAILY REPORT's & ABNORMALITIES</span>
             </label>
             <div id="sec_ab" class="section-body hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                <!-- FOOTPLATE ENTRIES -->
-<div class="lg:col-span-3 mt-4">
-    <h3 class="font-bold text-xl text-blue-700 border-b-2 border-blue-300 pb-2">
-        FOOTPLATE ENTRIES
-    </h3>
-</div>
-
-<div>
-    <label class="modern-label">ANY FOOTPLATE DONE AS PER TLC</label>
-    <select data-name="ANY FOOTPLATE DONE AS PER TLC" class="modern-input req-ab">
-        <option value="" disabled selected>Select</option>
-        <option value="YES">YES</option>
-        <option value="NO">NO</option>
-    </select>
-</div>
-
-<div>
-    <label class="modern-label">FOOTPLATE DURING WEE HOURS</label>
-    <input type="number" data-name="FOOTPLATE DURING WEE HOURS" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITIES ON FOOTPLATE DURING WEE HOURS</label>
-    <input type="number" data-name="ABNORMALITIES ON FOOTPLATE DURING WEE HOURS" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">FOOTPLATE DURING NIGHT HOURS</label>
-    <input type="number" data-name="FOOTPLATE DURING NIGHT HOURS" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITIES ON FOOTPLATE DURING NIGHT HOURS</label>
-    <input type="number" data-name="ABNORMALITIES ON FOOTPLATE DURING NIGHT HOURS" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">FOOTPLATE EXCLUDING WEE HOURS</label>
-    <input type="number" data-name="FOOTPLATE EXCLUDING WEE HOURS" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITIES ON FOOTPLATE EXCLUDING WEE HOURS</label>
-    <input type="number" data-name="ABNORMALITIES ON FOOTPLATE EXCLUDING WEE HOURS" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">FOOT PLATE DONE IN COACHING</label>
-    <input type="number" data-name="FOOT PLATE DONE IN COACHING" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITY COUNT DURING FOOTPLATE IN COACHING</label>
-    <input type="number" id="abCoachingCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN COACHING" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITY DETAIL DURING FOOTPLATE IN COACHING</label>
-    <textarea id="abCoachingDetail" data-name="ABNORMALITY DETAIL DURING FOOTPLATE IN COACHING" class="modern-input">NIL</textarea>
-</div>
-
-<div>
-    <label class="modern-label">FOOT PLATE DONE IN MEMU</label>
-    <input type="number" data-name="FOOT PLATE DONE IN MEMU" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITY COUNT DURING FOOTPLATE IN MEMU</label>
-    <input type="number" id="abMemuCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN MEMU" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITY DETAIL DURING FOOTPLATE IN MEMU</label>
-    <textarea id="abMemuDetail" data-name="ABNORMALITY DETAIL DURING FOOTPLATE IN MEMU" class="modern-input">NIL</textarea>
-</div>
-
-<div>
-    <label class="modern-label">FOOT PLATE DONE IN GOODS TRAIN</label>
-    <input type="number" data-name="FOOT PLATE DONE IN GOODS TRAIN" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN</label>
-    <input type="number" id="abGoodsCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN</label>
-    <textarea id="abGoodsDetail" data-name="ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN" class="modern-input">NIL</textarea>
-</div>
-
-<div>
-    <label class="modern-label">FOOTPLATE DONE WITH GROUP LP ON DATE</label>
-    <input type="number" data-name="FOOTPLATE DONE WITH GROUP LP ON DATE" value="0" min="0" class="modern-input">
-</div>
-
-<div>
-    <label class="modern-label">FOOTPLATE DONE WITH GROUP ALP ON DATE</label>
-    <input type="number" data-name="FOOTPLATE DONE WITH GROUP ALP ON DATE" value="0" min="0" class="modern-input">
-</div>
-
-<div>
-    <label class="modern-label">FOOTPLATE DONE WITH GROUP LPS ON DATE</label>
-    <input type="number" data-name="FOOTPLATE DONE WITH GROUP LPS ON DATE" value="0" min="0" class="modern-input">
-</div>
-
-<div>
-    <label class="modern-label">SPECIAL FOOTPLATE(IMPROVING DRIVING/BRAKING TECHNIQUES LIKE HANDLING)</label>
-    <input type="number" data-name="SPECIAL FOOTPLATE(IMPROVING DRIVING/BRAKING TECHNIQUES LIKE HANDLING)" value="0" min="0" class="modern-input req-ab">
-</div>
-<!-- AMBUSH ENTRIES -->
-<!-- AMBUSH ENTRIES -->
-<div class="lg:col-span-3 mt-6">
-    <h3 class="font-bold text-xl text-red-700 border-b-2 border-red-300 pb-2">
-        AMBUSH ENTRIES
-    </h3>
-</div>
-
-<!-- SPECIAL DRIVE HIGH-LIGHTED SECTION (TOP OF AMBUSH) -->
-<div class="lg:col-span-3 mt-2">
-    <h4 class="font-black text-sm text-white bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 px-4 py-2.5 rounded-lg shadow-lg tracking-wide uppercase border border-pink-400 animate-bounce">
-        🚨 CRITICAL DRIVE: A-9 & SA-9 APPLICATION AMBUSH AT HALT (16-06-2026 TO 30-06-2026)
-    </h4>
-</div>
-
-<div>
-    <label class="modern-label font-extrabold text-pink-600">A-9 & SA-9 Application Ambush at Halt (No of Trains)</label>
-    <input type="number" data-name="A-9 & SA-9 Application Ambush at Halt (No of Trains)" value="0" min="0" class="modern-input req-ab border-pink-400 focus:border-pink-600 bg-pink-50/30 font-bold">
-</div>
-
-<div>
-    <label class="modern-label font-extrabold text-pink-600">Abnormalities found on A-9 & SA-9 Application Ambush Drive</label>
-    <input type="number" data-name="Abnormalities found on A-9 & SA-9 Application Ambush Drive" value="0" min="0" class="modern-input req-ab border-pink-400 focus:border-pink-600 bg-pink-50/30 font-bold">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label font-extrabold text-pink-600">Abnormalities Detail on A-9 & SA-9 Application Ambush Drive</label>
-    <textarea data-name="Abnormalities Detail on A-9 & SA-9 Application Ambush Drive" class="modern-input border-pink-400 focus:border-pink-600 bg-pink-50/30 font-semibold">NIL</textarea>
-</div>
-
-<div class="lg:col-span-3 border-b border-dashed border-pink-300 my-2"></div>
-
-<!-- AUTO AMBUSH -->
-<div>
-    <label class="modern-label">AUTO AMBUSH (NO OF TRAINS)</label>
-    <input type="number" data-name="AUTO AMBUSH (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITIES ON AUTO AMBUSH</label>
-    <input type="number" data-name="ABNORMALITIES ON AUTO AMBUSH" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITIES DETAIL ON AUTO AMBUSH</label>
-    <textarea data-name="ABNORMALITIES DETAIL ON AUTO AMBUSH" class="modern-input">NIL</textarea>
-</div>
-
-<!-- IB AMBUSH -->
-<div>
-    <label class="modern-label">IB AMBUSH (NO OF TRAINS)</label>
-    <input type="number" data-name="IB AMBUSH (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITIES ON IB AMBUSH</label>
-    <input type="number" data-name="ABNORMALITIES ON IB AMBUSH" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITIES DETAIL ON IB AMBUSH</label>
-    <textarea data-name="ABNORMALITIES DETAIL ON IB AMBUSH" class="modern-input">NIL</textarea>
-</div>
-
-<!-- LEVEL CROSSING -->
-<div>
-    <label class="modern-label">LEVEL CROSSING AMBUSH(NO OF TRAINS)</label>
-    <input type="number" data-name="LEVEL CROSSING AMBUSH(NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITIES ON LEVEL CROSSING AMBUSH</label>
-    <input type="number" data-name="ABNORMALITIES ON LEVEL CROSSING AMBUSH" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITIES DETAIL ON LEVEL CROSSING AMBUSH</label>
-    <textarea data-name="ABNORMALITIES DETAIL ON LEVEL CROSSING AMBUSH" class="modern-input">NIL</textarea>
-</div>
-
-<!-- CD ZONES -->
-<div>
-    <label class="modern-label">CD ZONES AMBUSH(NO OF TRAINS)</label>
-    <input type="number" data-name="CD ZONES AMBUSH(NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNBORMALITIES ON CD ZONES AMBUSH</label>
-    <input type="number" data-name="ABNBORMALITIES ON CD ZONES AMBUSH" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITIES DETAIL ON CD ZONES AMBUSH</label>
-    <textarea data-name="ABNORMALITIES DETAIL ON CD ZONES AMBUSH" class="modern-input">NIL</textarea>
-</div>
-
-<!-- BA AMBUSH -->
-<div>
-    <label class="modern-label">BA AMBUSH(NO OF CREWS)</label>
-    <input type="number" data-name="BA AMBUSH(NO OF CREWS)" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITIES ON BA AMBUSH</label>
-    <input type="number" data-name="ABNORMALITIES ON BA AMBUSH" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITIES DETAIL ON BA AMBUSH</label>
-    <textarea data-name="ABNORMALITIES DETAIL ON BA AMBUSH" class="modern-input">NIL</textarea>
-</div>
-
-<!-- BPT/BFT -->
-<div>
-    <label class="modern-label">BPT/BFT AMBUSH (NO OF TRAINS)</label>
-    <input type="number" data-name="BPT/BFT AMBUSH (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITIES ON BPT/BFT AMBUSH</label>
-    <input type="number" data-name="ABNORMALITIES ON BPT/BFT AMBUSH" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITIES DETAIL ON BPT/BFT AMBUSH</label>
-    <textarea data-name="ABNORMALITIES DETAIL ON BPT/BFT AMBUSH" class="modern-input">NIL</textarea>
-</div>
-
-<!-- BPC -->
-<div>
-    <label class="modern-label">BPC AMBUSH (NO OF TRAINS)</label>
-    <input type="number" data-name="BPC AMBUSH (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITIES ON BPC AMBUSH</label>
-    <input type="number" data-name="ABNORMALITIES ON BPC AMBUSH" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITIES DETAIL ON BPC AMBUSH</label>
-    <textarea data-name="ABNORMALITIES DETAIL ON BPC AMBUSH" class="modern-input">NIL</textarea>
-</div>
-
-<!-- SPEED GUN -->
-<div>
-    <label class="modern-label">SPEED GUN CHECKING AUTO AT ON (NO OF TRAINS)</label>
-    <input type="number" data-name="SPEED GUN CHECKING AUTO AT ON (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITIES ON SPEED GUN CHECKING AUTO AT ON</label>
-    <input type="number" data-name="ABNORMALITIES ON SPEED GUN CHECKING AUTO AT ON" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITIES DETAIL ON SPEED GUN CHECKING AUTO AT ON</label>
-    <textarea data-name="ABNORMALITIES DETAIL ON SPEED GUN CHECKING AUTO AT ON" class="modern-input">NIL</textarea>
-</div>                
-
-<div>
-    <label class="modern-label">SPEED GUN CHECKING PASSING AT YELLOW (NO OF TRAINS)</label>
-    <input type="number" data-name="SPEED GUN CHECKING PASSING AT YELLOW (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITIES ON SPEED GUN CHECKING PASSING AT YELLOW</label>
-    <input type="number" data-name="ABNORMALITIES ON SPEED GUN CHECKING PASSING AT YELLOW" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITIES DETAIL ON SPEED GUN CHECKING PASSING AT YELLOW</label>
-    <textarea data-name="ABNORMALITIES DETAIL ON SPEED GUN CHECKING PASSING AT YELLOW" class="modern-input">NIL</textarea>
-</div>     
-                
-<!-- FSD -->
-<div>
-    <label class="modern-label">FSD ROUTE SETTING AMBUSH (NO OF CREW)</label>
-    <input type="number" data-name="FSD ROUTE SETTING AMBUSH (NO OF CREW)" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABN ON FSD ROUTE SETTING AMBUSH</label>
-    <input type="number" data-name="ABN ON FSD ROUTE SETTING AMBUSH" value="0" min="0" class="modern-input req-ab">
-</div>
-                
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITIES DETAIL ON FSD ROUTE SETTING AMBUSH</label>
-    <textarea data-name="ABNORMALITIES DETAIL ON FSD ROUTE SETTING AMBUSH" class="modern-input">NIL</textarea>
-</div> 
-<!-- SHUNTING -->
-<div>
-    <label class="modern-label">SHUNTING AMBUSH (NO OF TRAINS)</label>
-    <input type="number" data-name="SHUNTING AMBUSH (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITY ON SHUNTING AMBUSH</label>
-    <input type="number" data-name="ABNORMALITY ON SHUNTING AMBUSH" value="0" min="0" class="modern-input req-ab">
-</div>
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITIES DETAIL ON SHUNTING AMBUSH</label>
-    <textarea data-name="ABNORMALITIES DETAIL ON SHUNTING AMBUSH" class="modern-input">NIL</textarea>
-</div> 
-<!-- CREW MOBILE -->
-<div>
-    <label class="modern-label">CREW MOBILE AMBUSH</label>
-    <input type="number" data-name="CREW MOBILE AMBUSH" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITY ON CREW MOBILE AMBUSH</label>
-    <input type="number" data-name="ABNORMALITY ON CREW MOBILE AMBUSH" value="0" min="0" class="modern-input req-ab">
-</div>
- <div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITIES DETAIL ON CREW MOBILE AMBUSH</label>
-    <textarea data-name="ABNORMALITIES DETAIL ON CREW MOBILE AMBUSH" class="modern-input">NIL</textarea>
-</div>                
-   <!-- COUNSELLING ENTRIES -->
-<div class="lg:col-span-3 mt-6">
-    <h3 class="font-bold text-xl text-green-700 border-b-2 border-green-300 pb-2">
-        COUNSELLING ENTRIES
-    </h3>
-</div>
-
-<div>
-    <label class="modern-label">COUNCELLING AT LOBBY CONCERNED TO SAFETY(NO OF CREWS)</label>
-    <input type="number" data-name="COUNCELLING AT LOBBY CONCERNED TO SAFETY(NO OF CREWS)" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">SHUNTING PROCEDURE & RULES INVOLVED AS PER GR 5.13</label>
-    <input type="number" data-name="SHUNTING PROCEDURE & RULES INVOLVED AS PER GR 5.13" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">COUNSELLING FOR SPAD PREVENTION</label>
-    <input type="number" data-name="COUNSELLING FOR SPAD PREVENTION" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">LONG HOURS DUTY OF CREW</label>
-    <input type="number" data-name="LONG HOURS DUTY OF CREW" value="0" min="0" class="modern-input req-ab">
-</div>             
-<!-- INSPECTION & SEMINAR ENTRIES -->
-<div class="lg:col-span-3 mt-6">
-    <h3 class="font-bold text-xl text-purple-700 border-b-2 border-purple-300 pb-2">
-        INSPECTION & SEMINAR ENTRIES
-    </h3>
-</div>
-
-<div>
-    <label class="modern-label">FAMILY SEMINAR</label>
-    <input type="number" data-name="FAMILY SEMINAR" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">SAFETY SEMINAR</label>
-    <input type="number" data-name="SAFETY SEMINAR" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<!-- COACHING CLEANLINESS -->
-
-<div>
-    <label class="modern-label">COACHING CLEANLINESS INSPECTION</label>
-    <input type="number" data-name="COACHING CLEANLINESS INSPECTION" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITIES ON COACHING CLEANLINESS INSPECTION</label>
-    <input type="number" data-name="ABNORMALITIES ON COACHING CLEANLINESS INSPECTION" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITY DETAIL DURING COACHING CLEANLINESS INSPECTION</label>
-    <textarea data-name="ABNORMALITY DETAIL DURING COACHING CLEANLINESS INSPECTION" class="modern-input">NIL</textarea>
-</div>
-
-<!-- NIGHT STABLING -->
-
-<div>
-    <label class="modern-label">NIGHT STABLING INSPECTION</label>
-    <input type="number" data-name="NIGHT STABLING INSPECTION" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITIES ON NIGHT STABLING INSPECTION</label>
-    <input type="number" data-name="ABNORMALITIES ON NIGHT STABLING INSPECTION" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITY DETAIL DURING NIGHT STABLING INSPECTION</label>
-    <textarea data-name="ABNORMALITY DETAIL DURING NIGHT STABLING INSPECTION" class="modern-input">NIL</textarea>
-</div>
-
-<!-- STABLE LOAD -->
-
-<div>
-    <label class="modern-label">STABLE LOAD INSPECTION</label>
-    <input type="number" data-name="STABLE LOAD INSPECTION" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITIES ON STABLE LOAD INSPECTION</label>
-    <input type="number" data-name="ABNORMALITIES ON STABLE LOAD INSPECTION" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITY DETAIL DURING STABLE LOAD INSPECTION</label>
-    <textarea data-name="ABNORMALITY DETAIL DURING STABLE LOAD INSPECTION" class="modern-input">NIL</textarea>
-</div>
-
-<!-- SAND GOOMTY -->
-
-<div>
-    <label class="modern-label">SAND GOOMTY INSPECTION</label>
-    <input type="number" data-name="SAND GOOMTY INSPECTION" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITIES ON SAND GOOMTY INSPECTION</label>
-    <input type="number" data-name="ABNORMALITIES ON SAND GOOMTY INSPECTION" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITY DETAIL DURING SAND GOOMTY INSPECTION</label>
-    <textarea data-name="ABNORMALITY DETAIL DURING SAND GOOMTY INSPECTION" class="modern-input">NIL</textarea>
-</div>
-
-<!-- RUNNING ROOM -->
-
-<div>
-    <label class="modern-label">RUNNING ROOM INSPECTION</label>
-    <input type="number" data-name="RUNNING ROOM INSPECTION" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITIES ON RUNNING ROOM INSPECTION</label>
-    <input type="number" data-name="ABNORMALITIES ON RUNNING ROOM INSPECTION" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITY DETAIL DURING RUNNING ROOM INSPECTION</label>
-    <textarea data-name="ABNORMALITY DETAIL DURING RUNNING ROOM INSPECTION" class="modern-input">NIL</textarea>
-</div>
-
-<!-- LOBBY -->
-
-<div>
-    <label class="modern-label">LOBBY INSPECTION</label>
-    <input type="number" data-name="LOBBY INSPECTION" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div>
-    <label class="modern-label">ABNORMALITIES ON LOBBY INSPECTION</label>
-    <input type="number" data-name="ABNORMALITIES ON LOBBY INSPECTION" value="0" min="0" class="modern-input req-ab">
-</div>
-
-<div class="lg:col-span-2">
-    <label class="modern-label">ABNORMALITY DETAIL DURING LOBBY INSPECTION</label>
-    <textarea data-name="ABNORMALITY DETAIL DURING LOBBY INSPECTION" class="modern-input">NIL</textarea>
-</div>
+                <div class="lg:col-span-3 mt-4">
+                    <h3 class="font-bold text-xl text-blue-700 border-b-2 border-blue-300 pb-2">
+                        FOOTPLATE ENTRIES
+                    </h3>
+                </div>
+
+                <div>
+                    <label class="modern-label">ANY FOOTPLATE DONE AS PER TLC</label>
+                    <select data-name="ANY FOOTPLATE DONE AS PER TLC" class="modern-input req-ab">
+                        <option value="" disabled selected>Select</option>
+                        <option value="YES">YES</option>
+                        <option value="NO">NO</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="modern-label">FOOTPLATE DURING WEE HOURS</label>
+                    <input type="number" id="fpWeeHours" data-name="FOOTPLATE DURING WEE HOURS" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITIES ON FOOTPLATE DURING WEE HOURS</label>
+                    <input type="number" id="abWeeHours" data-name="ABNORMALITIES ON FOOTPLATE DURING WEE HOURS" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">FOOTPLATE DURING NIGHT HOURS</label>
+                    <input type="number" id="fpNightHours" data-name="FOOTPLATE DURING NIGHT HOURS" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITIES ON FOOTPLATE DURING NIGHT HOURS</label>
+                    <input type="number" id="abNightHours" data-name="ABNORMALITIES ON FOOTPLATE DURING NIGHT HOURS" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">FOOTPLATE EXCLUDING WEE HOURS</label>
+                    <input type="number" id="fpExcludingWee" data-name="FOOTPLATE EXCLUDING WEE HOURS" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITIES ON FOOTPLATE EXCLUDING WEE HOURS</label>
+                    <input type="number" id="abExcludingWee" data-name="ABNORMALITIES ON FOOTPLATE EXCLUDING WEE HOURS" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">FOOT PLATE DONE IN COACHING</label>
+                    <input type="number" id="fpCoaching" data-name="FOOT PLATE DONE IN COACHING" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITY COUNT DURING FOOTPLATE IN COACHING</label>
+                    <input type="number" id="abCoachingCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN COACHING" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abCoachingCount', 'coachingRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITY DETAIL DURING FOOTPLATE IN COACHING</label>
+                    <div id="coachingRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="modern-label">FOOT PLATE DONE IN MEMU</label>
+                    <input type="number" id="fpMemu" data-name="FOOT PLATE DONE IN MEMU" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITY COUNT DURING FOOTPLATE IN MEMU</label>
+                    <input type="number" id="abMemuCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN MEMU" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abMemuCount', 'memuRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITY DETAIL DURING FOOTPLATE IN MEMU</label>
+                    <div id="memuRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="modern-label">FOOT PLATE DONE IN GOODS TRAIN</label>
+                    <input type="number" id="fpGoods" data-name="FOOT PLATE DONE IN GOODS TRAIN" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN</label>
+                    <input type="number" id="abGoodsCount" data-name="ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abGoodsCount', 'goodsRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN</label>
+                    <div id="goodsRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="modern-label">FOOTPLATE DONE WITH GROUP LP ON DATE</label>
+                    <input type="number" data-name="FOOTPLATE DONE WITH GROUP LP ON DATE" value="0" min="0" class="modern-input">
+                </div>
+
+                <div>
+                    <label class="modern-label">FOOTPLATE DONE WITH GROUP ALP ON DATE</label>
+                    <input type="number" data-name="FOOTPLATE DONE WITH GROUP ALP ON DATE" value="0" min="0" class="modern-input">
+                </div>
+
+                <div>
+                    <label class="modern-label">FOOTPLATE DONE WITH GROUP LPS ON DATE</label>
+                    <input type="number" data-name="FOOTPLATE DONE WITH GROUP LPS ON DATE" value="0" min="0" class="modern-input">
+                </div>
+
+                <div>
+                    <label class="modern-label">SPECIAL FOOTPLATE(IMPROVING DRIVING/BRAKING TECHNIQUES LIKE HANDLING)</label>
+                    <input type="number" data-name="SPECIAL FOOTPLATE(IMPROVING DRIVING/BRAKING TECHNIQUES LIKE HANDLING)" value="0" min="0" class="modern-input req-ab">
+                </div>
+                <div class="lg:col-span-3 mt-6">
+                    <h3 class="font-bold text-xl text-red-700 border-b-2 border-red-300 pb-2">
+                        AMBUSH ENTRIES
+                    </h3>
+                </div>
+
+                <div class="lg:col-span-3 mt-2">
+                    <h4 class="font-black text-sm text-white bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 px-4 py-2.5 rounded-lg shadow-lg tracking-wide uppercase border border-pink-400 animate-bounce">
+                        🚨 CRITICAL DRIVE: A-9 & SA-9 APPLICATION AMBUSH AT HALT (16-06-2026 TO 30-06-2026)
+                    </h4>
+                </div>
+
+                <div>
+                    <label class="modern-label font-extrabold text-pink-600">A-9 & SA-9 Application Ambush at Halt (No of Trains)</label>
+                    <input type="number" data-name="A-9 & SA-9 Application Ambush at Halt (No of Trains)" value="0" min="0" class="modern-input req-ab border-pink-400 focus:border-pink-600 bg-pink-50/30 font-bold">
+                </div>
+
+                <div>
+                    <label class="modern-label font-extrabold text-pink-600">Abnormalities found on A-9 & SA-9 Application Ambush Drive</label>
+                    <input type="number" id="abAmbushDriveCount" data-name="Abnormalities found on A-9 & SA-9 Application Ambush Drive" value="0" min="0" class="modern-input req-ab border-pink-400 focus:border-pink-600 bg-pink-50/30 font-bold" oninput="generateDynamicRows('abAmbushDriveCount', 'ambushDriveRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label font-extrabold text-pink-600">Abnormalities Detail on A-9 & SA-9 Application Ambush Drive</label>
+                    <div id="ambushDriveRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input border-pink-400 focus:border-pink-600 bg-pink-50/30 font-semibold" value="NIL" readonly>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-3 border-b border-dashed border-pink-300 my-2"></div>
+
+                <div>
+                    <label class="modern-label">AUTO AMBUSH (NO OF TRAINS)</label>
+                    <input type="number" data-name="AUTO AMBUSH (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITIES ON AUTO AMBUSH</label>
+                    <input type="number" id="abAutoAmbushCount" data-name="ABNORMALITIES ON AUTO AMBUSH" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abAutoAmbushCount', 'autoAmbushRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITIES DETAIL ON AUTO AMBUSH</label>
+                    <div id="autoAmbushRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="modern-label">IB AMBUSH (NO OF TRAINS)</label>
+                    <input type="number" data-name="IB AMBUSH (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITIES ON IB AMBUSH</label>
+                    <input type="number" id="abIbAmbushCount" data-name="ABNORMALITIES ON IB AMBUSH" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abIbAmbushCount', 'ibAmbushRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITIES DETAIL ON IB AMBUSH</label>
+                    <div id="ibAmbushRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="modern-label">LEVEL CROSSING AMBUSH(NO OF TRAINS)</label>
+                    <input type="number" data-name="LEVEL CROSSING AMBUSH(NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITIES ON LEVEL CROSSING AMBUSH</label>
+                    <input type="number" id="abLcAmbushCount" data-name="ABNORMALITIES ON LEVEL CROSSING AMBUSH" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abLcAmbushCount', 'lcAmbushRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITIES DETAIL ON LEVEL CROSSING AMBUSH</label>
+                    <div id="lcAmbushRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="modern-label">CD ZONES AMBUSH(NO OF TRAINS)</label>
+                    <input type="number" data-name="CD ZONES AMBUSH(NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNBORMALITIES ON CD ZONES AMBUSH</label>
+                    <input type="number" id="abCdAmbushCount" data-name="ABNBORMALITIES ON CD ZONES AMBUSH" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abCdAmbushCount', 'cdAmbushRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITIES DETAIL ON CD ZONES AMBUSH</label>
+                    <div id="cdAmbushRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="modern-label">BA AMBUSH(NO OF CREWS)</label>
+                    <input type="number" data-name="BA AMBUSH(NO OF CREWS)" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITIES ON BA AMBUSH</label>
+                    <input type="number" id="abBaAmbushCount" data-name="ABNORMALITIES ON BA AMBUSH" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abBaAmbushCount', 'baAmbushRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITIES DETAIL ON BA AMBUSH</label>
+                    <div id="baAmbushRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="modern-label">BPT/BFT AMBUSH (NO OF TRAINS)</label>
+                    <input type="number" data-name="BPT/BFT AMBUSH (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITIES ON BPT/BFT AMBUSH</label>
+                    <input type="number" id="abBptAmbushCount" data-name="ABNORMALITIES ON BPT/BFT AMBUSH" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abBptAmbushCount', 'bptAmbushRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITIES DETAIL ON BPT/BFT AMBUSH</label>
+                    <div id="bptAmbushRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="modern-label">BPC AMBUSH (NO OF TRAINS)</label>
+                    <input type="number" data-name="BPC AMBUSH (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITIES ON BPC AMBUSH</label>
+                    <input type="number" id="abBpcAmbushCount" data-name="ABNORMALITIES ON BPC AMBUSH" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abBpcAmbushCount', 'bpcAmbushRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITIES DETAIL ON BPC AMBUSH</label>
+                    <div id="bpcAmbushRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="modern-label">SPEED GUN CHECKING AUTO AT ON (NO OF TRAINS)</label>
+                    <input type="number" data-name="SPEED GUN CHECKING AUTO AT ON (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITIES ON SPEED GUN CHECKING AUTO AT ON</label>
+                    <input type="number" id="abSpeedGunOnCount" data-name="ABNORMALITIES ON SPEED GUN CHECKING AUTO AT ON" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abSpeedGunOnCount', 'speedGunOnRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITIES DETAIL ON SPEED GUN CHECKING AUTO AT ON</label>
+                    <div id="speedGunOnRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>                
+
+                <div>
+                    <label class="modern-label">SPEED GUN CHECKING PASSING AT YELLOW (NO OF TRAINS)</label>
+                    <input type="number" data-name="SPEED GUN CHECKING PASSING AT YELLOW (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITIES ON SPEED GUN CHECKING PASSING AT YELLOW</label>
+                    <input type="number" id="abSpeedGunYellowCount" data-name="ABNORMALITIES ON SPEED GUN CHECKING PASSING AT YELLOW" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abSpeedGunYellowCount', 'speedGunYellowRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITIES DETAIL ON SPEED GUN CHECKING PASSING AT YELLOW</label>
+                    <div id="speedGunYellowRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>     
+                                
+                <div>
+                    <label class="modern-label">FSD ROUTE SETTING ANALYSIS AT LOBBY (NO OF TRAINS)</label>
+                    <input type="number" id="fsdTrainsCount" data-name="FSD ROUTE SETTING ANALYSIS AT LOBBY (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab" oninput="generateFsdTableGrid()">
+                </div>
+                                
+                <div class="lg:col-span-3 overflow-x-auto mt-2">
+                    <label class="modern-label font-bold text-slate-700">DETAILs OF FSD ROUTE SETTING AMBUSH</label>
+                    <div id="fsdTableRowsContainer" class="min-w-full bg-white rounded-lg border border-slate-200 p-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div> 
+
+                <div>
+                    <label class="modern-label">SHUNTING AMBUSH (NO OF TRAINS)</label>
+                    <input type="number" data-name="SHUNTING AMBUSH (NO OF TRAINS)" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITY ON SHUNTING AMBUSH</label>
+                    <input type="number" id="abShuntingAmbushCount" data-name="ABNORMALITY ON SHUNTING AMBUSH" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abShuntingAmbushCount', 'shuntingAmbushRowsContainer')">
+                </div>
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITIES DETAIL ON SHUNTING AMBUSH</label>
+                    <div id="shuntingAmbushRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div> 
+                <div>
+                    <label class="modern-label">CREW MOBILE AMBUSH</label>
+                    <input type="number" data-name="CREW MOBILE AMBUSH" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITY ON CREW MOBILE AMBUSH</label>
+                    <input type="number" id="abCrewMobileCount" data-name="ABNORMALITY ON CREW MOBILE AMBUSH" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abCrewMobileCount', 'crewMobileRowsContainer')">
+                </div>
+                 <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITIES DETAIL ON CREW MOBILE AMBUSH</label>
+                    <div id="crewMobileRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>                
+                   <div class="lg:col-span-3 mt-6">
+                    <h3 class="font-bold text-xl text-green-700 border-b-2 border-green-300 pb-2">
+                        COUNSELLING ENTRIES
+                    </h3>
+                </div>
+
+                <div>
+                    <label class="modern-label">COUNCELLING AT LOBBY CONCERNED TO SAFETY(NO OF CREWS)</label>
+                    <input type="number" data-name="COUNCELLING AT LOBBY CONCERNED TO SAFETY(NO OF CREWS)" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">SHUNTING PROCEDURE & RULES INVOLWAL AS PER GR 5.13</label>
+                    <input type="number" data-name="SHUNTING PROCEDURE & RULES INVOLVED AS PER GR 5.13" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">COUNSELLING FOR SPAD PREVENTION</label>
+                    <input type="number" data-name="COUNSELLING FOR SPAD PREVENTION" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">LONG HOURS DUTY OF CREW</label>
+                    <input type="number" data-name="LONG HOURS DUTY OF CREW" value="0" min="0" class="modern-input req-ab">
+                </div>             
+                <div class="lg:col-span-3 mt-6">
+                    <h3 class="font-bold text-xl text-purple-700 border-b-2 border-purple-300 pb-2">
+                        INSPECTION & SEMINAR ENTRIES
+                    </h3>
+                </div>
+
+                <div>
+                    <label class="modern-label">FAMILY SEMINAR</label>
+                    <input type="number" data-name="FAMILY SEMINAR" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">SAFETY SEMINAR</label>
+                    <input type="number" data-name="SAFETY SEMINAR" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">COACHING CLEANLINESS INSPECTION</label>
+                    <input type="number" data-name="COACHING CLEANLINESS INSPECTION" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITIES ON COACHING CLEANLINESS INSPECTION</label>
+                    <input type="number" id="abCoachingCleanCount" data-name="ABNORMALITIES ON COACHING CLEANLINESS INSPECTION" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abCoachingCleanCount', 'coachingCleanRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITY DETAIL DURING COACHING CLEANLINESS INSPECTION</label>
+                    <div id="coachingCleanRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="modern-label">NIGHT STABLING INSPECTION</label>
+                    <input type="number" data-name="NIGHT STABLING INSPECTION" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITIES ON NIGHT STABLING INSPECTION</label>
+                    <input type="number" id="abNightStablingCount" data-name="ABNORMALITIES ON NIGHT STABLING INSPECTION" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abNightStablingCount', 'nightStablingRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITY DETAIL DURING NIGHT STABLING INSPECTION</label>
+                    <div id="nightStablingRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="modern-label">STABLE LOAD INSPECTION</label>
+                    <input type="number" data-name="STABLE LOAD INSPECTION" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITIES ON STABLE LOAD INSPECTION</label>
+                    <input type="number" id="abStableLoadCount" data-name="ABNORMALITIES ON STABLE LOAD INSPECTION" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abStableLoadCount', 'stableLoadRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITY DETAIL DURING STABLE LOAD INSPECTION</label>
+                    <div id="stableLoadRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="modern-label">SAND GOOMTY INSPECTION</label>
+                    <input type="number" data-name="SAND GOOMTY INSPECTION" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITIES ON SAND GOOMTY INSPECTION</label>
+                    <input type="number" id="abSandGoomtyCount" data-name="ABNORMALITIES ON SAND GOOMTY INSPECTION" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abSandGoomtyCount', 'sandGoomtyRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITY DETAIL DURING SAND GOOMTY INSPECTION</label>
+                    <div id="sandGoomtyRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="modern-label">RUNNING ROOM INSPECTION</label>
+                    <input type="number" data-name="RUNNING ROOM INSPECTION" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITIES ON RUNNING ROOM INSPECTION</label>
+                    <input type="number" id="abRunningRoomCount" data-name="ABNORMALITIES ON RUNNING ROOM INSPECTION" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abRunningRoomCount', 'runningRoomRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITY DETAIL DURING RUNNING ROOM INSPECTION</label>
+                    <div id="runningRoomRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="modern-label">LOBBY INSPECTION</label>
+                    <input type="number" data-name="LOBBY INSPECTION" value="0" min="0" class="modern-input req-ab">
+                </div>
+
+                <div>
+                    <label class="modern-label">ABNORMALITIES ON LOBBY INSPECTION</label>
+                    <input type="number" id="abLobbyCount" data-name="ABNORMALITIES ON LOBBY INSPECTION" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abLobbyCount', 'lobbyRowsContainer')">
+                </div>
+
+                <div class="lg:col-span-2">
+                    <label class="modern-label">ABNORMALITY DETAIL DURING LOBBY INSPECTION</label>
+                    <div id="lobbyRowsContainer" class="space-y-2">
+                        <input type="text" class="modern-input" value="NIL" readonly>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="clean-card overflow-hidden">
@@ -608,10 +628,10 @@
             </label>
             <div id="sec_lp" class="section-body hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                 <div><label class="modern-label">LP ID</label><select id="lp_id" class="modern-input req-lp font-mono" onchange="autoFillLpDetails(this.value)"><option value="">Select LP ID</option></select></div>
-<div><label class="modern-label">LP NAME</label><input type="text" id="lp_name" class="modern-input font-semibold" readonly></div>
-<div><label class="modern-label">DESG</label><input type="text" id="lp_desg" class="modern-input" readonly></div>
-<div><label class="modern-label">HQ</label><input type="text" id="lp_hq" class="modern-input" readonly></div>
-<div><label class="modern-label">EMP CODE</label><input type="text" id="lp_empcode" class="modern-input font-mono" readonly></div>
+                <div><label class="modern-label">LP NAME</label><input type="text" id="lp_name" class="modern-input font-semibold" readonly></div>
+                <div><label class="modern-label">DESG</label><input type="text" id="lp_desg" class="modern-input" readonly></div>
+                <div><label class="modern-label">HQ</label><input type="text" id="lp_hq" class="modern-input" readonly></div>
+                <div><label class="modern-label">EMP CODE</label><input type="text" id="lp_empcode" class="modern-input font-mono" readonly></div>
                 
                 <div class="md:col-span-2"><label class="modern-label">MAJOR BEAT</label><select id="lp_major_beat" class="modern-input req-lp"><option value="">Select MAJOR BEAT</option></select></div>
                 <div class="md:col-span-2"><label class="modern-label">BEAT</label>
@@ -773,21 +793,18 @@
     // =========================================================
     requestAnimationFrame(() => { lucide.createIcons(); });
 
-    // Google Sheets Config
     const API_KEY = "AIzaSyAw23pJz0K9fZb2rRRAe2C2cJDilRc0Kac";
     const SHEET_ID = "1EXYvdvs9OGwgXwvK_DmMpgFQ39nh-g5LWDk0-cZhl0A";
     const CREW_SHEET_ID = "1c5niOafzh20MEepDrnwjZSXBWfJoD87_efAoC1mwxb8";
     const CREW_RANGE = "'COMBINE'!A:L";
     const CREW_API = `https://sheets.googleapis.com/v4/spreadsheets/${CREW_SHEET_ID}/values/${encodeURIComponent(CREW_RANGE)}?key=${API_KEY}`;
     
-    // Cloud URLs
     const URL_MATRIX = "https://script.google.com/macros/s/AKfycbxbmRynNgDQdLFK28-vizuV-aSWOXt3aYLUwjnvCS9e3R7JHidy5Ob9qTM9AVyOfE_S/exec";
     const URL_AB = "https://script.google.com/macros/s/AKfycbzTpR-XJHKJQUT0MnEjOTuh6iH9amkUDoI1pnZ29WdoAH8bDEJaAihhMGlhC4D9Yb5CUA/exec";
     const URL_OD = "https://script.google.com/macros/s/AKfycbzD319B272QFM5HK-3ejkl41n3zm1r_0F6bc9ZzJE1Z_6Tc-4wge65Ip16uQe9eDUmrUw/exec";
     const URL_ALP = "https://script.google.com/macros/s/AKfycbwxnVSd3eGB4SvHVz2IINLEat031qB4xvNKbe8BcdPyg5BQpL0xkbQuAyu_B-fTdIqB0A/exec";
     const URL_LP = "https://script.google.com/macros/s/AKfycbxbHiwAGtuvUh_0M3eGX3gQZ1SGA96ffn9Tw93aKGZbU-8fMtArUmpqzGgfI-CqSOyG/exec";
 
-    // State Vars
     let historyMap = new Set();
     let latestDateMap = new Map();
     let latestCrewData = [];
@@ -801,22 +818,86 @@
       "Mandatory A9 & SA9 Application at Halt & LR Procedure": "https://drive.google.com/file/d/1nFiRv-uJNUo42vmkzcj4Exi8fgeo7wMb/view?usp=sharing",  
 };
     
-    // CSV Vars
     let cliData = {};
     let majorBeatData = [];
 
+    const ABN_DETAIL_CONTAINERS = {
+        "ABNORMALITY COUNT DURING FOOTPLATE IN COACHING": "coachingRowsContainer",
+        "ABNORMALITY COUNT DURING FOOTPLATE IN MEMU": "memuRowsContainer",
+        "ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN": "goodsRowsContainer",
+        "Abnormalities found on A-9 & SA-9 Application Ambush Drive": "ambushDriveRowsContainer",
+        "ABNORMALITIES ON AUTO AMBUSH": "autoAmbushRowsContainer",
+        "ABNORMALITIES ON IB AMBUSH": "ibAmbushRowsContainer",
+        "ABNORMALITIES ON LEVEL CROSSING AMBUSH": "lcAmbushRowsContainer",
+        "ABNBORMALITIES ON CD ZONES AMBUSH": "cdAmbushRowsContainer",
+        "ABNORMALITIES ON BA AMBUSH": "baAmbushRowsContainer",
+        "ABNORMALITIES ON BPT/BFT AMBUSH": "bptAmbushRowsContainer",
+        "ABNORMALITIES ON BPC AMBUSH": "bpcAmbushRowsContainer",
+        "ABNORMALITIES ON SPEED GUN CHECKING AUTO AT ON": "speedGunOnRowsContainer",
+        "ABNORMALITIES ON SPEED GUN CHECKING PASSING AT YELLOW": "speedGunYellowRowsContainer",
+        "ABNORMALITY ON SHUNTING AMBUSH": "shuntingAmbushRowsContainer",
+        "ABNORMALITY ON CREW MOBILE AMBUSH": "crewMobileRowsContainer",
+        "ABNORMALITIES ON COACHING CLEANLINESS INSPECTION": "coachingCleanRowsContainer",
+        "ABNORMALITIES ON NIGHT STABLING INSPECTION": "nightStablingRowsContainer",
+        "ABNORMALITIES ON STABLE LOAD INSPECTION": "stableLoadRowsContainer",
+        "ABNORMALITIES ON SAND GOOMTY INSPECTION": "sandGoomtyRowsContainer",
+        "ABNORMALITIES ON RUNNING ROOM INSPECTION": "runningRoomRowsContainer",
+        "ABNORMALITIES ON LOBBY INSPECTION": "lobbyRowsContainer"
+    };
+
+    const ABN_MAP_COUNT_TO_DETAIL_HEADER = {
+        "ABNORMALITY COUNT DURING FOOTPLATE IN COACHING": "ABNORMALITY DETAIL DURING FOOTPLATE IN COACHING",
+        "ABNORMALITY COUNT DURING FOOTPLATE IN MEMU": "ABNORMALITY DETAIL DURING FOOTPLATE IN MEMU",
+        "ABNORMALITY COUNT DURING FOOTPLATE IN GOODS TRAIN": "ABNORMALITY DETAIL DURING FOOTPLATE IN GOODS TRAIN",
+        "Abnormalities found on A-9 & SA-9 Application Ambush Drive": "Abnormalities Detail on A-9 & SA-9 Application Ambush Drive",
+        "ABNORMALITIES ON AUTO AMBUSH": "ABNORMALITIES DETAIL ON AUTO AMBUSH",
+        "ABNORMALITIES ON IB AMBUSH": "ABNORMALITIES DETAIL ON IB AMBUSH",
+        "ABNORMALITIES ON LEVEL CROSSING AMBUSH": "ABNORMALITIES DETAIL ON LEVEL CROSSING AMBUSH",
+        "ABNBORMALITIES ON CD ZONES AMBUSH": "ABNORMALITIES DETAIL ON CD ZONES AMBUSH",
+        "ABNORMALITIES ON BA AMBUSH": "ABNORMALITIES DETAIL ON BA AMBUSH",
+        "ABNORMALITIES ON BPT/BFT AMBUSH": "ABNORMALITIES DETAIL ON BPT/BFT AMBUSH",
+        "ABNORMALITIES ON BPC AMBUSH": "ABNORMALITIES DETAIL ON BPC AMBUSH",
+        "ABNORMALITIES ON SPEED GUN CHECKING AUTO AT ON": "ABNORMALITIES DETAIL ON SPEED GUN CHECKING AUTO AT ON",
+        "ABNORMALITIES ON SPEED GUN CHECKING PASSING AT YELLOW": "ABNORMALITIES DETAIL ON SPEED GUN CHECKING PASSING AT YELLOW",
+        "ABNORMALITY ON SHUNTING AMBUSH": "ABNORMALITIES DETAIL ON SHUNTING AMBUSH",
+        "ABNORMALITY ON CREW MOBILE AMBUSH": "ABNORMALITIES DETAIL ON CREW MOBILE AMBUSH",
+        "ABNORMALITIES ON COACHING CLEANLINESS INSPECTION": "ABNORMALITY DETAIL DURING COACHING CLEANLINESS INSPECTION",
+        "ABNORMALITIES ON NIGHT STABLING INSPECTION": "ABNORMALITY DETAIL DURING NIGHT STABLING INSPECTION",
+        "ABNORMALITIES ON STABLE LOAD INSPECTION": "ABNORMALITY DETAIL DURING STABLE LOAD INSPECTION",
+        "ABNORMALITIES ON SAND GOOMTY INSPECTION": "ABNORMALITY DETAIL DURING SAND GOOMTY INSPECTION",
+        "ABNORMALITIES ON RUNNING ROOM INSPECTION": "ABNORMALITY DETAIL DURING RUNNING ROOM INSPECTION",
+        "ABNORMALITIES ON LOBBY INSPECTION": "ABNORMALITY DETAIL DURING LOBBY INSPECTION"
+    };
+
     // =========================================================
-    // UI HELPERS
+    // FIXED CENTER VALIDATION MODAL DISPLAY SYSTEM
     // =========================================================
-    function toast(msg, type = 'info') {
-        const container = document.getElementById('toastContainer');
-        const div = document.createElement('div');
-        let icon = `<i data-lucide="${type==='success'?'check-circle':type==='error'?'alert-circle':'info'}" class="w-5 h-5 ${type==='success'?'text-emerald-500':type==='error'?'text-red-500':'text-blue-500'}"></i>`;
-        div.className = `toast-card p-4 flex items-center gap-3 min-w-[250px] z-50`;
-        div.innerHTML = `${icon} <span class="font-bold text-sm">${msg}</span>`;
-        container.appendChild(div);
-        requestAnimationFrame(() => { lucide.createIcons({ root: div }); });
-        setTimeout(() => { div.style.opacity = '0'; div.style.transform = 'translateY(10px)'; div.style.transition = 'all 0.3s ease'; setTimeout(() => div.remove(), 300); }, 3500);
+    function showCenterAlert(msg, type = 'info') {
+        const container = document.getElementById('centerAlertContainer');
+        let isError = (type === 'error');
+        let iconMarkup = `<i data-lucide="${isError ? 'alert-triangle' : 'check-circle'}" class="w-12 h-12 mx-auto ${isError ? 'text-red-500' : 'text-emerald-500'}"></i>`;
+        let borderHeader = isError ? 'border-t-red-500' : 'border-t-emerald-500';
+
+        container.innerHTML = `
+            <div class="center-alert-card p-6 text-center border-t-4 ${borderHeader}">
+                <div class="mb-4">${iconMarkup}</div>
+                <h4 class="text-lg font-black tracking-tight mb-2 ${isError ? 'text-red-600' : 'text-emerald-600'}">
+                    ${isError ? 'VALIDATION ERROR' : 'STATUS INFO'}
+                </h4>
+                <p class="text-slate-600 font-medium text-sm leading-relaxed mb-6 whitespace-pre-line text-left bg-slate-50 p-3.5 rounded-lg border border-slate-100 font-mono">
+                    ${msg}
+                </p>
+                <button type="button" onclick="closeCenterAlert()" class="w-full py-2.5 px-4 rounded-lg font-bold text-sm text-white transition-all shadow-md ${isError ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'}">
+                    Okay, Got it
+                </button>
+            </div>
+        `;
+        container.classList.remove('hidden');
+        requestAnimationFrame(() => { lucide.createIcons({ root: container }); });
+    }
+
+    function closeCenterAlert() {
+        document.getElementById('centerAlertContainer').classList.add('hidden');
     }
 
     setInterval(() => {
@@ -838,74 +919,145 @@
         }
     }
 
+    function generateDynamicRows(countInputId, containerId) {
+        const countVal = parseInt(document.getElementById(countInputId).value) || 0;
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+
+        if (countVal <= 0) {
+            container.innerHTML = `<input type="text" class="modern-input" value="NIL" readonly>`;
+            return;
+        }
+
+        for (let i = 1; i <= countVal; i++) {
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2';
+            div.innerHTML = `
+                <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1.5 rounded border border-slate-200">${i}.</span>
+                <input type="text" class="modern-input ab-row-input" placeholder="Enter abnormality detail statement ${i}" required>
+            `;
+            container.appendChild(div);
+        }
+    }
+
+    // NEW FUNCTION: Generate FSD Grid Table based on Trains Count input
+    function generateFsdTableGrid() {
+        const countVal = parseInt(document.getElementById('fsdTrainsCount').value) || 0;
+        const container = document.getElementById('fsdTableRowsContainer');
+        container.innerHTML = '';
+
+        if (countVal <= 0) {
+            container.innerHTML = `<input type="text" class="modern-input" value="NIL" readonly>`;
+            return;
+        }
+
+        let tableMarkup = `
+            <table class="w-full text-left border-collapse border border-slate-200 mt-2 text-xs">
+                <thead>
+                    <tr class="bg-slate-100 font-bold text-slate-700">
+                        <th class="border border-slate-200 p-2 text-center w-10">S.No</th>
+                        <th class="border border-slate-200 p-2">LP ID</th>
+                        <th class="border border-slate-200 p-2">ALP ID</th>
+                        <th class="border border-slate-200 p-2">Name of Train</th>
+                        <th class="border border-slate-200 p-2">Abnormality Detail</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        for (let i = 1; i <= countVal; i++) {
+            tableMarkup += `
+                <tr class="fsd-data-row">
+                    <td class="border border-slate-200 p-2 text-center font-bold text-slate-500">${i}</td>
+                    <td class="border border-slate-200 p-1">
+                        <input type="text" class="modern-input p-1.5 font-mono uppercase font-bold fsd-lp-id" placeholder="e.g. BSP1234" required oninput="sanitizeAlphanumericNoSpace(this)">
+                    </td>
+                    <td class="border border-slate-200 p-1">
+                        <input type="text" class="modern-input p-1.5 font-mono uppercase font-bold fsd-alp-id" placeholder="e.g. BSP5678" required oninput="sanitizeAlphanumericNoSpace(this)">
+                    </td>
+                    <td class="border border-slate-200 p-1">
+                        <input type="text" class="modern-input p-1.5 font-semibold fsd-train-name" placeholder="Train Name/No." required>
+                    </td>
+                    <td class="border border-slate-200 p-1">
+                        <input type="text" class="modern-input p-1.5 fsd-abn-detail" placeholder="Describe issue" required>
+                    </td>
+                </tr>
+            `;
+        }
+
+        tableMarkup += `</tbody></table>`;
+        container.innerHTML = tableMarkup;
+    }
+
+    // Helper input sanitizer to restrict layout to alphanumeric characters without space
+    function sanitizeAlphanumericNoSpace(input) {
+        input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    }
+
+    // Parse FSD Grid Table layout into structured string format for Google Sheets cell
+    function getFsdTableDetailString() {
+        const rows = document.querySelectorAll('.fsd-data-row');
+        if (rows.length === 0) return "NIL";
+
+        let parsedStatements = [];
+        rows.forEach((row, index) => {
+            const lpId = row.querySelector('.fsd-lp-id').value.trim();
+            const alpId = row.querySelector('.fsd-alp-id').value.trim();
+            const trainName = row.querySelector('.fsd-train-name').value.trim();
+            const abnDetail = row.querySelector('.fsd-abn-detail').value.trim();
+
+            parsedStatements.push(`${index + 1}. LP ID: ${lpId}, ALP ID: ${alpId}, Train: ${trainName}, Abnormality: ${abnDetail}`);
+        });
+
+        return parsedStatements.join('\n');
+    }
+
+    function getAbnormalityDetailString(containerId) {
+        const container = document.getElementById(containerId);
+        const inputs = container.querySelectorAll('.ab-row-input');
+        if (inputs.length === 0) return "NIL";
+        
+        let result = [];
+        inputs.forEach((input, index) => {
+            let val = input.value.trim();
+            if (val) result.push(`${index + 1}. ${val}`);
+        });
+        return result.join('\n');
+    }
+
     // =========================================================
     // BOOT & DATA FETCHING
     // =========================================================
-document.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+        document.getElementById('c_date').valueAsDate = new Date();
+        const now = new Date();
+        document.getElementById('m_month').value = String(now.getMonth() + 1);
+        document.getElementById('m_year').value = String(now.getFullYear());
 
-    document.getElementById('c_date').valueAsDate = new Date();
-    // Set current month and year in Matrix
-const now = new Date();
+        loadCSVs();
 
-document.getElementById('m_month').value =
-String(now.getMonth() + 1);
+        const btn = document.getElementById('matrixLoadBtn');
+        const btnText = document.getElementById('matrixBtnText');
 
-document.getElementById('m_year').value =
-String(now.getFullYear());
+        try {
+            await Promise.all([
+                initDrives(),
+                loadHistory(),
+                loadLatestCrewData()
+            ]);
 
-    loadCSVs();
+            dataLoaded = true;
+            btn.disabled = false;
+            btn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+            btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
+            btnText.innerHTML = '<i data-lucide="search" class="w-4 h-4"></i> Generate Matrix Grid';
+            lucide.createIcons();
+        } catch(err) {
+            btnText.innerHTML = '❌ Data Load Failed';
+            console.error(err);
+        }
+    });
 
-    const btn =
-    document.getElementById('matrixLoadBtn');
-
-    const btnText =
-    document.getElementById('matrixBtnText');
-
-    try {
-
-        await Promise.all([
-            initDrives(),
-            loadHistory(),
-            loadLatestCrewData()
-        ]);
-
-        dataLoaded = true;
-
-        btn.disabled = false;
-
-        btn.classList.remove(
-            'bg-gray-400',
-            'cursor-not-allowed'
-        );
-
-        btn.classList.add(
-            'bg-emerald-600',
-            'hover:bg-emerald-700'
-        );
-
-        btnText.innerHTML =
-        '<i data-lucide="search" class="w-4 h-4"></i> Generate Matrix Grid';
-
-        lucide.createIcons();
-
-        console.log(
-            "All Matrix Data Loaded"
-        );
-
-    } catch(err) {
-
-        btnText.innerHTML =
-        '❌ Data Load Failed';
-
-        console.error(err);
-
-        toast(
-            'Data loading failed',
-            'error'
-        );
-    }
-
-});
     function loadCSVs() {
         Papa.parse('CLIMICRO.csv', { download: true, header: false, skipEmptyLines: true, complete: function(results) {
             let correctedData = [];
@@ -927,93 +1079,44 @@ String(now.getFullYear());
             DRIVE_LIST = (data.values || []).slice(1).filter(row => (row[1] || "").toUpperCase() === "ACTIVE").map(row => row[0]).filter(Boolean);
         } catch (err) { console.error("Drives API error", err); }
     }
-function normalizeDate(dateStr) {
 
-    if (!dateStr) return '';
-
-    dateStr = String(dateStr).trim();
-
-    // Already dd/mm/yyyy
-    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
-        return dateStr;
-    }
-
-    // yyyy-mm-dd
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-        const [y,m,d] = dateStr.split('-');
-        return `${d}/${m}/${y}`;
-    }
-
-    // ISO format
-    if (dateStr.includes('T')) {
-        const [y,m,d] = dateStr.split('T')[0].split('-');
-        return `${d}/${m}/${y}`;
-    }
-
-    return dateStr;
-}
     async function loadHistory() {
         try {
             const res = await fetch(URL_MATRIX);
             const data = await res.json();
             historyMap.clear();
-data.slice(1).forEach(r => {
-    console.log("ROW DATA =", r);
-
-    const emp = String(r[0] || '').trim();
-    const drive = String(r[4] || '').trim();
-let dt = '';
-
-if (r[10]) {
-
-    const d = new Date(r[10]);
-
-    dt =
-        String(d.getDate()).padStart(2, '0') + '/' +
-        String(d.getMonth() + 1).padStart(2, '0') + '/' +
-        d.getFullYear();
-}
-    console.log(
-    "EMP=", emp,
-    "DRIVE=", drive,
-    "REAL DATE=", r[10],
-    "FINAL=", dt
-);
-console.log("RAW=", r[10], "FINAL=", dt);
-    const key = `${emp}|${drive}`;
-
-    historyMap.add(key);
-
-    if (!latestDateMap.has(key)) {
-        latestDateMap.set(key, dt);
-    } else {
-        const oldDate = latestDateMap.get(key);
-
-        const oldParts = oldDate.split('/');
-        const newParts = dt.split('/');
-
-        const oldObj = new Date(oldParts[2], oldParts[1]-1, oldParts[0]);
-        const newObj = new Date(newParts[2], newParts[1]-1, newParts[0]);
-
-        if (newObj > oldObj) {
-            latestDateMap.set(key, dt);
-        }
-    }
-});
+            data.slice(1).forEach(r => {
+                const emp = String(r[0] || '').trim();
+                const drive = String(r[4] || '').trim();
+                let dt = '';
+                if (r[10]) {
+                    const d = new Date(r[10]);
+                    dt = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+                }
+                const key = `${emp}|${drive}`;
+                historyMap.add(key);
+                if (!latestDateMap.has(key)) {
+                    latestDateMap.set(key, dt);
+                } else {
+                    const oldDate = latestDateMap.get(key);
+                    const oldParts = oldDate.split('/');
+                    const newParts = dt.split('/');
+                    const oldObj = new Date(oldParts[2], oldParts[1]-1, oldParts[0]);
+                    const newObj = new Date(newParts[2], newParts[1]-1, newParts[0]);
+                    if (newObj > oldObj) { latestDateMap.set(key, dt); }
+                }
+            });
         } catch (err) { console.warn("History data fetch failed.", err); }
     }
 
-async function loadLatestCrewData() {
+    async function loadLatestCrewData() {
         try {
             const res = await fetch(CREW_API);
             const data = await res.json();
             const crewMap = {};
-            
-            // Helper function: Date compare karne ke liye
             const getTimestamp = (dateStr) => {
                 if (!dateStr) return 0;
                 let d = String(dateStr).trim().split(" ")[0]; 
-                
                 if (d.includes("/")) {
                     let p = d.split("/");
                     if (p[2] && p[2].length === 4) return new Date(p[2], p[1]-1, p[0]).getTime();
@@ -1027,16 +1130,10 @@ async function loadLatestCrewData() {
 
             (data.values || []).slice(1).forEach(row => {
                 const empCode = row[4] || "";
-                const crewStatus = row[11] || ""; // Column L = Crew Status (Index 11)
-                
-                // FILTER: Agar Emp Code nahi hai YA Crew Status "ACTIVE" nahi hai, toh chhod do
-                if (!empCode || crewStatus.trim().toUpperCase() !== "ACTIVE") {
-                    return; 
-                }
-                
-                const updateDateStr = row[8] || ""; // Column I = Update Date (Index 8)
+                const crewStatus = row[11] || ""; 
+                if (!empCode || crewStatus.trim().toUpperCase() !== "ACTIVE") return; 
+                const updateDateStr = row[8] || ""; 
                 const currentTimestamp = getTimestamp(updateDateStr);
-                
                 const obj = { 
                     crewId: row[0]||"", 
                     crewName: row[1]||"", 
@@ -1047,28 +1144,17 @@ async function loadLatestCrewData() {
                     hq: row[7]||"",
                     timestamp: currentTimestamp 
                 };
-
-                // Date compare karke sirf latest active entry ko save karo
                 if (crewMap[empCode]) {
-                    if (currentTimestamp >= crewMap[empCode].timestamp) {
-                        crewMap[empCode] = obj;
-                    }
+                    if (currentTimestamp >= crewMap[empCode].timestamp) crewMap[empCode] = obj;
                 } else {
                     crewMap[empCode] = obj;
                 }
             });
-            
-            // Map se final active aur latest list nikal lo
             latestCrewData = Object.values(crewMap);
-            
-        } catch (err) { 
-            console.error("Crew Fetch Error", err); 
-        }
+        } catch (err) { console.error("Crew Fetch Error", err); }
     }
-    // =========================================================
-    // FORM LOGIC & AUTO-FILL
-    // =========================================================
-document.getElementById('c_cli_id').addEventListener('input', (e) => {
+
+    document.getElementById('c_cli_id').addEventListener('input', (e) => {
         const sanitized = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
         e.target.value = sanitized;
 
@@ -1077,196 +1163,96 @@ document.getElementById('c_cli_id').addEventListener('input', (e) => {
             document.getElementById('c_cli_name').value = currentCliName;
             document.getElementById('c_cli_hq').value = cliData[sanitized].hq;
             
-            // Fetch relevant crews for this CLI from Google Sheet Data
             const myCrews = latestCrewData.filter(c => c.cliName && c.cliName.trim().toUpperCase() === currentCliName.toUpperCase());
-            
-            // Filter for LP & ALP
             const lpCrews = myCrews.filter(c => ["LPG", "LPP", "LPM"].includes(c.crewType));
             const alpCrews = myCrews.filter(c => ["ALP", "SALP"].includes(c.crewType));
 
-            // Populate LP Dropdown
             const lpSelect = document.getElementById('lp_id');
             lpSelect.innerHTML = '<option value="">Select LP ID</option>';
             lpCrews.forEach(c => lpSelect.appendChild(new Option(`${c.crewId} (${c.crewName})`, c.crewId)));
 
-            // Populate ALP Dropdown
             const alpSelect = document.getElementById('alp_id');
             alpSelect.innerHTML = '<option value="">Select ALP ID</option>';
             alpCrews.forEach(c => alpSelect.appendChild(new Option(`${c.crewId} (${c.crewName})`, c.crewId)));
-
         } else {
             document.getElementById('c_cli_name').value = ""; document.getElementById('c_cli_hq').value = "";
             document.getElementById('alp_id').innerHTML = '<option value="">Select ALP ID</option>'; document.getElementById('lp_id').innerHTML = '<option value="">Select LP ID</option>';
         }
     });
 
-    // Abnormality Date Logic
     function checkAbnormalityDate(checkbox) {
         if (checkbox.checked) {
             const dateStr = document.getElementById('c_date').value;
-            if (!dateStr) { toast("Please select a DATE first.", "error"); checkbox.checked = false; return; }
+            if (!dateStr) { showCenterAlert("Please select a DATE first.", "error"); checkbox.checked = false; return; }
             const diffDays = Math.ceil((new Date().setHours(0,0,0,0) - new Date(dateStr).setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
-            if (diffDays > 3) { toast("Abnormality Report restricted to past 3 days.", "error"); checkbox.checked = false; toggleSection('sec_ab', false); return; }
+            if (diffDays > 3) { showCenterAlert("Abnormality Report restricted to past 3 days.", "error"); checkbox.checked = false; toggleSection('sec_ab', false); return; }
         }
         toggleSection('sec_ab', checkbox.checked);
     }
-    
-    document.getElementById('c_date').addEventListener('change', function() {
-        if (document.getElementById('chk_ab').checked) {
-            if (Math.ceil((new Date().setHours(0,0,0,0) - new Date(this.value).setHours(0,0,0,0)) / 86400000) > 3) {
-                toast("Out of range date. Abnormality Report closing.", "error");
-                document.getElementById('chk_ab').checked = false; toggleSection('sec_ab', false);
-            }
+
+    function autoFillLpDetails(lpId) {
+        const data = latestCrewData.find(i => i.crewId === lpId);
+        document.getElementById('lp_name').value = data ? data.crewName : "";
+        document.getElementById('lp_desg').value = data ? data.crewType : "";
+        const hq = data ? data.hq : "";
+        document.getElementById('lp_hq').value = hq;
+        document.getElementById('lp_empcode').value = data ? data.empCode : "";
+
+        const mb = document.getElementById('lp_major_beat');
+        mb.innerHTML = '<option value="">Select MAJOR BEAT</option>';
+        if (hq) {
+            majorBeatData.filter(i => i['HQ'] === hq).forEach(i => mb.appendChild(new Option(i['BEAT'], i['BEAT'])));
         }
-    });
-
-    // Small Helpers
-    setupAutoNil('abCoachingCount', 'abCoachingDetail');
-    setupAutoNil('abMemuCount', 'abMemuDetail');
-    setupAutoNil('abGoodsCount', 'abGoodsDetail');
-
-    function setupAutoNil(countId, detailId) {
-        document.getElementById(countId).addEventListener('input', function() {
-            let val = parseInt(this.value); let detailInput = document.getElementById(detailId);
-            if (val > 0 && detailInput.value === 'NIL') detailInput.value = ''; else if (val <= 0 || isNaN(val)) detailInput.value = 'NIL';
-        });
     }
 
-    function populateDropdown(ddId, arr, cli, key) {
-        const dd = document.getElementById(ddId); dd.innerHTML = `<option value="">Select ${key}</option>`;
-        arr.filter(i => i['CLI NAME'] === cli).forEach(i => { dd.appendChild(new Option(i[key], i[key])); });
+    function autoFillAlpDetails(alpId) {
+        const data = latestCrewData.find(i => i.crewId === alpId);
+        document.getElementById('alp_name').value = data ? data.crewName : "";
+        document.getElementById('alp_desg').value = data ? data.crewType : "";
+        document.getElementById('alp_hq').value = data ? data.hq : "";
     }
-
-function autoFillLpDetails(lpId) {
-    const data = latestCrewData.find(i => i.crewId === lpId);
-
-    document.getElementById('lp_name').value = data ? data.crewName : "";
-    document.getElementById('lp_desg').value = data ? data.crewType : "";
-    const hq = data ? data.hq : "";
-    document.getElementById('lp_hq').value = hq;
-    document.getElementById('lp_empcode').value = data ? data.empCode : "";
-
-    const mb = document.getElementById('lp_major_beat');
-    mb.innerHTML = '<option value="">Select MAJOR BEAT</option>';
-
-    if (hq) {
-        majorBeatData
-            .filter(i => i['HQ'] === hq)
-            .forEach(i => mb.appendChild(new Option(i['BEAT'], i['BEAT'])));
-    }
-}
-
-function autoFillAlpDetails(alpId) {
-    const data = latestCrewData.find(i => i.crewId === alpId);
-    document.getElementById('alp_name').value = data ? data.crewName : "";
-    document.getElementById('alp_desg').value = data ? data.crewType : "";
-    document.getElementById('alp_hq').value = data ? data.hq : "";
-}
 
     function toggleOtherBeat(select, targetId) { const input = document.getElementById(targetId); if(select.value === 'OTHER') { input.classList.remove('hidden'); input.required = true; } else { input.classList.add('hidden'); input.required = false; input.value = ''; } }
-    
-    function handleAmbushTypeChange(sel) { const custom = document.getElementById('amb_custom_type'); if(sel.value === 'Other') { custom.classList.remove('hidden'); custom.required = true; } else { custom.classList.add('hidden'); custom.required = false; custom.value = ''; } }
-
     function toggleODFields() { document.getElementById('od_extra_group').style.display = (document.getElementById('od_dutyType').value === "OTHER DUTY") ? 'block' : 'none'; }
 
-
     // =========================================================
-    // SECTION 6: MASS MATRIX LOGIC (DOUBLE FREEZE COLUMNS)
+    // SECTION 5: MASS MATRIX LOGIC
     // =========================================================
     function loadCrewDataMaster() {
-        if(!dataLoaded){
-        toast(
-            "Please wait, data is still loading...",
-            "error"
-        );
-        return;
-    }
+        if(!dataLoaded){ showCenterAlert("Please wait, data is still loading...", "error"); return; }
         const cliName = document.getElementById('c_cli_name').value.trim();
-        if(!cliName) return toast('Please enter a Valid CLI ID at the top first.', 'error');
+        if(!cliName) return showCenterAlert('Please enter a Valid CLI ID at the top first.', 'error');
         const filtered = latestCrewData.filter(r => r.cliName?.trim().toLowerCase() === cliName.toLowerCase());
-        if(!filtered.length) return toast('No Crew assigned to this CLI', 'error');
+        if(!filtered.length) return showCenterAlert('No Crew assigned to this CLI', 'error');
         
         const month = document.getElementById('m_month').value;
         const year = document.getElementById('m_year').value;
         searchedCrews = [];
         generateMatrixTable(filtered, month, year);
         document.getElementById('tableWrapper').classList.remove('hidden');
-        toast('Matrix Grid generated', 'success');
-    }
- function searchCrewMatrix() {
-
-    const keyword =
-        document.getElementById('crewSearch')
-        .value
-        .trim()
-        .toLowerCase();
-
-    if (!keyword) {
-        toast('Enter Crew ID first', 'error');
-        return;
     }
 
-    const foundCrew =
-        latestCrewData.find(r =>
-            String(r.crewId || '')
-            .toLowerCase() === keyword
-        );
+    function searchCrewMatrix() {
+        const keyword = document.getElementById('crewSearch').value.trim().toLowerCase();
+        if (!keyword) { showCenterAlert('Enter Crew ID first', 'error'); return; }
+        const foundCrew = latestCrewData.find(r => String(r.crewId || '').toLowerCase() === keyword);
+        if (!foundCrew) { showCenterAlert('Crew not found', 'error'); return; }
 
-    if (!foundCrew) {
-        toast('Crew not found', 'error');
-        return;
+        if (searchedCrews.some(x => x.empCode === foundCrew.empCode)) { showCenterAlert('Crew already added', 'info'); return; }
+        searchedCrews.push(foundCrew);
+
+        const cliName = document.getElementById('c_cli_name').value.trim();
+        const ownCrew = latestCrewData.filter(r => r.cliName?.trim().toLowerCase() === cliName.toLowerCase());
+        const finalData = [...ownCrew, ...searchedCrews];
+        const month = document.getElementById('m_month').value;
+        const year = document.getElementById('m_year').value;
+
+        generateMatrixTable(finalData, month, year);
+        document.getElementById('tableWrapper').classList.remove('hidden');
     }
 
-    // Duplicate add mat karo
-    if (
-        searchedCrews.some(
-            x => x.empCode === foundCrew.empCode
-        )
-    ) {
-        toast('Crew already added', 'info');
-        return;
-    }
-
-    searchedCrews.push(foundCrew);
-
-    const cliName =
-        document.getElementById('c_cli_name')
-        .value
-        .trim();
-
-    const ownCrew =
-        latestCrewData.filter(
-            r =>
-                r.cliName?.trim().toLowerCase() ===
-                cliName.toLowerCase()
-        );
-
-    const finalData = [
-        ...ownCrew,
-        ...searchedCrews
-    ];
-
-    const month =
-        document.getElementById('m_month').value;
-
-    const year =
-        document.getElementById('m_year').value;
-
-    generateMatrixTable(
-        finalData,
-        month,
-        year
-    );
-
-    document
-        .getElementById('tableWrapper')
-        .classList.remove('hidden');
-
-    toast('Crew Added', 'success');
-}
     function generateMatrixTable(data, month, year) {
         const days = new Date(year, month, 0).getDate();
-        // Sticky th for both Crew ID and Name
         let html = `<thead class="sticky top-0 z-30"><tr>
                    <th class="sticky-id min-w-[75px] max-w-[75px] text-[10px]">Crew ID</th>
                     <th class="min-w-[180px] max-w-[180px] text-[11px]">Name</th>`;
@@ -1274,7 +1260,6 @@ function autoFillAlpDetails(alpId) {
         html += `</tr></thead><tbody>`;
 
         data.forEach(row => {
-            // Sticky td for both Crew ID and Name
             html += `<tr data-emp="${row.empCode}">
                         <td class="sticky-id font-mono text-blue-600 min-w-[75px] max-w-[75px] text-[10px]">${row.crewId}</td>
                         <td class="font-semibold truncate min-w-[190px] max-w-[190px] text-[10px]" title="${row.crewName}">${row.crewName}</td>`;
@@ -1285,8 +1270,6 @@ function autoFillAlpDetails(alpId) {
                 
                 const totalDrives = DRIVE_LIST.length;
                 const btnClass = completedCount > 0 ? 'bg-emerald-100 text-emerald-700 border border-emerald-300 shadow-sm' : 'bg-white text-blue-500 border border-slate-200 hover:bg-slate-50';
-                
-                // Show X/Y format (e.g., 5/12)
                 const btnText = completedCount > 0 ? `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i>${completedCount}/${totalDrives}` : '+ Add';
 
                 html += `
@@ -1296,18 +1279,8 @@ function autoFillAlpDetails(alpId) {
                     </button>
                     <div class="drive-popup hidden fixed z-[99999] p-4 w-[420px] max-w-[90vw]">
                         <div class="flex justify-between items-center border-b pb-2 mb-2">
-
-    <div class="text-[10px] text-slate-500 uppercase tracking-widest font-black">
-        Select Drives (${totalDrives} Total)
-    </div>
-
-    <button
-        type="button"
-        onclick="closePopup(this)"
-        class="text-red-500 hover:text-red-700 font-bold text-lg leading-none px-2">
-        ✕
-    </button>
-
+    <div class="text-[10px] text-slate-500 uppercase tracking-widest font-black">Select Drives (${totalDrives} Total)</div>
+    <button type="button" onclick="closePopup(this)" class="text-red-500 hover:text-red-700 font-bold text-lg leading-none px-2">✕</button>
 </div>
                         <div class="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-2">
                         ${DRIVE_LIST.map(drive => {
@@ -1315,33 +1288,10 @@ function autoFillAlpDetails(alpId) {
                             const key = `${String(row.empCode).trim()}|${drive}`;
                             const latestDate = latestDateMap.get(key) || '';               
                             return `<label class="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${done ? 'bg-emerald-50 border border-emerald-200' : 'hover:bg-slate-50 border border-transparent'}">
-                               <input type="checkbox"
-class="checkbox-custom driveCheck"
-${selectedDrives.has(`${row.empCode}|${date}|${drive}`) ? 'checked' : ''} value="${drive}" data-emp="${row.empCode}" data-date="${date}" data-drive="${drive}" data-cliname="${row.cliName}" data-crewid="${row.crewId}" data-crewname="${row.crewName}" data-hq="${row.hq}" data-desg="${row.crewType}" onchange="updateButton(this)">
+                               <input type="checkbox" class="checkbox-custom driveCheck" ${selectedDrives.has(`${row.empCode}|${date}|${drive}`) ? 'checked' : ''} value="${drive}" data-emp="${row.empCode}" data-date="${date}" data-drive="${drive}" data-cliname="${row.cliName}" data-crewid="${row.crewId}" data-crewname="${row.crewName}" data-hq="${row.hq}" data-desg="${row.crewType}" onchange="updateButton(this)">
 <div class="flex flex-col">
-
-${DRIVE_PDF_LINKS[drive] ? `
-<a href="${DRIVE_PDF_LINKS[drive]}"
-   target="_blank"
-   rel="noopener noreferrer"
-   class="text-xs font-bold underline flex items-start gap-1 break-words whitespace-normal leading-4 ${done ? 'text-emerald-700' : 'text-blue-600'}">
-
-   <i data-lucide="file-text" class="w-3 h-3"></i>
-
-   ${drive}
-</a>
-` : `
-<span class="text-xs font-bold break-words whitespace-normal leading-4 ${done ? 'text-emerald-700' : 'text-slate-700'}">
-   ${drive}
-</span>
-`}
-
-${done ? `
-<span class="text-[10px] font-bold text-amber-600 mt-0.5">
-Already Done (${latestDate})
-</span>
-` : ''}
-
+${DRIVE_PDF_LINKS[drive] ? `<a href="${DRIVE_PDF_LINKS[drive]}" target="_blank" rel="noopener noreferrer" class="text-xs font-bold underline flex items-start gap-1 break-words whitespace-normal leading-4 ${done ? 'text-emerald-700' : 'text-blue-600'}"><i data-lucide="file-text" class="w-3 h-3"></i>${drive}</a>` : `<span class="text-xs font-bold break-words whitespace-normal leading-4 ${done ? 'text-emerald-700' : 'text-slate-700'}">${drive}</span>`}
+${done ? `<span class="text-[10px] font-bold text-amber-600 mt-0.5">Already Done (${latestDate})</span>` : ''}
 </div>
                             </label>`;
                         }).join('')}
@@ -1355,71 +1305,40 @@ Already Done (${latestDate})
         requestAnimationFrame(() => { lucide.createIcons(); });
     }
 
-function togglePopup(btn) {
-    document.querySelectorAll('.drive-popup').forEach(p => {
-        if (p !== btn.nextElementSibling) {
-            p.classList.add('hidden');
+    function togglePopup(btn) {
+        document.querySelectorAll('.drive-popup').forEach(p => { if (p !== btn.nextElementSibling) p.classList.add('hidden'); });
+        const popup = btn.nextElementSibling;
+        popup.classList.remove('hidden');
+
+        const isMobile = window.innerWidth < 768;
+        if (isMobile) {
+            popup.style.position = 'fixed'; popup.style.top = '50%'; popup.style.left = '50%'; popup.style.transform = 'translate(-50%, -50%)'; popup.style.width = '92vw'; popup.style.maxWidth = '380px'; popup.style.height = 'auto'; popup.style.maxHeight = '80vh'; popup.style.zIndex = '99999';
+        } else {
+            const rect = btn.getBoundingClientRect();
+            const popupWidth = 420; const popupHeight = 450;
+            let left = rect.left;
+            if (left + popupWidth > window.innerWidth - 20) left = window.innerWidth - popupWidth - 20;
+            if (left < 10) left = 10;
+            let top = rect.bottom + 8;
+            if (window.innerHeight - rect.bottom < popupHeight && rect.top > popupHeight + 50) top = rect.top - popupHeight;
+
+            popup.style.position = 'fixed'; popup.style.transform = 'none'; popup.style.width = popupWidth + 'px'; popup.style.left = left + 'px'; popup.style.top = top + 'px'; popup.style.zIndex = '99999';
+        }
+    }
+    function closePopup(btn){ btn.closest('.drive-popup').classList.add('hidden'); }
+
+    document.getElementById('c_date').addEventListener('change', function() {
+        if (document.getElementById('chk_ab').checked) {
+            if (Math.ceil((new Date().setHours(0,0,0,0) - new Date(this.value).setHours(0,0,0,0)) / 86400000) > 3) {
+                showCenterAlert("Out of range date. Abnormality Report closing.", "error");
+                document.getElementById('chk_ab').checked = false; toggleSection('sec_ab', false);
+            }
         }
     });
 
-    const popup = btn.nextElementSibling;
-    popup.classList.remove('hidden');
-
-    // Mobile viewport detection
-    const isMobile = window.innerWidth < 768;
-
-    if (isMobile) {
-        // Mobile me center layout modal banayenge taaki text screen se bahar na kate
-        popup.style.position = 'fixed';
-        popup.style.top = '50%';
-        popup.style.left = '50%';
-        popup.style.transform = 'translate(-50%, -50%)';
-        popup.style.width = '92vw';
-        popup.style.maxWidth = '380px';
-        popup.style.height = 'auto';
-        popup.style.maxHeight = '80vh';
-        popup.style.zIndex = '99999';
-    } else {
-        // Desktop floating dynamic positioning logic
-        const rect = btn.getBoundingClientRect();
-        const popupWidth = 420;
-        const popupHeight = 450;
-        
-        let left = rect.left;
-        if (left + popupWidth > window.innerWidth - 20) {
-            left = window.innerWidth - popupWidth - 20;
-        }
-        if (left < 10) left = 10;
-
-        let top = rect.bottom + 8;
-        if (window.innerHeight - rect.bottom < popupHeight && rect.top > popupHeight + 50) {
-            top = rect.top - popupHeight;
-        }
-
-        popup.style.position = 'fixed';
-        popup.style.transform = 'none';
-        popup.style.width = popupWidth + 'px';
-        popup.style.left = left + 'px';
-        popup.style.top = top + 'px';
-        popup.style.zIndex = '99999';
-    }
-}
-function closePopup(btn){
-
-    const popup = btn.closest('.drive-popup');
-
-    popup.classList.add('hidden');
-
-}
     function updateButton(cb) {
-        const key =
-`${cb.dataset.emp}|${cb.dataset.date}|${cb.dataset.drive}`;
-
-if(cb.checked){
-    selectedDrives.add(key);
-}else{
-    selectedDrives.delete(key);
-}
+        const key = `${cb.dataset.emp}|${cb.dataset.date}|${cb.dataset.drive}`;
+        if(cb.checked) selectedDrives.add(key); else selectedDrives.delete(key);
         const p = cb.closest('td.relative'); 
         const btn = p.querySelector('button'); 
         const checkedCount = p.querySelectorAll('.driveCheck:checked').length;
@@ -1436,22 +1355,52 @@ if(cb.checked){
     }
 
     // =========================================================
-    // SUBMIT TO CLOUD (FIXED CORS ISSUE)
+    // SUBMIT TO CLOUD
     // =========================================================
     async function processUnifiedSubmit() {
         const form = document.getElementById('masterForm');
         if(!form.checkValidity()) { form.reportValidity(); return; }
 
+        const checks = ['chk_ab','chk_lp','chk_alp','chk_od','chk_matrix'].map(id => document.getElementById(id).checked);
+        if(!checks.includes(true)) return showCenterAlert("Please select at least one section to submit.", "error");
+
+        // Dynamic Mathematical Validations
+        if (checks[0]) {
+            const fpWee = parseInt(document.getElementById('fpWeeHours').value) || 0;
+            const fpExcl = parseInt(document.getElementById('fpExcludingWee').value) || 0;
+            
+            const fpCoaching = parseInt(document.getElementById('fpCoaching').value) || 0;
+            const fpMemu = parseInt(document.getElementById('fpMemu').value) || 0;
+            const fpGoods = parseInt(document.getElementById('fpGoods').value) || 0;
+
+            const sumLeftFp = fpWee + fpExcl;
+            const sumRightFp = fpCoaching + fpMemu + fpGoods;
+
+            if (sumLeftFp !== sumRightFp) {
+                showCenterAlert(`Validation Failed: Sum of Footplates mismatch!\n\n(Wee + Excl) = ${sumLeftFp}\n\nMust be equal to:\n(Coaching + MEMU + Goods) = ${sumRightFp}`, "error");
+                return;
+            }
+
+            const abWee = parseInt(document.getElementById('abWeeHours').value) || 0;
+            const abExcl = parseInt(document.getElementById('abExcludingWee').value) || 0;
+
+            const abCoaching = parseInt(document.getElementById('abCoachingCount').value) || 0;
+            const abMemu = parseInt(document.getElementById('abMemuCount').value) || 0;
+            const abGoods = parseInt(document.getElementById('abGoodsCount').value) || 0;
+
+            const sumLeftAbn = abWee + abExcl;
+            const sumRightAbn = abCoaching + abMemu + abGoods;
+
+            if (sumLeftAbn !== sumRightAbn) {
+                showCenterAlert(`Validation Failed: Sum of Abnormalities mismatch!\n\n(Wee + Excl) = ${sumLeftAbn}\n\nMust be equal to:\n(Coaching + MEMU + Goods) = ${sumRightAbn}`, "error");
+                return;
+            }
+        }
+
         const c_cli_id = document.getElementById('c_cli_id').value;
         const c_cli_name = document.getElementById('c_cli_name').value;
         const c_cli_hq = document.getElementById('c_cli_hq').value;
         const c_date = document.getElementById('c_date').value;
-
-        // Check which sections are selected for submission
-        // 0: Abnormality, 1: LP, 2: ALP, 3: Ambush, 4: Other Duties, 5: Matrix
-        const checks = ['chk_ab','chk_lp','chk_alp','chk_od','chk_matrix'].map(id => document.getElementById(id).checked);
-        
-        if(!checks.includes(true)) return toast("Please select at least one section to submit.", "error");
 
         const btn = document.getElementById('masterSubmitBtn');
         const origText = btn.innerHTML;
@@ -1463,10 +1412,30 @@ if(cb.checked){
 
         let promises = [];
 
-        // 1. ABNORMALITY (ADDED no-cors)
+        // 1. ABNORMALITY
         if (checks[0]) {
-            let fd = new FormData(); fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name); fd.append("CLI LOBBY", c_cli_hq); fd.append("DATE", c_date);
-            document.querySelectorAll('#sec_ab [data-name]').forEach(el => fd.append(el.getAttribute('data-name'), el.value));
+            let fd = new FormData(); 
+            fd.append("CLI ID", c_cli_id); 
+            fd.append("CLI NAME", c_cli_name); 
+            fd.append("CLI LOBBY", c_cli_hq); 
+            fd.append("DATE", c_date);
+            
+            document.querySelectorAll('#sec_ab [data-name]').forEach(el => {
+                const headerName = el.getAttribute('data-name');
+                fd.append(headerName, el.value);
+
+                if (ABN_DETAIL_CONTAINERS[headerName]) {
+                    const containerId = ABN_DETAIL_CONTAINERS[headerName];
+                    const targetDetailHeader = ABN_MAP_COUNT_TO_DETAIL_HEADER[headerName];
+                    const combinedDetailString = getAbnormalityDetailString(containerId);
+                    fd.append(targetDetailHeader, combinedDetailString);
+                }
+            });
+
+            // Map and parse the new layout Grid data of FSD to its old backend column matching header
+            const combinedFsdString = getFsdTableDetailString();
+            fd.append("ABNORMALITIES DETAIL ON FSD ROUTE SETTING AMBUSH", combinedFsdString);
+
             promises.push(fetch(URL_AB, { method: 'POST', mode: 'no-cors', body: fd }));
         }
         
@@ -1486,7 +1455,7 @@ if(cb.checked){
             promises.push(fetch(URL_ALP, { method: 'POST', mode: 'no-cors', body: fd }));
         }
 
-        // 5. OTHER DUTY (ADDED no-cors)
+        // 4. OTHER DUTY
         if (checks[3]) {
             let fd = new FormData(); fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name); fd.append("CLI LOBBY", c_cli_hq); fd.append("DATE", c_date); fd.append("FROM TIME", document.getElementById('od_fromTime').value); fd.append("TO TIME", document.getElementById('od_toTime').value);
             let dt = document.getElementById('od_dutyType').value; if(dt==="OTHER DUTY") dt=`${document.getElementById('od_desc').value} (${document.getElementById('od_subType').value})`;
@@ -1494,55 +1463,40 @@ if(cb.checked){
             promises.push(fetch(URL_OD, { method: 'POST', mode: 'no-cors', body: fd }));
         }
 
-        // 6. MASS MATRIX (ADDED no-cors)
+        // 5. MASS MATRIX
         if (checks[4]) {
             let matrixData = [];
-document.querySelectorAll('.driveCheck:checked').forEach(cb => {
-
-matrixData.push({
-    empCode: cb.dataset.emp,
-    crewId: cb.dataset.crewid,
-    crewName: cb.dataset.crewname,
-    date: cb.dataset.date,
-    drive: cb.dataset.drive,
-
-    cliName: document.getElementById('c_cli_name').value,
-
-    hq: cb.dataset.hq,
-    desg: cb.dataset.desg
-});
-
-});
+            document.querySelectorAll('.driveCheck:checked').forEach(cb => {
+                matrixData.push({
+                    empCode: cb.dataset.emp,
+                    crewId: cb.dataset.crewid,
+                    crewName: cb.dataset.crewname,
+                    date: cb.dataset.date,
+                    drive: cb.dataset.drive,
+                    cliName: document.getElementById('c_cli_name').value,
+                    hq: cb.dataset.hq,
+                    desg: cb.dataset.desg
+                });
+            });
             if(matrixData.length > 0) {
                 promises.push(fetch(URL_MATRIX, { 
                     method: 'POST', 
-                    mode: 'no-cors', // Bypasses CORS 
+                    mode: 'no-cors', 
                     body: JSON.stringify(matrixData), 
                     headers: { 'Content-Type': 'text/plain' } 
                 }));
             }
         }
 
-        if(promises.length === 0) { 
-            toast("No new data to submit.", "info"); 
-            btn.disabled = false; 
-            btn.innerHTML = origText; 
-            btn.classList.replace('bg-slate-400', 'bg-blue-600');
-            btn.classList.replace('hover:bg-slate-500', 'hover:bg-blue-700');
-            return; 
-        }
-
         try {
             await Promise.all(promises);
-            toast('✅ ALL DATA SYNCED SUCCESSFULLY!', 'success');
-            setTimeout(() => location.reload(), 2000);
+            showCenterAlert('✅ ALL DATA SYNCED SUCCESSFULLY!', 'success');
+            setTimeout(() => location.reload(), 2200);
         } catch(e) { 
-            toast('Error in submission network', 'error'); 
+            showCenterAlert('Error in submission network', 'error'); 
             console.error(e);
-            btn.disabled = false; 
-            btn.innerHTML = origText; 
-            btn.classList.replace('bg-slate-400', 'bg-blue-600');
-            btn.classList.replace('hover:bg-slate-500', 'hover:bg-blue-700');
+            btn.disabled = false; btn.innerHTML = origText; 
+            btn.classList.replace('bg-slate-400', 'bg-blue-600'); btn.classList.replace('hover:bg-slate-500', 'hover:bg-blue-700');
         }
     }
 </script>
