@@ -1270,8 +1270,37 @@
                 DRIVE_LIST.forEach(drive => { if(historyMap.has(`${String(row.empCode).trim()}|${drive}`)) completedCount++; });
                 
                 const totalDrives = DRIVE_LIST.length;
-                const btnClass = completedCount > 0 ? 'bg-emerald-100 text-emerald-700 border border-emerald-300 shadow-sm' : 'bg-white text-blue-500 border border-slate-200 hover:bg-slate-50';
-                const btnText = completedCount > 0 ? `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i>${completedCount}/${totalDrives}` : '+ Add';
+// Check karenge ki kya is cell ka koi drive abhi select kiya gaya hai
+                let hasCurrentSelection = false;
+                DRIVE_LIST.forEach(drive => { 
+                    if(selectedDrives.has(`${row.empCode}|${date}|${drive}`)) hasCurrentSelection = true; 
+                });
+
+                // Naya selection Blue dikhega, database wala data Green dikhega, baaki White
+                const btnClass = hasCurrentSelection 
+                    ? 'bg-blue-100 text-blue-700 border border-blue-300 font-bold shadow-sm'
+                    : (completedCount > 0 ? 'bg-emerald-100 text-emerald-700 border border-emerald-300 font-bold shadow-sm' : 'bg-white text-blue-500 border border-slate-200 hover:bg-slate-50');
+
+                // Live dynamic counts calculation
+                let totalCheckedInCell = completedCount;
+                if (hasCurrentSelection) {
+                    // Agar popup open karke check kiya hai toh popup ke live checked boxes ko ginenye
+                    const cellPopup = document.querySelector(`tr[data-emp="${row.empCode}"] td.relative`);
+                    if(cellPopup) {
+                        totalCheckedInCell = cellPopup.querySelectorAll('.driveCheck:checked').length;
+                    } else {
+                        // Safe fallback count
+                        let activeDrives = 0;
+                        DRIVE_LIST.forEach(drive => {
+                            if(historyMap.has(`${String(row.empCode).trim()}|${drive}`) || selectedDrives.has(`${row.empCode}|${date}|${drive}`)) activeDrives++;
+                        });
+                        totalCheckedInCell = activeDrives;
+                    }
+                }
+
+                const btnText = (completedCount > 0 || hasCurrentSelection) 
+                    ? `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i>${totalCheckedInCell}/${totalDrives}` 
+                    : '+ Add';
 
                 html += `
                 <td class="relative">
@@ -1337,24 +1366,36 @@ ${done ? `<span class="text-[10px] font-bold text-amber-600 mt-0.5">Already Done
         }
     });
 
-    function updateButton(cb) {
-        const key = `${cb.dataset.emp}|${cb.dataset.date}|${cb.dataset.drive}`;
-        if(cb.checked) selectedDrives.add(key); else selectedDrives.delete(key);
-        const p = cb.closest('td.relative'); 
-        const btn = p.querySelector('button'); 
-        const checkedCount = p.querySelectorAll('.driveCheck:checked').length;
-        const totalDrives = DRIVE_LIST.length;
+function updateButton(cb) {
+    const key = `${cb.dataset.emp}|${cb.dataset.date}|${cb.dataset.drive}`;
+    if(cb.checked) selectedDrives.add(key); else selectedDrives.delete(key);
+    
+    const p = cb.closest('td.relative'); 
+    const btn = p.querySelector('button'); 
+    const totalDrives = DRIVE_LIST.length;
 
-        if(checkedCount === 0){ 
+    // Check karein ki kya popup ke andar abhi koi checkbox active hai
+    const manualCheckedCount = p.querySelectorAll('.driveCheck:checked').length;
+
+    if(manualCheckedCount === 0) { 
+        // Agar saare check nikal diye toh wapas pehle wali state par le aao
+        let completedCount = 0;
+        DRIVE_LIST.forEach(drive => { if(historyMap.has(`${String(cb.dataset.emp).trim()}|${drive}`)) completedCount++; });
+
+        if(completedCount > 0) {
+            btn.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i>${completedCount}/${totalDrives}`; 
+            btn.className = 'w-full py-1.5 px-2 rounded-md text-xs font-bold flex justify-center items-center gap-1 bg-emerald-100 text-emerald-700 border border-emerald-300 font-bold shadow-sm transition-all';
+        } else {
             btn.innerHTML = '+ Add'; 
             btn.className = 'w-full py-1.5 px-2 rounded-md text-xs font-bold flex justify-center items-center gap-1 bg-white text-blue-500 border border-slate-200 hover:bg-slate-50 transition-all'; 
-        } else { 
-            btn.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i>${checkedCount}/${totalDrives}`; 
-            btn.className = 'w-full py-1.5 px-2 rounded-md text-xs font-bold flex justify-center items-center gap-1 bg-emerald-100 text-emerald-700 border border-emerald-300 shadow-sm transition-all'; 
         }
-        requestAnimationFrame(() => { lucide.createIcons({ root: btn }); });
+    } else { 
+        // Live naye clicks par hum ise instantly Dark Bold Blue look denge
+        btn.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i>${manualCheckedCount}/${totalDrives}`; 
+        btn.className = 'w-full py-1.5 px-2 rounded-md text-xs font-bold flex justify-center items-center gap-1 bg-blue-100 text-blue-700 border border-blue-300 shadow-sm transition-all'; 
     }
-
+    requestAnimationFrame(() => { lucide.createIcons({ root: btn }); });
+}
     // =========================================================
     // SUBMIT TO CLOUD
     // =========================================================
