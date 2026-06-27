@@ -799,7 +799,7 @@
     const CREW_RANGE = "'COMBINE'!A:L";
     const CREW_API = `https://sheets.googleapis.com/v4/spreadsheets/${CREW_SHEET_ID}/values/${encodeURIComponent(CREW_RANGE)}?key=${API_KEY}`;
     
-    const URL_MATRIX = "https://script.google.com/macros/s/AKfycbxbmRynNgDQdLFK28-vizuV-aSWOXt3aYLUwjnvCS9e3R7JHidy5Ob9qTM9AVyOfE_S/exec";
+    const URL_MATRIX = "https://script.google.com/macros/s/AKfycbxSzL0pK_zXd_KFD7yPZQ2_SFyPz7J5bgSt4H_6fvfOfEGDxQOQ-g4KUvulEHONwHgu/exec";
     const URL_AB = "https://script.google.com/macros/s/AKfycbzTpR-XJHKJQUT0MnEjOTuh6iH9amkUDoI1pnZ29WdoAH8bDEJaAihhMGlhC4D9Yb5CUA/exec";
     const URL_OD = "https://script.google.com/macros/s/AKfycbzD319B272QFM5HK-3ejkl41n3zm1r_0F6bc9ZzJE1Z_6Tc-4wge65Ip16uQe9eDUmrUw/exec";
     const URL_ALP = "https://script.google.com/macros/s/AKfycbwxnVSd3eGB4SvHVz2IINLEat031qB4xvNKbe8BcdPyg5BQpL0xkbQuAyu_B-fTdIqB0A/exec";
@@ -1081,33 +1081,25 @@
         } catch (err) { console.error("Drives API error", err); }
     }
 
-    async function loadHistory() {
+async function loadHistory() {
         try {
             const res = await fetch(URL_MATRIX);
             const data = await res.json();
+            
             historyMap.clear();
-            data.slice(1).forEach(r => {
-                const emp = String(r[0] || '').trim();
-                const drive = String(r[4] || '').trim();
-                let dt = '';
-                if (r[10]) {
-                    const d = new Date(r[10]);
-                    dt = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+            latestDateMap.clear();
+            
+            // Clean dynamic hash optimization lookup mapping
+            for (let key in data) {
+                if (Object.prototype.hasOwnProperty.call(data, key)) {
+                    historyMap.add(key);
+                    latestDateMap.set(key, data[key]);
                 }
-                const key = `${emp}|${drive}`;
-                historyMap.add(key);
-                if (!latestDateMap.has(key)) {
-                    latestDateMap.set(key, dt);
-                } else {
-                    const oldDate = latestDateMap.get(key);
-                    const oldParts = oldDate.split('/');
-                    const newParts = dt.split('/');
-                    const oldObj = new Date(oldParts[2], oldParts[1]-1, oldParts[0]);
-                    const newObj = new Date(newParts[2], newParts[1]-1, newParts[0]);
-                    if (newObj > oldObj) { latestDateMap.set(key, dt); }
-                }
-            });
-        } catch (err) { console.warn("History data fetch failed.", err); }
+            }
+            console.log("⚡ Super-Fast Backend Object Sync Complete!");
+        } catch (err) { 
+            console.error("History engine failure bypass:", err); 
+        }
     }
 
     async function loadLatestCrewData() {
@@ -1251,89 +1243,73 @@
         generateMatrixTable(finalData, month, year);
         document.getElementById('tableWrapper').classList.remove('hidden');
     }
-
-    function generateMatrixTable(data, month, year) {
-        const days = new Date(year, month, 0).getDate();
-        let html = `<thead class="sticky top-0 z-30"><tr>
+function generateMatrixTable(data, month, year) {
+    const days = new Date(year, month, 0).getDate();
+    const totalDrives = DRIVE_LIST.length;
+    
+    let html = `<thead class="sticky top-0 z-30"><tr>
                    <th class="sticky-id min-w-[75px] max-w-[75px] text-[10px]">Crew ID</th>
                     <th class="min-w-[180px] max-w-[180px] text-[11px]">Name</th>`;
-        for(let d=1; d<=days; d++) html += `<th class="text-center min-w-[70px] text-[10px] px-1 bg-[#e2e8f0]">${String(d).padStart(2,'0')}/${String(month).padStart(2,'0')}</th>`;
-        html += `</tr></thead><tbody>`;
+    for(let d=1; d<=days; d++) html += `<th class="text-center min-w-[70px] text-[10px] px-1 bg-[#e2e8f0]">${String(d).padStart(2,'0')}/${String(month).padStart(2,'0')}</th>`;
+    html += `</tr></thead><tbody>`;
 
-        data.forEach(row => {
-            html += `<tr data-emp="${row.empCode}">
-                        <td class="sticky-id font-mono text-blue-600 min-w-[75px] max-w-[75px] text-[10px]">${row.crewId}</td>
-                        <td class="font-semibold truncate min-w-[190px] max-w-[190px] text-[10px]" title="${row.crewName}">${row.crewName}</td>`;
-            for(let d=1; d<=days; d++) {
-                const date = `${String(d).padStart(2,'0')}/${String(month).padStart(2,'0')}/${year}`;
-                let completedCount = 0;
-                DRIVE_LIST.forEach(drive => { if(historyMap.has(`${String(row.empCode).trim()}|${drive}`)) completedCount++; });
-                
-                const totalDrives = DRIVE_LIST.length;
-// Check karenge ki kya is cell ka koi drive abhi select kiya gaya hai
-                let hasCurrentSelection = false;
-                DRIVE_LIST.forEach(drive => { 
-                    if(selectedDrives.has(`${row.empCode}|${date}|${drive}`)) hasCurrentSelection = true; 
-                });
-
-                // Naya selection Blue dikhega, database wala data Green dikhega, baaki White
-                const btnClass = hasCurrentSelection 
-                    ? 'bg-blue-100 text-blue-700 border border-blue-300 font-bold shadow-sm'
-                    : (completedCount > 0 ? 'bg-emerald-100 text-emerald-700 border border-emerald-300 font-bold shadow-sm' : 'bg-white text-blue-500 border border-slate-200 hover:bg-slate-50');
-
-                // Live dynamic counts calculation
-                let totalCheckedInCell = completedCount;
-                if (hasCurrentSelection) {
-                    // Agar popup open karke check kiya hai toh popup ke live checked boxes ko ginenye
-                    const cellPopup = document.querySelector(`tr[data-emp="${row.empCode}"] td.relative`);
-                    if(cellPopup) {
-                        totalCheckedInCell = cellPopup.querySelectorAll('.driveCheck:checked').length;
-                    } else {
-                        // Safe fallback count
-                        let activeDrives = 0;
-                        DRIVE_LIST.forEach(drive => {
-                            if(historyMap.has(`${String(row.empCode).trim()}|${drive}`) || selectedDrives.has(`${row.empCode}|${date}|${drive}`)) activeDrives++;
-                        });
-                        totalCheckedInCell = activeDrives;
-                    }
-                }
-
-                const btnText = (completedCount > 0 || hasCurrentSelection) 
-                    ? `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i>${totalCheckedInCell}/${totalDrives}` 
-                    : '+ Add';
-
-                html += `
-                <td class="relative">
-                    <button type="button" onclick="togglePopup(this)" class="w-full py-1 px-1 rounded text-[10px] font-bold flex justify-center items-center gap-1 transition-all ${btnClass}">
-                     ${btnText}
-                    </button>
-                    <div class="drive-popup hidden fixed z-[99999] p-4 w-[420px] max-w-[90vw]">
-                        <div class="flex justify-between items-center border-b pb-2 mb-2">
-    <div class="text-[10px] text-slate-500 uppercase tracking-widest font-black">Select Drives (${totalDrives} Total)</div>
-    <button type="button" onclick="closePopup(this)" class="text-red-500 hover:text-red-700 font-bold text-lg leading-none px-2">✕</button>
-</div>
-                        <div class="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-2">
-                        ${DRIVE_LIST.map(drive => {
-                            const done = historyMap.has(`${String(row.empCode).trim()}|${drive}`); 
-                            const key = `${String(row.empCode).trim()}|${drive}`;
-                            const latestDate = latestDateMap.get(key) || '';               
-                            return `<label class="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${done ? 'bg-emerald-50 border border-emerald-200' : 'hover:bg-slate-50 border border-transparent'}">
-                               <input type="checkbox" class="checkbox-custom driveCheck" ${selectedDrives.has(`${row.empCode}|${date}|${drive}`) ? 'checked' : ''} value="${drive}" data-emp="${row.empCode}" data-date="${date}" data-drive="${drive}" data-cliname="${row.cliName}" data-crewid="${row.crewId}" data-crewname="${row.crewName}" data-hq="${row.hq}" data-desg="${row.crewType}" onchange="updateButton(this)">
-<div class="flex flex-col">
-${DRIVE_PDF_LINKS[drive] ? `<a href="${DRIVE_PDF_LINKS[drive]}" target="_blank" rel="noopener noreferrer" class="text-xs font-bold underline flex items-start gap-1 break-words whitespace-normal leading-4 ${done ? 'text-emerald-700' : 'text-blue-600'}"><i data-lucide="file-text" class="w-3 h-3"></i>${drive}</a>` : `<span class="text-xs font-bold break-words whitespace-normal leading-4 ${done ? 'text-emerald-700' : 'text-slate-700'}">${drive}</span>`}
-${done ? `<span class="text-[10px] font-bold text-amber-600 mt-0.5">Already Done (${latestDate})</span>` : ''}
-</div>
-                            </label>`;
-                        }).join('')}
-                        </div>
-                    </div>
-                </td>`;
-            }
-            html += `</tr>`;
+    // Pre-calculate completed drives counts for each crew to eliminate O(N^2) loop inside date loop
+    const crewCompletedCounts = new Map();
+    data.forEach(row => {
+        let count = 0;
+        const empTrimmed = String(row.empCode).trim();
+        DRIVE_LIST.forEach(drive => { 
+            if(historyMap.has(`${empTrimmed}|${drive}`)) count++; 
         });
-        document.getElementById('tableContainer').innerHTML = `<table class="w-full text-sm">${html}</tbody></table>`;
-        requestAnimationFrame(() => { lucide.createIcons(); });
-    }
+        crewCompletedCounts.set(row.empCode, count);
+    });
+
+    data.forEach(row => {
+        const empCodeStr = String(row.empCode).trim();
+        const completedCount = crewCompletedCounts.get(row.empCode) || 0;
+        
+        html += `<tr data-emp="${row.empCode}">
+                    <td class="sticky-id font-mono text-blue-600 min-w-[75px] max-w-[75px] text-[10px]">${row.crewId}</td>
+                    <td class="font-semibold truncate min-w-[190px] max-w-[190px] text-[10px]" title="${row.crewName}">${row.crewName}</td>`;
+                    
+        for(let d=1; d<=days; d++) {
+            const date = `${String(d).padStart(2,'0')}/${String(month).padStart(2,'0')}/${year}`;
+            
+// Check current global selections instantly from Set
+            let currentSelectionCount = 0;
+            DRIVE_LIST.forEach(drive => {
+                if(selectedDrives.has(`${row.empCode}|${date}|${drive}`)) currentSelectionCount++;
+            });
+
+            const hasCurrentSelection = currentSelectionCount > 0;
+            
+            // Fixed validation calculation logic to prevent crash
+            let totalCheckedInCell = completedCount;
+            if (hasCurrentSelection) {
+                totalCheckedInCell = currentSelectionCount;
+            }
+
+            const btnClass = hasCurrentSelection 
+                ? 'bg-blue-100 text-blue-700 border border-blue-300 font-bold shadow-sm'
+                : (completedCount > 0 ? 'bg-emerald-100 text-emerald-700 border border-emerald-300 font-bold shadow-sm' : 'bg-white text-blue-500 border border-slate-200 hover:bg-slate-50');
+
+            const btnText = (completedCount > 0 || hasCurrentSelection) 
+                ? `<i class="w-3 h-3 border-2 border-current rounded-full inline-block mr-1"></i>${totalCheckedInCell}/${totalDrives}` 
+                : '+ Add';
+
+html += `
+            <td class="relative" data-date="${date}" data-emp="${row.empCode}">
+                <button type="button" onclick="toggleDeferredPopup(this)" class="w-full py-1 px-1 rounded text-[10px] font-bold flex justify-center items-center gap-1 transition-all ${btnClass}">
+                 ${btnText}
+                </button>
+                <div class="drive-popup hidden fixed z-[99999] p-4 w-[420px] max-w-[90vw]"></div>
+            </td>`;
+        }
+        html += `</tr>`;
+    });
+    document.getElementById('tableContainer').innerHTML = `<table class="w-full text-sm">${html}</tbody></table>`;
+    requestAnimationFrame(() => { lucide.createIcons(); });
+}
 
     function togglePopup(btn) {
         document.querySelectorAll('.drive-popup').forEach(p => { if (p !== btn.nextElementSibling) p.classList.add('hidden'); });
@@ -1374,13 +1350,16 @@ function updateButton(cb) {
     const btn = p.querySelector('button'); 
     const totalDrives = DRIVE_LIST.length;
 
-    // Check karein ki kya popup ke andar abhi koi checkbox active hai
-    const manualCheckedCount = p.querySelectorAll('.driveCheck:checked').length;
+    // Fast calculation without querySelectorAll DOM scanning
+    let manualCheckedCount = 0;
+    DRIVE_LIST.forEach(drive => {
+        if(selectedDrives.has(`${cb.dataset.emp}|${cb.dataset.date}|${drive}`)) manualCheckedCount++;
+    });
 
     if(manualCheckedCount === 0) { 
-        // Agar saare check nikal diye toh wapas pehle wali state par le aao
         let completedCount = 0;
-        DRIVE_LIST.forEach(drive => { if(historyMap.has(`${String(cb.dataset.emp).trim()}|${drive}`)) completedCount++; });
+        const empTrimmed = String(cb.dataset.emp).trim();
+        DRIVE_LIST.forEach(drive => { if(historyMap.has(`${empTrimmed}|${drive}`)) completedCount++; });
 
         if(completedCount > 0) {
             btn.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i>${completedCount}/${totalDrives}`; 
@@ -1390,7 +1369,6 @@ function updateButton(cb) {
             btn.className = 'w-full py-1.5 px-2 rounded-md text-xs font-bold flex justify-center items-center gap-1 bg-white text-blue-500 border border-slate-200 hover:bg-slate-50 transition-all'; 
         }
     } else { 
-        // Live naye clicks par hum ise instantly Dark Bold Blue look denge
         btn.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i>${manualCheckedCount}/${totalDrives}`; 
         btn.className = 'w-full py-1.5 px-2 rounded-md text-xs font-bold flex justify-center items-center gap-1 bg-blue-100 text-blue-700 border border-blue-300 shadow-sm transition-all'; 
     }
@@ -1541,6 +1519,45 @@ function updateButton(cb) {
             btn.classList.replace('bg-slate-400', 'bg-blue-600'); btn.classList.replace('hover:bg-slate-500', 'hover:bg-blue-700');
         }
     }
+    function toggleDeferredPopup(btn) {
+    const parentTd = btn.closest('td');
+    const popup = parentTd.querySelector('.drive-popup');
+    const empCode = parentTd.dataset.emp;
+    const date = parentTd.dataset.date;
+    
+    if (popup.innerHTML === "") {
+        const row = latestCrewData.find(c => String(c.empCode).trim() === empCode);
+        const empCodeStr = String(empCode).trim();
+        const totalDrives = DRIVE_LIST.length;
+        
+        let popupHTML = `
+            <div class="flex justify-between items-center border-b pb-2 mb-2">
+                <div class="text-[10px] text-slate-500 uppercase tracking-widest font-black">Select Drives (${totalDrives} Total)</div>
+                <button type="button" onclick="closePopup(this)" class="text-red-500 hover:text-red-700 font-bold text-lg leading-none px-2">✕</button>
+            </div>
+            <div class="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-2">`;
+            
+        popupHTML += DRIVE_LIST.map(drive => {
+            const done = historyMap.has(`${empCodeStr}|${drive}`); 
+            const key = `${empCodeStr}|${drive}`;
+            const latestDate = latestDateMap.get(key) || '';               
+            return `<label class="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${done ? 'bg-emerald-50 border border-emerald-200' : 'hover:bg-slate-50 border border-transparent'}">
+                       <input type="checkbox" class="checkbox-custom driveCheck" ${selectedDrives.has(`${empCode}|${date}|${drive}`) ? 'checked' : ''} value="${drive}" data-emp="${empCode}" data-date="${date}" data-drive="${drive}" data-cliname="${row ? row.cliName : ''}" data-crewid="${row ? row.crewId : ''}" data-crewname="${row ? row.crewName : ''}" data-hq="${row ? row.hq : ''}" data-desg="${row ? row.crewType : ''}" onchange="updateButton(this)">
+                        <div class="flex flex-col">
+                        ${DRIVE_PDF_LINKS[drive] ? `<a href="${DRIVE_PDF_LINKS[drive]}" target="_blank" rel="noopener noreferrer" class="text-xs font-bold underline flex items-start gap-1 break-words whitespace-normal leading-4 ${done ? 'text-emerald-700' : 'text-blue-600'}"><i data-lucide="file-text" class="w-3 h-3"></i>${drive}</a>` : `<span class="text-xs font-bold break-words whitespace-normal leading-4 ${done ? 'text-emerald-700' : 'text-slate-700'}">${drive}</span>`}
+                        ${done ? `<span class="text-[10px] font-bold text-amber-600 mt-0.5">Already Done (${latestDate})</span>` : ''}
+                        </div>
+                    </label>`;
+        }).join('');
+        
+popupHTML += `</div>`;
+        popup.innerHTML = popupHTML;
+        
+        // Dynamic icons rendering handler line inject karein taaki popup open hote hi file-text icons activate ho sakein
+        requestAnimationFrame(() => { lucide.createIcons({ root: popup }); });
+    }
+    togglePopup(btn);
+}
 </script>
 </body>
 </html>
