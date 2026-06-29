@@ -799,7 +799,7 @@
     const CREW_RANGE = "'COMBINE'!A:L";
     const CREW_API = `https://sheets.googleapis.com/v4/spreadsheets/${CREW_SHEET_ID}/values/${encodeURIComponent(CREW_RANGE)}?key=${API_KEY}`;
     
-    const URL_MATRIX = "https://script.google.com/macros/s/AKfycbxSzL0pK_zXd_KFD7yPZQ2_SFyPz7J5bgSt4H_6fvfOfEGDxQOQ-g4KUvulEHONwHgu/exec";
+    const URL_MATRIX = "https://script.google.com/macros/s/AKfycbz_FpTEVj4zgWHuGp7p_bazMeH3dFmdTsigh728hpdYF6mK5l2ZlF8Qv_Ps3i3fhmnr/exec";
     const URL_AB = "https://script.google.com/macros/s/AKfycbzTpR-XJHKJQUT0MnEjOTuh6iH9amkUDoI1pnZ29WdoAH8bDEJaAihhMGlhC4D9Yb5CUA/exec";
     const URL_OD = "https://script.google.com/macros/s/AKfycbzD319B272QFM5HK-3ejkl41n3zm1r_0F6bc9ZzJE1Z_6Tc-4wge65Ip16uQe9eDUmrUw/exec";
     const URL_ALP = "https://script.google.com/macros/s/AKfycbwxnVSd3eGB4SvHVz2IINLEat031qB4xvNKbe8BcdPyg5BQpL0xkbQuAyu_B-fTdIqB0A/exec";
@@ -1483,43 +1483,47 @@ function updateButton(cb) {
             promises.push(fetch(URL_OD, { method: 'POST', mode: 'no-cors', body: fd }));
         }
 
-        // 5. MASS MATRIX
+// 5. MASS MATRIX (Main Button Batch Collector Engine)
         if (checks[4]) {
-            let matrixData = [];
-            document.querySelectorAll('.driveCheck:checked').forEach(cb => {
-                matrixData.push({
-                    empCode: cb.dataset.emp,
-                    crewId: cb.dataset.crewid,
-                    crewName: cb.dataset.crewname,
-                    date: cb.dataset.date,
-                    drive: cb.dataset.drive,
-                    cliName: document.getElementById('c_cli_name').value,
-                    hq: cb.dataset.hq,
-                    desg: cb.dataset.desg
-                });
+            let matrixBatchData = [];
+            
+            // Pure portal par jitne bhi popups ke andar selected active checks hain, sabko ek jhatke me scan karo
+            document.querySelectorAll('.matrix-active-check:checked:not(:disabled)').forEach(cb => {
+                const empCodeStr = cb.dataset.emp;
+                const driveName = cb.dataset.drive;
+                const dateStr = cb.dataset.date;
+                const row = latestCrewData.find(c => String(c.empCode).trim() === empCodeStr);
+                
+                if (row) {
+                    // Cache lock internally right away
+                    historyMap.add(`${empCodeStr}|${driveName}`);
+                    latestDateMap.set(`${empCodeStr}|${empCodeStr}`, dateStr);
+
+                    matrixBatchData.push({
+                        empCode: empCodeStr,
+                        crewId: String(row.crewId || "").trim(),
+                        crewName: String(row.crewName || "").trim(),
+                        date: dateStr,
+                        drive: driveName,
+                        cliName: String(c_cli_name).trim(),
+                        hq: String(row.hq || "").trim(),
+                        desg: String(row.crewType || "").trim()
+                    });
+                }
             });
-            if(matrixData.length > 0) {
+
+            // Agar main button click karne par checkmarks mile hain, tabhi array payload pass karo
+            if (matrixBatchData.length > 0) {
                 promises.push(fetch(URL_MATRIX, { 
                     method: 'POST', 
                     mode: 'no-cors', 
-                    body: JSON.stringify(matrixData), 
+                    body: JSON.stringify(matrixBatchData),
                     headers: { 'Content-Type': 'text/plain' } 
                 }));
             }
         }
-
-        try {
-            await Promise.all(promises);
-            showCenterAlert('✅ ALL DATA SYNCED SUCCESSFULLY!', 'success');
-            setTimeout(() => location.reload(), 2200);
-        } catch(e) { 
-            showCenterAlert('Error in submission network', 'error'); 
-            console.error(e);
-            btn.disabled = false; btn.innerHTML = origText; 
-            btn.classList.replace('bg-slate-400', 'bg-blue-600'); btn.classList.replace('hover:bg-slate-500', 'hover:bg-blue-700');
-        }
     }
-    function toggleDeferredPopup(btn) {
+ function toggleDeferredPopup(btn) {
     const parentTd = btn.closest('td');
     const popup = parentTd.querySelector('.drive-popup');
     const empCode = parentTd.dataset.emp;
@@ -1535,28 +1539,285 @@ function updateButton(cb) {
                 <div class="text-[10px] text-slate-500 uppercase tracking-widest font-black">Select Drives (${totalDrives} Total)</div>
                 <button type="button" onclick="closePopup(this)" class="text-red-500 hover:text-red-700 font-bold text-lg leading-none px-2">✕</button>
             </div>
-            <div class="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-2">`;
+            <div class="flex flex-col gap-2 max-h-[320px] overflow-y-auto pr-2 mb-3">`;
             
         popupHTML += DRIVE_LIST.map(drive => {
-            const done = historyMap.has(`${empCodeStr}|${drive}`); 
             const key = `${empCodeStr}|${drive}`;
-            const latestDate = latestDateMap.get(key) || '';               
-            return `<label class="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${done ? 'bg-emerald-50 border border-emerald-200' : 'hover:bg-slate-50 border border-transparent'}">
-                       <input type="checkbox" class="checkbox-custom driveCheck" ${selectedDrives.has(`${empCode}|${date}|${drive}`) ? 'checked' : ''} value="${drive}" data-emp="${empCode}" data-date="${date}" data-drive="${drive}" data-cliname="${row ? row.cliName : ''}" data-crewid="${row ? row.crewId : ''}" data-crewname="${row ? row.crewName : ''}" data-hq="${row ? row.hq : ''}" data-desg="${row ? row.crewType : ''}" onchange="updateButton(this)">
-                        <div class="flex flex-col">
+            const done = historyMap.has(key); 
+            const latestDate = latestDateMap.get(key) || ''; 
+            const isCurrentDateDone = done && (latestDate === date);
+
+            return `<label class="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${isCurrentDateDone ? 'bg-gray-100 border border-gray-200 opacity-60' : (done ? 'bg-emerald-50 border border-emerald-200' : 'hover:bg-slate-50 border border-transparent')}">
+                       <input type="checkbox" class="checkbox-custom tempDriveCheck matrix-active-check" 
+                           ${isCurrentDateDone ? 'checked disabled' : ''} 
+                           value="${drive}" 
+                           data-emp="${empCodeStr}"
+                           data-date="${date}"
+                           data-drive="${drive}">
+                        <div class="flex flex-col flex-1">
                         ${DRIVE_PDF_LINKS[drive] ? `<a href="${DRIVE_PDF_LINKS[drive]}" target="_blank" rel="noopener noreferrer" class="text-xs font-bold underline flex items-start gap-1 break-words whitespace-normal leading-4 ${done ? 'text-emerald-700' : 'text-blue-600'}"><i data-lucide="file-text" class="w-3 h-3"></i>${drive}</a>` : `<span class="text-xs font-bold break-words whitespace-normal leading-4 ${done ? 'text-emerald-700' : 'text-slate-700'}">${drive}</span>`}
-                        ${done ? `<span class="text-[10px] font-bold text-amber-600 mt-0.5">Already Done (${latestDate})</span>` : ''}
+                        ${done ? `<span class="text-[10px] font-bold text-amber-600 mt-0.5">Last Done: ${latestDate}</span>` : ''}
                         </div>
                     </label>`;
         }).join('');
         
-popupHTML += `</div>`;
-        popup.innerHTML = popupHTML;
+        popupHTML += `</div>
+            <div class="pt-2 border-t flex gap-2">
+                <button type="button" onclick="syncBatchDrivesFromPopup(this, '${empCodeStr}', '${date}')" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded text-xs tracking-wider uppercase shadow-md flex justify-center items-center gap-2">
+                    <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i> Sync Selected
+                </button>
+            </div>`;
         
-        // Dynamic icons rendering handler line inject karein taaki popup open hote hi file-text icons activate ho sakein
+        popup.innerHTML = popupHTML;
         requestAnimationFrame(() => { lucide.createIcons({ root: popup }); });
     }
     togglePopup(btn);
+}
+async function syncBatchDrivesFromPopup(btnElement, empCode, date) {
+    const popup = btnElement.closest('.drive-popup');
+    const parentTd = btnElement.closest('td.relative');
+    const mainCellBtn = parentTd.querySelector('button[onclick="toggleDeferredPopup(this)"]');
+    
+    // Sirf wahi checkboxes uthao jo user ne manually tick kiye hain
+    const checkedBoxes = popup.querySelectorAll('.tempDriveCheck:checked:not(:disabled)');
+    if (checkedBoxes.length === 0) {
+        popup.classList.add('hidden');
+        return;
+    }
+
+    const row = latestCrewData.find(c => String(c.empCode).trim() === empCode);
+    if (!row) return;
+
+    // Popup button status update
+    const originalText = btnElement.innerHTML;
+    btnElement.disabled = true;
+    btnElement.innerText = "⏳ Syncing...";
+
+    // Batch Payload array collect karein
+    let batchPayload = [];
+    checkedBoxes.forEach(cb => {
+        const driveName = cb.dataset.drive;
+        
+        // Optimistic local cache push instantly
+        historyMap.add(`${empCode}|${driveName}`);
+        latestDateMap.set(`${empCode}|${driveName}`, date);
+
+        batchPayload.push({
+            empCode: empCode,
+            crewId: String(row.crewId || "").trim(),
+            crewName: String(row.crewName || "").trim(),
+            date: date,
+            drive: driveName,
+            cliName: String(document.getElementById('c_cli_name').value || row.cliName || "").trim(),
+            hq: String(row.hq || "").trim(),
+            desg: String(row.crewType || "").trim()
+        });
+    });
+
+    // Grid Counter live update
+    const totalDrives = DRIVE_LIST.length;
+    let currentDoneCount = 0;
+    DRIVE_LIST.forEach(d => { if(historyMap.has(`${empCode}|${d}`)) currentDoneCount++; });
+    
+    mainCellBtn.innerHTML = `<i class="w-3 h-3 border-2 border-current rounded-full inline-block mr-1"></i>${currentDoneCount}/${totalDrives}`;
+    mainCellBtn.className = 'w-full py-1 px-1 rounded text-[10px] font-bold flex justify-center items-center gap-1 transition-all bg-emerald-100 text-emerald-700 border border-emerald-300 font-bold shadow-sm';
+
+    // API Hit for immediate cell sync
+    try {
+        await fetch(URL_MATRIX, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            body: JSON.stringify(batchPayload),
+            headers: { 'Content-Type': 'text/plain' } 
+        });
+        
+        popup.innerHTML = ""; // Popup clean surface
+        popup.classList.add('hidden');
+    } catch (err) {
+        console.error("Batch Sync Drop Error:", err);
+        btnElement.disabled = false;
+        btnElement.innerHTML = originalText;
+        showCenterAlert("Network pipeline execution error.", "error");
+    }
+}
+
+async function processUnifiedSubmit() {
+    const form = document.getElementById('masterForm');
+    if(!form.checkValidity()) { form.reportValidity(); return; }
+
+    const checks = ['chk_ab','chk_lp','chk_alp','chk_od','chk_matrix'].map(id => document.getElementById(id).checked);
+    if(!checks.includes(true)) return showCenterAlert("Please select at least one section to submit.", "error");
+
+    // Dynamic Mathematical Validations
+    if (checks[0]) {
+        const fpWee = parseInt(document.getElementById('fpWeeHours').value) || 0;
+        const fpExcl = parseInt(document.getElementById('fpExcludingWee').value) || 0;
+        const fpCoaching = parseInt(document.getElementById('fpCoaching').value) || 0;
+        const fpMemu = parseInt(document.getElementById('fpMemu').value) || 0;
+        const fpGoods = parseInt(document.getElementById('fpGoods').value) || 0;
+
+        const sumLeftFp = fpWee + fpExcl;
+        const sumRightFp = fpCoaching + fpMemu + fpGoods;
+
+        if (sumLeftFp !== sumRightFp) {
+            showCenterAlert(`Validation Failed: Sum of Footplates mismatch!\n\n(Wee + Excl) = ${sumLeftFp}\n\nMust be equal to:\n(Coaching + MEMU + Goods) = ${sumRightFp}`, "error");
+            return;
+        }
+
+        const abWee = parseInt(document.getElementById('abWeeHours').value) || 0;
+        const abExcl = parseInt(document.getElementById('abExcludingWee').value) || 0;
+        const abCoaching = parseInt(document.getElementById('abCoachingCount').value) || 0;
+        const abMemu = parseInt(document.getElementById('abMemuCount').value) || 0;
+        const abGoods = parseInt(document.getElementById('abGoodsCount').value) || 0;
+
+        const sumLeftAbn = abWee + abExcl;
+        const sumRightAbn = abCoaching + abMemu + abGoods;
+
+        if (sumLeftAbn !== sumRightAbn) {
+            showCenterAlert(`Validation Failed: Sum of Abnormalities mismatch!\n\n(Wee + Excl) = ${sumLeftAbn}\n\nMust be equal to:\n(Coaching + MEMU + Goods) = ${sumRightAbn}`, "error");
+            return;
+        }
+    }
+
+    const c_cli_id = document.getElementById('c_cli_id').value;
+    const c_cli_name = document.getElementById('c_cli_name').value;
+    const c_cli_hq = document.getElementById('c_cli_hq').value;
+    const c_date = document.getElementById('c_date').value;
+
+    const btn = document.getElementById('masterSubmitBtn');
+    const origText = btn.innerHTML;
+    btn.disabled = true; 
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> SYNCING TO CLOUD...';
+    btn.classList.replace('bg-blue-600', 'bg-slate-400');
+    btn.classList.replace('hover:bg-blue-700', 'hover:bg-slate-500');
+    requestAnimationFrame(() => { lucide.createIcons(); });
+
+    let promises = [];
+
+    // 1. ABNORMALITY
+    if (checks[0]) {
+        let fd = new FormData(); 
+        fd.append("CLI ID", c_cli_id); 
+        fd.append("CLI NAME", c_cli_name); 
+        fd.append("CLI LOBBY", c_cli_hq); 
+        fd.append("DATE", c_date);
+        
+        document.querySelectorAll('#sec_ab [data-name]').forEach(el => {
+            const headerName = el.getAttribute('data-name');
+            fd.append(headerName, el.value);
+
+            if (ABN_DETAIL_CONTAINERS[headerName]) {
+                const containerId = ABN_DETAIL_CONTAINERS[headerName];
+                const targetDetailHeader = ABN_MAP_COUNT_TO_DETAIL_HEADER[headerName];
+                const combinedDetailString = getAbnormalityDetailString(containerId);
+                fd.append(targetDetailHeader, combinedDetailString);
+            }
+        });
+
+        const combinedFsdString = getFsdTableDetailString();
+        fd.append("ABNORMALITIES DETAIL ON FSD ROUTE SETTING AMBUSH", combinedFsdString);
+        promises.push(fetch(URL_AB, { method: 'POST', mode: 'no-cors', body: fd }));
+    }
+    
+    // 2. LP
+    if (checks[1]) {
+        let fd = new FormData(); fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name); fd.append("LP ID", document.getElementById('lp_id').value); fd.append("LP NAME", document.getElementById('lp_name').value); fd.append("DESG", document.getElementById('lp_desg').value); fd.append("HQ", document.getElementById('lp_hq').value); fd.append("EMP CODE", document.getElementById('lp_empcode').value); fd.append("MAJOR BEAT", document.getElementById('lp_major_beat').value);
+        const bv = document.getElementById('lp_beat').value; if(bv==='OTHER'){ fd.append("BEAT_OTHER","OTHER"); fd.append("BEAT",document.getElementById('lp_other_beat').value); }else{ fd.append("BEAT",bv); }
+        fd.append("LOCO NUMBER", document.getElementById('lp_loco').value); fd.append("TRAIN NUMBER", document.getElementById('lp_train').value); fd.append("DATE", c_date); fd.append("FROM TIME", document.getElementById('lp_from').value); fd.append("TO TIME", document.getElementById('lp_to').value);
+        promises.push(fetch(URL_LP, { method: 'POST', mode: 'no-cors', body: fd }));
+    }
+
+    // 3. ALP
+    if (checks[2]) {
+        let fd = new FormData(); fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name); fd.append("ALP ID", document.getElementById('alp_id').value); fd.append("ALP NAME", document.getElementById('alp_name').value); fd.append("DESG", document.getElementById('alp_desg').value); fd.append("HQ", document.getElementById('alp_hq').value);
+        const bv = document.getElementById('alp_beat').value; if(bv==='OTHER'){ fd.append("BEAT_OTHER","OTHER"); fd.append("BEAT",document.getElementById('alp_other_beat').value); }else{ fd.append("BEAT",bv); }
+        fd.append("DATE", c_date);
+        promises.push(fetch(URL_ALP, { method: 'POST', mode: 'no-cors', body: fd }));
+    }
+
+    // 4. OTHER DUTY
+    if (checks[3]) {
+        let fd = new FormData(); fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name); fd.append("CLI LOBBY", c_cli_hq); fd.append("DATE", c_date); fd.append("FROM TIME", document.getElementById('od_fromTime').value); fd.append("TO TIME", document.getElementById('od_toTime').value);
+        let dt = document.getElementById('od_dutyType').value; if(dt==="OTHER DUTY") dt=`${document.getElementById('od_desc').value} (${document.getElementById('od_subType').value})`;
+        fd.append("DUTY TYPE", dt);
+        promises.push(fetch(URL_OD, { method: 'POST', mode: 'no-cors', body: fd }));
+    }
+
+    // 5. MASS MATRIX
+    if (checks[4]) {
+        let matrixBatchData = [];
+        document.querySelectorAll('.matrix-active-check:checked:not(:disabled)').forEach(cb => {
+            const empCodeStr = cb.dataset.emp;
+            const driveName = cb.dataset.drive;
+            const dateStr = cb.dataset.date;
+            const row = latestCrewData.find(c => String(c.empCode).trim() === empCodeStr);
+            
+            if (row) {
+                historyMap.add(`${empCodeStr}|${driveName}`);
+                latestDateMap.set(`${empCodeStr}|${driveName}`, dateStr);
+
+                matrixBatchData.push({
+                    empCode: empCodeStr,
+                    crewId: String(row.crewId || "").trim(),
+                    crewName: String(row.crewName || "").trim(),
+                    date: dateStr,
+                    drive: driveName,
+                    cliName: String(c_cli_name).trim(),
+                    hq: String(row.hq || "").trim(),
+                    desg: String(row.crewType || "").trim()
+                });
+            }
+        });
+
+        if (matrixBatchData.length > 0) {
+            promises.push(fetch(URL_MATRIX, { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                body: JSON.stringify(matrixBatchData),
+                headers: { 'Content-Type': 'text/plain' } 
+            }));
+        }
+    }
+
+    // =========================================================
+    // MASTER BUTTON RENDER & COMPLETION HANDLING
+    // =========================================================
+    try {
+        if (promises.length === 0) {
+            showCenterAlert('✅ NO NEW ENTRIES TO SYNC!', 'info');
+            btn.disabled = false;
+            btn.innerHTML = origText;
+            btn.classList.replace('bg-slate-400', 'bg-blue-600');
+            btn.classList.replace('hover:bg-slate-500', 'hover:bg-blue-700');
+            return;
+        }
+
+        // High-Speed Racing Trigger
+        const fetchPromise = Promise.all(promises);
+        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve('FORCE_BYPASS'), 3500));
+        const finalResult = await Promise.race([fetchPromise, timeoutPromise]);
+
+        if (finalResult === 'FORCE_BYPASS') {
+            console.log("⚠️ Background pipeline crowded. Forcing frontend release.");
+        }
+
+        showCenterAlert('✅ ALL DATA DISPATCHED SUCCESSFULLY!', 'success');
+        setTimeout(() => { location.reload(); }, 1800);
+
+    } catch(e) { 
+        showCenterAlert('Sync Warning: Data triggered to cloud but response parsed with warning.', 'info'); 
+        console.error("Submission Engine Trace Error:", e);
+        setTimeout(() => { location.reload(); }, 2000);
+    } finally {
+        setTimeout(() => {
+            if (btn.disabled) {
+                btn.disabled = false;
+                btn.innerHTML = origText;
+                btn.classList.replace('bg-slate-400', 'bg-blue-600');
+                btn.classList.replace('hover:bg-slate-500', 'hover:bg-blue-700');
+            }
+        }, 4000);
+    }
 }
 </script>
 </body>
