@@ -1096,51 +1096,63 @@ async function loadHistory() {
         }
     }
 
-    async function loadLatestCrewData() {
-        try {
-            const res = await fetch(CREW_API);
-            const data = await res.json();
-            const crewMap = {};
-            const getTimestamp = (dateStr) => {
-                if (!dateStr) return 0;
-                let d = String(dateStr).trim().split(" ")[0]; 
-                if (d.includes("/")) {
-                    let p = d.split("/");
-                    if (p[2] && p[2].length === 4) return new Date(p[2], p[1]-1, p[0]).getTime();
-                } else if (d.includes("-")) {
-                    let p = d.split("-");
-                    if (p[0] && p[0].length === 4) return new Date(p[0], p[1]-1, p[2]).getTime();
-                    if (p[2] && p[2].length === 4) return new Date(p[2], p[1]-1, p[0]).getTime();
-                }
-                return new Date(dateStr).getTime() || 0; 
+async function loadLatestCrewData() {
+    try {
+        const res = await fetch(CREW_API);
+        const data = await res.json();
+        const crewMap = {};
+        
+        const getTimestamp = (dateStr) => {
+            if (!dateStr) return 0;
+            let d = String(dateStr).trim().split(" ")[0]; 
+            if (d.includes("/")) {
+                let p = d.split("/");
+                if (p[2] && p[2].length === 4) return new Date(p[2], p[1]-1, p[0]).getTime();
+            } else if (d.includes("-")) {
+                let p = d.split("-");
+                if (p[0] && p[0].length === 4) return new Date(p[0], p[1]-1, p[2]).getTime();
+                if (p[2] && p[2].length === 4) return new Date(p[2], p[1]-1, p[0]).getTime();
+            }
+            return new Date(dateStr).getTime() || 0; 
+        };
+
+        (data.values || []).slice(1).forEach(row => {
+            const empCode = row[4] || "";
+            if (!empCode) return; 
+
+            const crewStatus = String(row[11] || "").trim().toUpperCase(); 
+            const updateDateStr = row[8] || ""; 
+            const currentTimestamp = getTimestamp(updateDateStr);
+
+            const obj = { 
+                crewId: row[0]||"", 
+                crewName: row[1]||"", 
+                hrmsId: row[2]||"", 
+                crewType: row[3]||"", 
+                empCode: empCode, 
+                cliName: row[6]||"", 
+                hq: row[7]||"",
+                status: crewStatus, // Status ko yahan save rakh rahe hain comparison ke liye
+                timestamp: currentTimestamp 
             };
 
-            (data.values || []).slice(1).forEach(row => {
-                const empCode = row[4] || "";
-                const crewStatus = row[11] || ""; 
-                if (!empCode || crewStatus.trim().toUpperCase() !== "ACTIVE") return; 
-                const updateDateStr = row[8] || ""; 
-                const currentTimestamp = getTimestamp(updateDateStr);
-                const obj = { 
-                    crewId: row[0]||"", 
-                    crewName: row[1]||"", 
-                    hrmsId: row[2]||"", 
-                    crewType: row[3]||"", 
-                    empCode: empCode, 
-                    cliName: row[6]||"", 
-                    hq: row[7]||"",
-                    timestamp: currentTimestamp 
-                };
-                if (crewMap[empCode]) {
-                    if (currentTimestamp >= crewMap[empCode].timestamp) crewMap[empCode] = obj;
-                } else {
+            // Agar is Emp Code ki entry pehle se hai, toh check karein kya yeh nayi (latest) entry hai?
+            if (crewMap[empCode]) {
+                if (currentTimestamp >= crewMap[empCode].timestamp) {
                     crewMap[empCode] = obj;
                 }
-            });
-            latestCrewData = Object.values(crewMap);
-        } catch (err) { console.error("Crew Fetch Error", err); }
-    }
+            } else {
+                crewMap[empCode] = obj;
+            }
+        });
 
+        // Sabhi crews ki latest entry nikalne ke baad, ab filter karein ki sirf ACTIVE waale hi bachein
+        latestCrewData = Object.values(crewMap).filter(c => c.status === "ACTIVE");
+        
+    } catch (err) { 
+        console.error("Crew Fetch Error", err); 
+    }
+}
     document.getElementById('c_cli_id').addEventListener('input', (e) => {
         const sanitized = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
         e.target.value = sanitized;
