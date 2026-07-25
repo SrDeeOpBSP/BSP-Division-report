@@ -3902,10 +3902,15 @@ function generateLast90DaysSummary() {
     ninetyDaysAgo.setDate(today.getDate() - 90);
     ninetyDaysAgo.setHours(0, 0, 0, 0);
 
+    // 10-day warning date threshold (80 days old)
+    const eightyDaysAgo = new Date();
+    eightyDaysAgo.setDate(today.getDate() - 80);
+    eightyDaysAgo.setHours(0, 0, 0, 0);
+
     window.overdueCrewMap = {}; 
+    window.dueSoonCrewMap = {}; 
     
-    // NAYA LOGIC: CSV ke liye globally perfect format yahi se set karenge
-    window.last90CsvData = [["CLI NAME", "HQ", "DESG", "TOTAL CREW", "FP DONE (LAST 90 DAYS)", "OVERDUE", "TOTAL OVERDUE"]];
+    window.last90CsvData = [["CLI NAME", "HQ", "DESG", "TOTAL CREW", "FP DONE (LAST 90 DAYS)", "DUE IN <= 10 DAYS", "OVERDUE", "TOTAL OVERDUE"]];
 
     const parseDateSafely = (dStr) => {
         if (!dStr) return new Date(NaN);
@@ -3937,6 +3942,7 @@ function generateLast90DaysSummary() {
             <th style="${thStyle}">DESG</th>
             <th style="${thStyle}">TOTAL CREW</th>
             <th style="${thStyle}">FP DONE (LAST 90 DAYS)</th>
+            <th style="${thStyle} color: #e0aaff;">DUE IN &le; 10 DAYS</th>
             <th style="${thStyle}">OVERDUE</th>
             <th style="${thStyle}">TOTAL OVERDUE</th>
         </tr>
@@ -3947,6 +3953,7 @@ function generateLast90DaysSummary() {
     // Grand Totals ke variables
     let grandTotalCrew = 0;
     let grandTotalDone = 0;
+    let grandTotalDueSoon = 0;
     let grandTotalOverdue = 0;
 
     Object.keys(cliMasterData).sort().forEach(cliName => {
@@ -3966,37 +3973,60 @@ function generateLast90DaysSummary() {
 
             let completed90 = 0;
             let pendingCrew = [];
+            let dueSoonCrew = [];
 
             desgCrew.forEach(lp => {
                 const targetEmp = (lp.empCode || '').toString().trim().toUpperCase();
                 if (!targetEmp) return;
 
-                const hasRecentFP = endToEndData.some(r => {
+                let latestFPDate = null;
+
+                endToEndData.forEach(r => {
                     const sheetEmp = (r[14] || '').toString().trim().toUpperCase(); 
-                    if (sheetEmp !== targetEmp) return false;
+                    if (sheetEmp !== targetEmp) return;
                     const fpDate = parseDateSafely(r[6]); 
-                    return !isNaN(fpDate) && fpDate >= ninetyDaysAgo && fpDate <= today;
+                    if (!isNaN(fpDate) && fpDate <= today) {
+                        if (!latestFPDate || fpDate > latestFPDate) {
+                            latestFPDate = fpDate;
+                        }
+                    }
                 });
 
-                if(hasRecentFP){
+                if (latestFPDate && latestFPDate >= ninetyDaysAgo) {
                     completed90++;
+                    // Agar FP date 80 se 90 din purani hai (mtlb aane wale 10 dino me overdue ho jaega)
+                    if (latestFPDate < eightyDaysAgo) {
+                        let nextDueDate = new Date(latestFPDate);
+                        nextDueDate.setDate(nextDueDate.getDate() + 90);
+                        dueSoonCrew.push({
+                            ...lp,
+                            dueDateStr: `${nextDueDate.getDate().toString().padStart(2,'0')}-${(nextDueDate.getMonth()+1).toString().padStart(2,'0')}-${nextDueDate.getFullYear()}`
+                        });
+                    }
                 } else {
                     pendingCrew.push(lp);
                 }
             });
 
             const overdue = crewCount - completed90;
+            const dueSoonCount = dueSoonCrew.length;
+
             cliTotalOverdue += overdue;
             
-            // Grand total ko update karna
+            // Grand totals
             grandTotalCrew += crewCount;
             grandTotalDone += completed90;
+            grandTotalDueSoon += dueSoonCount;
             grandTotalOverdue += overdue;
 
+            // Exactly keeping your original mapKey format for Overdue
             const mapKey = `${cliName}_${desg}`.replace(/\s+/g, '_');
-            window.overdueCrewMap[mapKey] = pendingCrew;
+            const mapKeyDueSoon = `${cliName}_${desg}_duesoon`.replace(/\s+/g, '_');
 
-            cliRows.push({ desg, crewCount, completed90, overdue, mapKey });
+            window.overdueCrewMap[mapKey] = pendingCrew;
+            window.dueSoonCrewMap[mapKeyDueSoon] = dueSoonCrew;
+
+            cliRows.push({ desg, crewCount, completed90, dueSoonCount, overdue, mapKey, mapKeyDueSoon });
         });
 
         const rowCount = cliRows.length;
@@ -4009,8 +4039,8 @@ function generateLast90DaysSummary() {
                 // --- PUSH ROW INTO CSV DIRECTLY ---
                 window.last90CsvData.push([
                     `"${cliName}"`, `"${majorityHQ}"`, `"${r.desg}"`, 
-                    r.crewCount, r.completed90, r.overdue, 
-                    (index === 0 ? cliTotalOverdue : "") // Total overdue sirf pehli baar
+                    r.crewCount, r.completed90, r.dueSoonCount, r.overdue, 
+                    (index === 0 ? cliTotalOverdue : "")
                 ]);
 
                 html += `<tr>`;
@@ -4024,6 +4054,13 @@ function generateLast90DaysSummary() {
                 html += `<td style="${tdStyle}">${r.crewCount}</td>`;
                 html += `<td style="${tdStyle} color: #00ff88;">${r.completed90}</td>`;
 
+                // --- 3rd Last Column: Due in <= 10 Days ---
+                let dueSoonCell = r.dueSoonCount > 0
+                    ? `<span style="cursor: pointer; text-decoration: underline; color: #e0aaff; font-weight: bold;" onclick="showDueSoonCrewModal('${r.mapKeyDueSoon}', '${cliName}', '${r.desg}')" title="Click to view Drivers due soon">${r.dueSoonCount} <i class="fas fa-hand-pointer" style="font-size:0.7rem;"></i></span>`
+                    : `<span style="color: #a0aab8;">0</span>`;
+                html += `<td style="${tdStyle}">${dueSoonCell}</td>`;
+
+                // Overdue Cell
                 let overdueCell = r.overdue > 0
                     ? `<span style="cursor: pointer; text-decoration: underline; color: #ff5252;" onclick="showOverdueCrewModal('${r.mapKey}', '${cliName}', '${r.desg}')" title="Click to view Driver details">${r.overdue} <i class="fas fa-hand-pointer" style="font-size:0.7rem;"></i></span>`
                     : `<span style="color: #ff5252;">${r.overdue}</span>`;
@@ -4045,6 +4082,7 @@ function generateLast90DaysSummary() {
             <td colspan="3" style="text-align: right; padding: 10px; border: 1px solid rgba(255,255,255,0.1);">GRAND TOTAL</td>
             <td style="text-align: center; padding: 10px; border: 1px solid rgba(255,255,255,0.1);">${grandTotalCrew}</td>
             <td style="text-align: center; padding: 10px; border: 1px solid rgba(255,255,255,0.1); color: #00ff88;">${grandTotalDone}</td>
+            <td style="text-align: center; padding: 10px; border: 1px solid rgba(255,255,255,0.1); color: #e0aaff;">${grandTotalDueSoon}</td>
             <td style="text-align: center; padding: 10px; border: 1px solid rgba(255,255,255,0.1); color: #ff5252;">${grandTotalOverdue}</td>
             <td style="text-align: center; padding: 10px; border: 1px solid rgba(255,255,255,0.1); color: #ff9999;">${grandTotalOverdue}</td>
         </tr>
@@ -4052,7 +4090,7 @@ function generateLast90DaysSummary() {
     
     // Grand Total Push in CSV
     window.last90CsvData.push([
-        `"GRAND TOTAL"`, `""`, `""`, grandTotalCrew, grandTotalDone, grandTotalOverdue, grandTotalOverdue
+        `"GRAND TOTAL"`, `""`, `""`, grandTotalCrew, grandTotalDone, grandTotalDueSoon, grandTotalOverdue, grandTotalOverdue
     ]);
 
     html += `
@@ -4172,6 +4210,40 @@ function showOverdueCrewModal(mapKey, cliName, desg) {
     // Reusing the existing date-modal logic to show this table
     document.getElementById('date-modal-list').innerHTML = listHtml;
     document.querySelector('.date-modal-content').style.width = '600px'; 
+    document.querySelector('.date-modal-content').style.maxWidth = '90vw';
+    document.getElementById('date-details-modal').style.display = 'flex';
+}
+// DUE SOON DRIVER DETAILS MODAL FUNCTION
+function showDueSoonCrewModal(mapKey, cliName, desg) {
+    const crewList = window.dueSoonCrewMap[mapKey];
+    if (!crewList || crewList.length === 0) return;
+
+    document.getElementById('date-modal-title').innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#e0aaff"></i> DUE IN ≤ 10 DAYS: ${cliName} (${desg})`;
+
+    let listHtml = `<table class="summary-card-table" style="font-size: 0.85rem; width: 100%; border-collapse: collapse; text-align: center;">
+        <thead>
+            <tr>
+                <th style="border: 1px solid #555; padding: 8px; color: var(--neon-blue);">EMP CODE</th>
+                <th style="border: 1px solid #555; padding: 8px; color: var(--neon-blue);">LP ID</th>
+                <th style="border: 1px solid #555; padding: 8px; color: var(--neon-blue);">NAME</th>
+                <th style="border: 1px solid #555; padding: 8px; color: #e0aaff;">DUE DATE</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    crewList.forEach(c => {
+        listHtml += `<tr>
+            <td style="border: 1px solid rgba(255,255,255,0.1); padding: 8px;">${c.empCode || '-'}</td>
+            <td style="border: 1px solid rgba(255,255,255,0.1); padding: 8px; font-weight: bold;">${c.lpId || '-'}</td>
+            <td style="border: 1px solid rgba(255,255,255,0.1); padding: 8px;">${c.lpName || '-'}</td>
+            <td style="border: 1px solid rgba(255,255,255,0.1); padding: 8px; color: #e0aaff; font-weight: bold;">${c.dueDateStr || '-'}</td>
+        </tr>`;
+    });
+
+    listHtml += `</tbody></table>`;
+
+    document.getElementById('date-modal-list').innerHTML = listHtml;
+    document.querySelector('.date-modal-content').style.width = '650px'; 
     document.querySelector('.date-modal-content').style.maxWidth = '90vw';
     document.getElementById('date-details-modal').style.display = 'flex';
 }
