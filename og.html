@@ -484,16 +484,12 @@
                 </div> 
                 <div>
                     <label class="modern-label">CREW MOBILE AMBUSH</label>
-                    <input type="number" data-name="CREW MOBILE AMBUSH" value="0" min="0" class="modern-input req-ab">
+                    <input type="number" id="crewMobileCount" data-name="CREW MOBILE AMBUSH" value="0" min="0" class="modern-input req-ab" oninput="generateMobileAmbushTableGrid()">
                 </div>
 
-                <div>
-                    <label class="modern-label">ABNORMALITY ON CREW MOBILE AMBUSH</label>
-                    <input type="number" id="abCrewMobileCount" data-name="ABNORMALITY ON CREW MOBILE AMBUSH" value="0" min="0" class="modern-input req-ab" oninput="generateDynamicRows('abCrewMobileCount', 'crewMobileRowsContainer')">
-                </div>
-                 <div class="lg:col-span-2">
-                    <label class="modern-label">ABNORMALITIES DETAIL ON CREW MOBILE AMBUSH</label>
-                    <div id="crewMobileRowsContainer" class="space-y-2">
+                <div class="lg:col-span-3 overflow-x-auto mt-2">
+                    <label class="modern-label font-bold text-slate-700">DETAILS OF MOBILE AMBUSH</label>
+                    <div id="crewMobileTableRowsContainer" class="min-w-full bg-white rounded-lg border border-slate-200 p-2">
                         <input type="text" class="modern-input" value="NIL" readonly>
                     </div>
                 </div>                
@@ -836,14 +832,14 @@
     let searchedCrews = [];
     let selectedDrives = new Set();
     const DRIVE_PDF_LINKS = {
-    "DRIVE FOR FIRE PREVENTION OF ELECTRIC AND DIESEL LOCOMOTIVES": "https://drive.google.com/file/d/107Lwzv7dP1h4tHJNSB1gbBYPqoplzQbh/view?usp=sharing",
-     "Duties of Crew during No Tension on run.": "https://drive.google.com/file/d/1XbV5AJnmBJMJ0z-T1C3KK2hqJbfzCiaz/view?usp=sharing",
-      "Mandatory A9 & SA9 Application at Halt & LR Procedure": "https://drive.google.com/file/d/1nFiRv-uJNUo42vmkzcj4Exi8fgeo7wMb/view?usp=sharing",  
-"Confirm the aspect of next Approaching signal from Sighting distance (200m) after passing Y aspect signal": "https://drive.google.com/file/d/173-4yzRIYn5eiQjH2gMzsi3u62-S__RP/view?usp=sharing",
+        "DRIVE FOR FIRE PREVENTION OF ELECTRIC AND DIESEL LOCOMOTIVES": "https://drive.google.com/file/d/107Lwzv7dP1h4tHJNSB1gbBYPqoplzQbh/view?usp=sharing",
+        "Duties of Crew during No Tension on run.": "https://drive.google.com/file/d/1XbV5AJnmBJMJ0z-T1C3KK2hqJbfzCiaz/view?usp=sharing",
+        "Mandatory A9 & SA9 Application at Halt & LR Procedure": "https://drive.google.com/file/d/1nFiRv-uJNUo42vmkzcj4Exi8fgeo7wMb/view?usp=sharing",  
+        "Confirm the aspect of next Approaching signal from Sighting distance (200m) after passing Y aspect signal": "https://drive.google.com/file/d/173-4yzRIYn5eiQjH2gMzsi3u62-S__RP/view?usp=sharing",
         "Securing and releasing of vehicles/trains/loco as per RB JPO Dt:24.01.2025.": "https://drive.google.com/file/d/1w7Zuij5lfN37Q3iXrmrT8FlWbpTIxzik/view?usp=sharing",
         "Intensive Counselling of Crew For Earnest GDR Checks.": "https://drive.google.com/file/d/1giDYzxOofH0ukybtvUW7l3uxpr1lhq_W/view?usp=sharing",
         "Counselling on Preventive Measures to avoid Stalling Cases.": "https://drive.google.com/file/d/1-P6YwvXfpVSkYSluVVHB8MViJ2FGOk2p/view?usp=sharing",
-};
+    };
     
     let cliData = {};
     let majorBeatData = [];
@@ -863,7 +859,6 @@
         "ABNORMALITIES ON SPEED GUN CHECKING AUTO AT ON": "speedGunOnRowsContainer",
         "ABNORMALITIES ON SPEED GUN CHECKING PASSING AT YELLOW": "speedGunYellowRowsContainer",
         "ABNORMALITY ON SHUNTING AMBUSH": "shuntingAmbushRowsContainer",
-        "ABNORMALITY ON CREW MOBILE AMBUSH": "crewMobileRowsContainer",
         "ABNORMALITIES ON COACHING CLEANLINESS INSPECTION": "coachingCleanRowsContainer",
         "ABNORMALITIES ON NIGHT STABLING INSPECTION": "nightStablingRowsContainer",
         "ABNORMALITIES ON STABLE LOAD INSPECTION": "stableLoadRowsContainer",
@@ -888,7 +883,6 @@
         "ABNORMALITIES ON SPEED GUN CHECKING AUTO AT ON": "ABNORMALITIES DETAIL ON SPEED GUN CHECKING AUTO AT ON",
         "ABNORMALITIES ON SPEED GUN CHECKING PASSING AT YELLOW": "ABNORMALITIES DETAIL ON SPEED GUN CHECKING PASSING AT YELLOW",
         "ABNORMALITY ON SHUNTING AMBUSH": "ABNORMALITIES DETAIL ON SHUNTING AMBUSH",
-        "ABNORMALITY ON CREW MOBILE AMBUSH": "ABNORMALITIES DETAIL ON CREW MOBILE AMBUSH",
         "ABNORMALITIES ON COACHING CLEANLINESS INSPECTION": "ABNORMALITY DETAIL DURING COACHING CLEANLINESS INSPECTION",
         "ABNORMALITIES ON NIGHT STABLING INSPECTION": "ABNORMALITY DETAIL DURING NIGHT STABLING INSPECTION",
         "ABNORMALITIES ON STABLE LOAD INSPECTION": "ABNORMALITY DETAIL DURING STABLE LOAD INSPECTION",
@@ -969,7 +963,7 @@
         }
     }
 
-    // NEW FUNCTION: Generate FSD Grid Table based on Trains Count input
+    // Generate FSD Grid Table
     function generateFsdTableGrid() {
         const countVal = parseInt(document.getElementById('fsdTrainsCount').value) || 0;
         const container = document.getElementById('fsdTableRowsContainer');
@@ -1018,15 +1012,13 @@
         container.innerHTML = tableMarkup;
     }
 
-    // Helper input sanitizer to restrict layout to alphanumeric characters without space
     function sanitizeAlphanumericNoSpace(input) {
         input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     }
 
-    // Parse FSD Grid Table layout into structured string format for Google Sheets cell
     function getFsdTableDetailString() {
         const rows = document.querySelectorAll('.fsd-data-row');
-        if (rows.length === 0) return "NIL";
+        if (!rows || rows.length === 0) return "NIL";
 
         let parsedStatements = [];
         rows.forEach((row, index) => {
@@ -1035,10 +1027,80 @@
             const trainName = row.querySelector('.fsd-train-name').value.trim();
             const abnDetail = row.querySelector('.fsd-abn-detail').value.trim();
 
-            parsedStatements.push(`${index + 1}. LP ID: ${lpId}, ALP ID: ${alpId}, Train: ${trainName}, Abnormality: ${abnDetail}`);
+            if (lpId || alpId || trainName || abnDetail) {
+                parsedStatements.push(`${index + 1}. LP ID: ${lpId}, ALP ID: ${alpId}, Train: ${trainName}, Abnormality: ${abnDetail}`);
+            }
         });
 
-        return parsedStatements.join('\n');
+        return parsedStatements.length > 0 ? parsedStatements.join('\n') : "NIL";
+    }
+
+    // Generate Mobile Ambush Grid Table with Single Crew ID
+    function generateMobileAmbushTableGrid() {
+        const countVal = parseInt(document.getElementById('crewMobileCount').value) || 0;
+        const container = document.getElementById('crewMobileTableRowsContainer');
+        container.innerHTML = '';
+
+        if (countVal <= 0) {
+            container.innerHTML = `<input type="text" class="modern-input" value="NIL" readonly>`;
+            return;
+        }
+
+        let tableMarkup = `
+            <table class="w-full text-left border-collapse border border-slate-200 mt-2 text-xs">
+                <thead>
+                    <tr class="bg-slate-100 font-bold text-slate-700">
+                        <th class="border border-slate-200 p-2 text-center w-10">S.No</th>
+                        <th class="border border-slate-200 p-2">CREW ID</th>
+                        <th class="border border-slate-200 p-2">Name of Train/Place</th>
+                        <th class="border border-slate-200 p-2">Abnormality Detail</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        for (let i = 1; i <= countVal; i++) {
+            tableMarkup += `
+                <tr class="mobile-data-row">
+                    <td class="border border-slate-200 p-2 text-center font-bold text-slate-500">${i}</td>
+                    <td class="border border-slate-200 p-1">
+                        <input type="text" class="modern-input p-1.5 font-mono uppercase font-bold mobile-crew-id" placeholder="e.g. BSP1234" required oninput="sanitizeAlphanumericNoSpace(this)">
+                    </td>
+                    <td class="border border-slate-200 p-1">
+                        <input type="text" class="modern-input p-1.5 font-semibold mobile-train-place" placeholder="Train Name/No./Place" required>
+                    </td>
+                    <td class="border border-slate-200 p-1">
+                        <input type="text" class="modern-input p-1.5 mobile-abn-detail" placeholder="Describe issue" required>
+                    </td>
+                </tr>
+            `;
+        }
+
+        tableMarkup += `</tbody></table>`;
+        container.innerHTML = tableMarkup;
+    }
+
+    // Parse Mobile Ambush Grid Data into String Format
+    function getMobileAmbushTableDetailString() {
+        const rows = document.querySelectorAll('.mobile-data-row');
+        if (!rows || rows.length === 0) return "NIL";
+
+        let parsedStatements = [];
+        rows.forEach((row, index) => {
+            const crewIdInput = row.querySelector('.mobile-crew-id');
+            const trainPlaceInput = row.querySelector('.mobile-train-place');
+            const abnDetailInput = row.querySelector('.mobile-abn-detail');
+
+            const crewId = crewIdInput ? crewIdInput.value.trim() : "";
+            const trainPlace = trainPlaceInput ? trainPlaceInput.value.trim() : "";
+            const abnDetail = abnDetailInput ? abnDetailInput.value.trim() : "";
+
+            if (crewId || trainPlace || abnDetail) {
+                parsedStatements.push(`${index + 1}. CREW ID: ${crewId}, Train/Place: ${trainPlace}, Abnormality: ${abnDetail}`);
+            }
+        });
+
+        return parsedStatements.length > 0 ? parsedStatements.join('\n') : "NIL";
     }
 
     function getAbnormalityDetailString(containerId) {
@@ -1051,7 +1113,7 @@
             let val = input.value.trim();
             if (val) result.push(`${index + 1}. ${val}`);
         });
-        return result.join('\n');
+        return result.length > 0 ? result.join('\n') : "NIL";
     }
 
     // =========================================================
@@ -1109,7 +1171,7 @@
         } catch (err) { console.error("Drives API error", err); }
     }
 
-async function loadHistory() {
+    async function loadHistory() {
         try {
             const res = await fetch(URL_MATRIX);
             const data = await res.json();
@@ -1117,7 +1179,6 @@ async function loadHistory() {
             historyMap.clear();
             latestDateMap.clear();
             
-            // Clean dynamic hash optimization lookup mapping
             for (let key in data) {
                 if (Object.prototype.hasOwnProperty.call(data, key)) {
                     historyMap.add(key);
@@ -1130,63 +1191,62 @@ async function loadHistory() {
         }
     }
 
-async function loadLatestCrewData() {
-    try {
-        const res = await fetch(CREW_API);
-        const data = await res.json();
-        const crewMap = {};
-        
-        const getTimestamp = (dateStr) => {
-            if (!dateStr) return 0;
-            let d = String(dateStr).trim().split(" ")[0]; 
-            if (d.includes("/")) {
-                let p = d.split("/");
-                if (p[2] && p[2].length === 4) return new Date(p[2], p[1]-1, p[0]).getTime();
-            } else if (d.includes("-")) {
-                let p = d.split("-");
-                if (p[0] && p[0].length === 4) return new Date(p[0], p[1]-1, p[2]).getTime();
-                if (p[2] && p[2].length === 4) return new Date(p[2], p[1]-1, p[0]).getTime();
-            }
-            return new Date(dateStr).getTime() || 0; 
-        };
-
-        (data.values || []).slice(1).forEach(row => {
-            const empCode = row[4] || "";
-            if (!empCode) return; 
-
-            const crewStatus = String(row[11] || "").trim().toUpperCase(); 
-            const updateDateStr = row[8] || ""; 
-            const currentTimestamp = getTimestamp(updateDateStr);
-
-            const obj = { 
-                crewId: row[0]||"", 
-                crewName: row[1]||"", 
-                hrmsId: row[2]||"", 
-                crewType: row[3]||"", 
-                empCode: empCode, 
-                cliName: row[6]||"", 
-                hq: row[7]||"",
-                status: crewStatus, // Status ko yahan save rakh rahe hain comparison ke liye
-                timestamp: currentTimestamp 
+    async function loadLatestCrewData() {
+        try {
+            const res = await fetch(CREW_API);
+            const data = await res.json();
+            const crewMap = {};
+            
+            const getTimestamp = (dateStr) => {
+                if (!dateStr) return 0;
+                let d = String(dateStr).trim().split(" ")[0]; 
+                if (d.includes("/")) {
+                    let p = d.split("/");
+                    if (p[2] && p[2].length === 4) return new Date(p[2], p[1]-1, p[0]).getTime();
+                } else if (d.includes("-")) {
+                    let p = d.split("-");
+                    if (p[0] && p[0].length === 4) return new Date(p[0], p[1]-1, p[2]).getTime();
+                    if (p[2] && p[2].length === 4) return new Date(p[2], p[1]-1, p[0]).getTime();
+                }
+                return new Date(dateStr).getTime() || 0; 
             };
 
-            // Agar is Emp Code ki entry pehle se hai, toh check karein kya yeh nayi (latest) entry hai?
-            if (crewMap[empCode]) {
-                if (currentTimestamp >= crewMap[empCode].timestamp) {
+            (data.values || []).slice(1).forEach(row => {
+                const empCode = row[4] || "";
+                if (!empCode) return; 
+
+                const crewStatus = String(row[11] || "").trim().toUpperCase(); 
+                const updateDateStr = row[8] || ""; 
+                const currentTimestamp = getTimestamp(updateDateStr);
+
+                const obj = { 
+                    crewId: row[0]||"", 
+                    crewName: row[1]||"", 
+                    hrmsId: row[2]||"", 
+                    crewType: row[3]||"", 
+                    empCode: empCode, 
+                    cliName: row[6]||"", 
+                    hq: row[7]||"",
+                    status: crewStatus,
+                    timestamp: currentTimestamp 
+                };
+
+                if (crewMap[empCode]) {
+                    if (currentTimestamp >= crewMap[empCode].timestamp) {
+                        crewMap[empCode] = obj;
+                    }
+                } else {
                     crewMap[empCode] = obj;
                 }
-            } else {
-                crewMap[empCode] = obj;
-            }
-        });
+            });
 
-        // Sabhi crews ki latest entry nikalne ke baad, ab filter karein ki sirf ACTIVE waale hi bachein
-        latestCrewData = Object.values(crewMap).filter(c => c.status === "ACTIVE");
-        
-    } catch (err) { 
-        console.error("Crew Fetch Error", err); 
+            latestCrewData = Object.values(crewMap).filter(c => c.status === "ACTIVE");
+            
+        } catch (err) { 
+            console.error("Crew Fetch Error", err); 
+        }
     }
-}
+
     document.getElementById('c_cli_id').addEventListener('input', (e) => {
         const sanitized = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
         e.target.value = sanitized;
@@ -1283,73 +1343,71 @@ async function loadLatestCrewData() {
         generateMatrixTable(finalData, month, year);
         document.getElementById('tableWrapper').classList.remove('hidden');
     }
-function generateMatrixTable(data, month, year) {
-    const days = new Date(year, month, 0).getDate();
-    const totalDrives = DRIVE_LIST.length;
-    
-    let html = `<thead class="sticky top-0 z-30"><tr>
-                   <th class="sticky-id min-w-[75px] max-w-[75px] text-[10px]">Crew ID</th>
-                    <th class="min-w-[180px] max-w-[180px] text-[11px]">Name</th>`;
-    for(let d=1; d<=days; d++) html += `<th class="text-center min-w-[70px] text-[10px] px-1 bg-[#e2e8f0]">${String(d).padStart(2,'0')}/${String(month).padStart(2,'0')}</th>`;
-    html += `</tr></thead><tbody>`;
 
-    // Pre-calculate completed drives counts for each crew to eliminate O(N^2) loop inside date loop
-    const crewCompletedCounts = new Map();
-    data.forEach(row => {
-        let count = 0;
-        const empTrimmed = String(row.empCode).trim();
-        DRIVE_LIST.forEach(drive => { 
-            if(historyMap.has(`${empTrimmed}|${drive}`)) count++; 
-        });
-        crewCompletedCounts.set(row.empCode, count);
-    });
-
-    data.forEach(row => {
-        const empCodeStr = String(row.empCode).trim();
-        const completedCount = crewCompletedCounts.get(row.empCode) || 0;
+    function generateMatrixTable(data, month, year) {
+        const days = new Date(year, month, 0).getDate();
+        const totalDrives = DRIVE_LIST.length;
         
-        html += `<tr data-emp="${row.empCode}">
-                    <td class="sticky-id font-mono text-blue-600 min-w-[75px] max-w-[75px] text-[10px]">${row.crewId}</td>
-                    <td class="font-semibold truncate min-w-[190px] max-w-[190px] text-[10px]" title="${row.crewName}">${row.crewName}</td>`;
-                    
-        for(let d=1; d<=days; d++) {
-            const date = `${String(d).padStart(2,'0')}/${String(month).padStart(2,'0')}/${year}`;
-            
-// Check current global selections instantly from Set
-            let currentSelectionCount = 0;
-            DRIVE_LIST.forEach(drive => {
-                if(selectedDrives.has(`${row.empCode}|${date}|${drive}`)) currentSelectionCount++;
+        let html = `<thead class="sticky top-0 z-30"><tr>
+                       <th class="sticky-id min-w-[75px] max-w-[75px] text-[10px]">Crew ID</th>
+                        <th class="min-w-[180px] max-w-[180px] text-[11px]">Name</th>`;
+        for(let d=1; d<=days; d++) html += `<th class="text-center min-w-[70px] text-[10px] px-1 bg-[#e2e8f0]">${String(d).padStart(2,'0')}/${String(month).padStart(2,'0')}</th>`;
+        html += `</tr></thead><tbody>`;
+
+        const crewCompletedCounts = new Map();
+        data.forEach(row => {
+            let count = 0;
+            const empTrimmed = String(row.empCode).trim();
+            DRIVE_LIST.forEach(drive => { 
+                if(historyMap.has(`${empTrimmed}|${drive}`)) count++; 
             });
+            crewCompletedCounts.set(row.empCode, count);
+        });
 
-            const hasCurrentSelection = currentSelectionCount > 0;
+        data.forEach(row => {
+            const empCodeStr = String(row.empCode).trim();
+            const completedCount = crewCompletedCounts.get(row.empCode) || 0;
             
-            // Fixed validation calculation logic to prevent crash
-            let totalCheckedInCell = completedCount;
-            if (hasCurrentSelection) {
-                totalCheckedInCell = currentSelectionCount;
+            html += `<tr data-emp="${row.empCode}">
+                        <td class="sticky-id font-mono text-blue-600 min-w-[75px] max-w-[75px] text-[10px]">${row.crewId}</td>
+                        <td class="font-semibold truncate min-w-[190px] max-w-[190px] text-[10px]" title="${row.crewName}">${row.crewName}</td>`;
+                        
+            for(let d=1; d<=days; d++) {
+                const date = `${String(d).padStart(2,'0')}/${String(month).padStart(2,'0')}/${year}`;
+                
+                let currentSelectionCount = 0;
+                DRIVE_LIST.forEach(drive => {
+                    if(selectedDrives.has(`${row.empCode}|${date}|${drive}`)) currentSelectionCount++;
+                });
+
+                const hasCurrentSelection = currentSelectionCount > 0;
+                
+                let totalCheckedInCell = completedCount;
+                if (hasCurrentSelection) {
+                    totalCheckedInCell = currentSelectionCount;
+                }
+
+                const btnClass = hasCurrentSelection 
+                    ? 'bg-blue-100 text-blue-700 border border-blue-300 font-bold shadow-sm'
+                    : (completedCount > 0 ? 'bg-emerald-100 text-emerald-700 border border-emerald-300 font-bold shadow-sm' : 'bg-white text-blue-500 border border-slate-200 hover:bg-slate-50');
+
+                const btnText = (completedCount > 0 || hasCurrentSelection) 
+                    ? `<i class="w-3 h-3 border-2 border-current rounded-full inline-block mr-1"></i>${totalCheckedInCell}/${totalDrives}` 
+                    : '+ Add';
+
+                html += `
+                <td class="relative" data-date="${date}" data-emp="${row.empCode}">
+                    <button type="button" onclick="toggleDeferredPopup(this)" class="w-full py-1 px-1 rounded text-[10px] font-bold flex justify-center items-center gap-1 transition-all ${btnClass}">
+                     ${btnText}
+                    </button>
+                    <div class="drive-popup hidden fixed z-[99999] p-4 w-[420px] max-w-[90vw]"></div>
+                </td>`;
             }
-
-            const btnClass = hasCurrentSelection 
-                ? 'bg-blue-100 text-blue-700 border border-blue-300 font-bold shadow-sm'
-                : (completedCount > 0 ? 'bg-emerald-100 text-emerald-700 border border-emerald-300 font-bold shadow-sm' : 'bg-white text-blue-500 border border-slate-200 hover:bg-slate-50');
-
-            const btnText = (completedCount > 0 || hasCurrentSelection) 
-                ? `<i class="w-3 h-3 border-2 border-current rounded-full inline-block mr-1"></i>${totalCheckedInCell}/${totalDrives}` 
-                : '+ Add';
-
-html += `
-            <td class="relative" data-date="${date}" data-emp="${row.empCode}">
-                <button type="button" onclick="toggleDeferredPopup(this)" class="w-full py-1 px-1 rounded text-[10px] font-bold flex justify-center items-center gap-1 transition-all ${btnClass}">
-                 ${btnText}
-                </button>
-                <div class="drive-popup hidden fixed z-[99999] p-4 w-[420px] max-w-[90vw]"></div>
-            </td>`;
-        }
-        html += `</tr>`;
-    });
-    document.getElementById('tableContainer').innerHTML = `<table class="w-full text-sm">${html}</tbody></table>`;
-    requestAnimationFrame(() => { lucide.createIcons(); });
-}
+            html += `</tr>`;
+        });
+        document.getElementById('tableContainer').innerHTML = `<table class="w-full text-sm">${html}</tbody></table>`;
+        requestAnimationFrame(() => { lucide.createIcons(); });
+    }
 
     function togglePopup(btn) {
         document.querySelectorAll('.drive-popup').forEach(p => { if (p !== btn.nextElementSibling) p.classList.add('hidden'); });
@@ -1371,6 +1429,7 @@ html += `
             popup.style.position = 'fixed'; popup.style.transform = 'none'; popup.style.width = popupWidth + 'px'; popup.style.left = left + 'px'; popup.style.top = top + 'px'; popup.style.zIndex = '99999';
         }
     }
+
     function closePopup(btn){ btn.closest('.drive-popup').classList.add('hidden'); }
 
     document.getElementById('c_date').addEventListener('change', function() {
@@ -1382,40 +1441,153 @@ html += `
         }
     });
 
-function updateButton(cb) {
-    const key = `${cb.dataset.emp}|${cb.dataset.date}|${cb.dataset.drive}`;
-    if(cb.checked) selectedDrives.add(key); else selectedDrives.delete(key);
-    
-    const p = cb.closest('td.relative'); 
-    const btn = p.querySelector('button'); 
-    const totalDrives = DRIVE_LIST.length;
+    function updateButton(cb) {
+        const key = `${cb.dataset.emp}|${cb.dataset.date}|${cb.dataset.drive}`;
+        if(cb.checked) selectedDrives.add(key); else selectedDrives.delete(key);
+        
+        const p = cb.closest('td.relative'); 
+        const btn = p.querySelector('button'); 
+        const totalDrives = DRIVE_LIST.length;
 
-    // Fast calculation without querySelectorAll DOM scanning
-    let manualCheckedCount = 0;
-    DRIVE_LIST.forEach(drive => {
-        if(selectedDrives.has(`${cb.dataset.emp}|${cb.dataset.date}|${drive}`)) manualCheckedCount++;
-    });
+        let manualCheckedCount = 0;
+        DRIVE_LIST.forEach(drive => {
+            if(selectedDrives.has(`${cb.dataset.emp}|${cb.dataset.date}|${drive}`)) manualCheckedCount++;
+        });
 
-    if(manualCheckedCount === 0) { 
-        let completedCount = 0;
-        const empTrimmed = String(cb.dataset.emp).trim();
-        DRIVE_LIST.forEach(drive => { if(historyMap.has(`${empTrimmed}|${drive}`)) completedCount++; });
+        if(manualCheckedCount === 0) { 
+            let completedCount = 0;
+            const empTrimmed = String(cb.dataset.emp).trim();
+            DRIVE_LIST.forEach(drive => { if(historyMap.has(`${empTrimmed}|${drive}`)) completedCount++; });
 
-        if(completedCount > 0) {
-            btn.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i>${completedCount}/${totalDrives}`; 
-            btn.className = 'w-full py-1.5 px-2 rounded-md text-xs font-bold flex justify-center items-center gap-1 bg-emerald-100 text-emerald-700 border border-emerald-300 font-bold shadow-sm transition-all';
-        } else {
-            btn.innerHTML = '+ Add'; 
-            btn.className = 'w-full py-1.5 px-2 rounded-md text-xs font-bold flex justify-center items-center gap-1 bg-white text-blue-500 border border-slate-200 hover:bg-slate-50 transition-all'; 
+            if(completedCount > 0) {
+                btn.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i>${completedCount}/${totalDrives}`; 
+                btn.className = 'w-full py-1.5 px-2 rounded-md text-xs font-bold flex justify-center items-center gap-1 bg-emerald-100 text-emerald-700 border border-emerald-300 font-bold shadow-sm transition-all';
+            } else {
+                btn.innerHTML = '+ Add'; 
+                btn.className = 'w-full py-1.5 px-2 rounded-md text-xs font-bold flex justify-center items-center gap-1 bg-white text-blue-500 border border-slate-200 hover:bg-slate-50 transition-all'; 
+            }
+        } else { 
+            btn.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i>${manualCheckedCount}/${totalDrives}`; 
+            btn.className = 'w-full py-1.5 px-2 rounded-md text-xs font-bold flex justify-center items-center gap-1 bg-blue-100 text-blue-700 border border-blue-300 shadow-sm transition-all'; 
         }
-    } else { 
-        btn.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i>${manualCheckedCount}/${totalDrives}`; 
-        btn.className = 'w-full py-1.5 px-2 rounded-md text-xs font-bold flex justify-center items-center gap-1 bg-blue-100 text-blue-700 border border-blue-300 shadow-sm transition-all'; 
+        requestAnimationFrame(() => { lucide.createIcons({ root: btn }); });
     }
-    requestAnimationFrame(() => { lucide.createIcons({ root: btn }); });
-}
+
+    function toggleDeferredPopup(btn) {
+        const parentTd = btn.closest('td');
+        const popup = parentTd.querySelector('.drive-popup');
+        const empCode = parentTd.dataset.emp;
+        const date = parentTd.dataset.date;
+        
+        if (popup.innerHTML === "") {
+            const row = latestCrewData.find(c => String(c.empCode).trim() === empCode);
+            const empCodeStr = String(empCode).trim();
+            const totalDrives = DRIVE_LIST.length;
+            
+            let popupHTML = `
+                <div class="flex justify-between items-center border-b pb-2 mb-2">
+                    <div class="text-[10px] text-slate-500 uppercase tracking-widest font-black">Select Drives (${totalDrives} Total)</div>
+                    <button type="button" onclick="closePopup(this)" class="text-red-500 hover:text-red-700 font-bold text-lg leading-none px-2">✕</button>
+                </div>
+                <div class="flex flex-col gap-2 max-h-[320px] overflow-y-auto pr-2 mb-3">`;
+                
+            popupHTML += DRIVE_LIST.map(drive => {
+                const key = `${empCodeStr}|${drive}`;
+                const done = historyMap.has(key); 
+                const latestDate = latestDateMap.get(key) || ''; 
+                const isCurrentDateDone = done && (latestDate === date);
+
+                return `<label class="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${isCurrentDateDone ? 'bg-gray-100 border border-gray-200 opacity-60' : (done ? 'bg-emerald-50 border border-emerald-200' : 'hover:bg-slate-50 border border-transparent')}">
+                           <input type="checkbox" class="checkbox-custom tempDriveCheck matrix-active-check" 
+                               ${isCurrentDateDone ? 'checked disabled' : ''} 
+                               value="${drive}" 
+                               data-emp="${empCodeStr}"
+                               data-date="${date}"
+                               data-drive="${drive}">
+                            <div class="flex flex-col flex-1">
+                            ${DRIVE_PDF_LINKS[drive] ? `<a href="${DRIVE_PDF_LINKS[drive]}" target="_blank" rel="noopener noreferrer" class="text-xs font-bold underline flex items-start gap-1 break-words whitespace-normal leading-4 ${done ? 'text-emerald-700' : 'text-blue-600'}"><i data-lucide="file-text" class="w-3 h-3"></i>${drive}</a>` : `<span class="text-xs font-bold break-words whitespace-normal leading-4 ${done ? 'text-emerald-700' : 'text-slate-700'}">${drive}</span>`}
+                            ${done ? `<span class="text-[10px] font-bold text-amber-600 mt-0.5">Last Done: ${latestDate}</span>` : ''}
+                            </div>
+                        </label>`;
+            }).join('');
+            
+            popupHTML += `</div>
+                <div class="pt-2 border-t flex gap-2">
+                    <button type="button" onclick="syncBatchDrivesFromPopup(this, '${empCodeStr}', '${date}')" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded text-xs tracking-wider uppercase shadow-md flex justify-center items-center gap-2">
+                        <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i> Sync Selected
+                    </button>
+                </div>`;
+            
+            popup.innerHTML = popupHTML;
+            requestAnimationFrame(() => { lucide.createIcons({ root: popup }); });
+        }
+        togglePopup(btn);
+    }
+
+    async function syncBatchDrivesFromPopup(btnElement, empCode, date) {
+        const popup = btnElement.closest('.drive-popup');
+        const parentTd = btnElement.closest('td.relative');
+        const mainCellBtn = parentTd.querySelector('button[onclick="toggleDeferredPopup(this)"]');
+        
+        const checkedBoxes = popup.querySelectorAll('.tempDriveCheck:checked:not(:disabled)');
+        if (checkedBoxes.length === 0) {
+            popup.classList.add('hidden');
+            return;
+        }
+
+        const row = latestCrewData.find(c => String(c.empCode).trim() === empCode);
+        if (!row) return;
+
+        const originalText = btnElement.innerHTML;
+        btnElement.disabled = true;
+        btnElement.innerText = "⏳ Syncing...";
+
+        let batchPayload = [];
+        checkedBoxes.forEach(cb => {
+            const driveName = cb.dataset.drive;
+            
+            historyMap.add(`${empCode}|${driveName}`);
+            latestDateMap.set(`${empCode}|${driveName}`, date);
+
+            batchPayload.push({
+                empCode: empCode,
+                crewId: String(row.crewId || "").trim(),
+                crewName: String(row.crewName || "").trim(),
+                date: date,
+                drive: driveName,
+                cliName: String(document.getElementById('c_cli_name').value || row.cliName || "").trim(),
+                hq: String(row.hq || "").trim(),
+                desg: String(row.crewType || "").trim()
+            });
+        });
+
+        const totalDrives = DRIVE_LIST.length;
+        let currentDoneCount = 0;
+        DRIVE_LIST.forEach(d => { if(historyMap.has(`${empCode}|${d}`)) currentDoneCount++; });
+        
+        mainCellBtn.innerHTML = `<i class="w-3 h-3 border-2 border-current rounded-full inline-block mr-1"></i>${currentDoneCount}/${totalDrives}`;
+        mainCellBtn.className = 'w-full py-1 px-1 rounded text-[10px] font-bold flex justify-center items-center gap-1 transition-all bg-emerald-100 text-emerald-700 border border-emerald-300 font-bold shadow-sm';
+
+        try {
+            await fetch(URL_MATRIX, { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                body: JSON.stringify(batchPayload),
+                headers: { 'Content-Type': 'text/plain' } 
+            });
+            
+            popup.innerHTML = "";
+            popup.classList.add('hidden');
+        } catch (err) {
+            console.error("Batch Sync Drop Error:", err);
+            btnElement.disabled = false;
+            btnElement.innerHTML = originalText;
+            showCenterAlert("Network pipeline execution error.", "error");
+        }
+    }
+
     // =========================================================
-    // SUBMIT TO CLOUD
+    // MASTER SINGLE UNIFIED SUBMIT FUNCTION
     // =========================================================
     async function processUnifiedSubmit() {
         const form = document.getElementById('masterForm');
@@ -1424,11 +1596,10 @@ function updateButton(cb) {
         const checks = ['chk_ab','chk_lp','chk_alp','chk_od','chk_matrix'].map(id => document.getElementById(id).checked);
         if(!checks.includes(true)) return showCenterAlert("Please select at least one section to submit.", "error");
 
-        // Dynamic Mathematical Validations
+        // Mathematical Validations
         if (checks[0]) {
             const fpWee = parseInt(document.getElementById('fpWeeHours').value) || 0;
             const fpExcl = parseInt(document.getElementById('fpExcludingWee').value) || 0;
-            
             const fpCoaching = parseInt(document.getElementById('fpCoaching').value) || 0;
             const fpMemu = parseInt(document.getElementById('fpMemu').value) || 0;
             const fpGoods = parseInt(document.getElementById('fpGoods').value) || 0;
@@ -1443,11 +1614,9 @@ function updateButton(cb) {
 
             const abWee = parseInt(document.getElementById('abWeeHours').value) || 0;
             const abExcl = parseInt(document.getElementById('abExcludingWee').value) || 0;
-
             const abCoaching = parseInt(document.getElementById('abCoachingCount').value) || 0;
             const abMemu = parseInt(document.getElementById('abMemuCount').value) || 0;
             const abGoods = parseInt(document.getElementById('abGoodsCount').value) || 0;
-            const abSecuring = parseInt(document.getElementById('abSecuringDriveCount').value) || 0;
 
             const sumLeftAbn = abWee + abExcl;
             const sumRightAbn = abCoaching + abMemu + abGoods;
@@ -1473,7 +1642,7 @@ function updateButton(cb) {
 
         let promises = [];
 
-        // 1. ABNORMALITY
+        // 1. ABNORMALITY SECTION
         if (checks[0]) {
             let fd = new FormData(); 
             fd.append("CLI ID", c_cli_id); 
@@ -1493,42 +1662,87 @@ function updateButton(cb) {
                 }
             });
 
-            // Map and parse the new layout Grid data of FSD to its old backend column matching header
+            // Grid Details Mapping
             const combinedFsdString = getFsdTableDetailString();
             fd.append("ABNORMALITIES DETAIL ON FSD ROUTE SETTING AMBUSH", combinedFsdString);
+
+            const combinedMobileString = getMobileAmbushTableDetailString();
+            fd.append("ABNORMALITIES DETAIL ON CREW MOBILE AMBUSH", combinedMobileString);
 
             promises.push(fetch(URL_AB, { method: 'POST', mode: 'no-cors', body: fd }));
         }
         
-        // 2. LP
+        // 2. LP SECTION
         if (checks[1]) {
-            let fd = new FormData(); fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name); fd.append("LP ID", document.getElementById('lp_id').value); fd.append("LP NAME", document.getElementById('lp_name').value); fd.append("DESG", document.getElementById('lp_desg').value); fd.append("HQ", document.getElementById('lp_hq').value); fd.append("EMP CODE", document.getElementById('lp_empcode').value); fd.append("MAJOR BEAT", document.getElementById('lp_major_beat').value);
-            const bv = document.getElementById('lp_beat').value; if(bv==='OTHER'){ fd.append("BEAT_OTHER","OTHER"); fd.append("BEAT",document.getElementById('lp_other_beat').value); }else{ fd.append("BEAT",bv); }
-            fd.append("LOCO NUMBER", document.getElementById('lp_loco').value); fd.append("TRAIN NUMBER", document.getElementById('lp_train').value); fd.append("DATE", c_date); fd.append("FROM TIME", document.getElementById('lp_from').value); fd.append("TO TIME", document.getElementById('lp_to').value);
+            let fd = new FormData(); 
+            fd.append("CLI ID", c_cli_id); 
+            fd.append("CLI NAME", c_cli_name); 
+            fd.append("LP ID", document.getElementById('lp_id').value); 
+            fd.append("LP NAME", document.getElementById('lp_name').value); 
+            fd.append("DESG", document.getElementById('lp_desg').value); 
+            fd.append("HQ", document.getElementById('lp_hq').value); 
+            fd.append("EMP CODE", document.getElementById('lp_empcode').value); 
+            fd.append("MAJOR BEAT", document.getElementById('lp_major_beat').value);
+            
+            const bv = document.getElementById('lp_beat').value; 
+            if(bv==='OTHER'){ 
+                fd.append("BEAT_OTHER","OTHER"); 
+                fd.append("BEAT",document.getElementById('lp_other_beat').value); 
+            } else { 
+                fd.append("BEAT",bv); 
+            }
+            
+            fd.append("LOCO NUMBER", document.getElementById('lp_loco').value); 
+            fd.append("TRAIN NUMBER", document.getElementById('lp_train').value); 
+            fd.append("DATE", c_date); 
+            fd.append("FROM TIME", document.getElementById('lp_from').value); 
+            fd.append("TO TIME", document.getElementById('lp_to').value);
+            
             promises.push(fetch(URL_LP, { method: 'POST', mode: 'no-cors', body: fd }));
         }
 
-        // 3. ALP
+        // 3. ALP SECTION
         if (checks[2]) {
-            let fd = new FormData(); fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name); fd.append("ALP ID", document.getElementById('alp_id').value); fd.append("ALP NAME", document.getElementById('alp_name').value); fd.append("DESG", document.getElementById('alp_desg').value); fd.append("HQ", document.getElementById('alp_hq').value);
-            const bv = document.getElementById('alp_beat').value; if(bv==='OTHER'){ fd.append("BEAT_OTHER","OTHER"); fd.append("BEAT",document.getElementById('alp_other_beat').value); }else{ fd.append("BEAT",bv); }
+            let fd = new FormData(); 
+            fd.append("CLI ID", c_cli_id); 
+            fd.append("CLI NAME", c_cli_name); 
+            fd.append("ALP ID", document.getElementById('alp_id').value); 
+            fd.append("ALP NAME", document.getElementById('alp_name').value); 
+            fd.append("DESG", document.getElementById('alp_desg').value); 
+            fd.append("HQ", document.getElementById('alp_hq').value);
+            
+            const bv = document.getElementById('alp_beat').value; 
+            if(bv==='OTHER'){ 
+                fd.append("BEAT_OTHER","OTHER"); 
+                fd.append("BEAT",document.getElementById('alp_other_beat').value); 
+            } else { 
+                fd.append("BEAT",bv); 
+            }
+            
             fd.append("DATE", c_date);
             promises.push(fetch(URL_ALP, { method: 'POST', mode: 'no-cors', body: fd }));
         }
 
-        // 4. OTHER DUTY
+        // 4. OTHER DUTY SECTION
         if (checks[3]) {
-            let fd = new FormData(); fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name); fd.append("CLI LOBBY", c_cli_hq); fd.append("DATE", c_date); fd.append("FROM TIME", document.getElementById('od_fromTime').value); fd.append("TO TIME", document.getElementById('od_toTime').value);
-            let dt = document.getElementById('od_dutyType').value; if(dt==="OTHER DUTY") dt=`${document.getElementById('od_desc').value} (${document.getElementById('od_subType').value})`;
+            let fd = new FormData(); 
+            fd.append("CLI ID", c_cli_id); 
+            fd.append("CLI NAME", c_cli_name); 
+            fd.append("CLI LOBBY", c_cli_hq); 
+            fd.append("DATE", c_date); 
+            fd.append("FROM TIME", document.getElementById('od_fromTime').value); 
+            fd.append("TO TIME", document.getElementById('od_toTime').value);
+            
+            let dt = document.getElementById('od_dutyType').value; 
+            if(dt==="OTHER DUTY") dt=`${document.getElementById('od_desc').value} (${document.getElementById('od_subType').value})`;
             fd.append("DUTY TYPE", dt);
+            
             promises.push(fetch(URL_OD, { method: 'POST', mode: 'no-cors', body: fd }));
         }
 
-// 5. MASS MATRIX (Main Button Batch Collector Engine)
+        // 5. MASS MATRIX SECTION
         if (checks[4]) {
             let matrixBatchData = [];
-            
-            // Pure portal par jitne bhi popups ke andar selected active checks hain, sabko ek jhatke me scan karo
             document.querySelectorAll('.matrix-active-check:checked:not(:disabled)').forEach(cb => {
                 const empCodeStr = cb.dataset.emp;
                 const driveName = cb.dataset.drive;
@@ -1536,9 +1750,8 @@ function updateButton(cb) {
                 const row = latestCrewData.find(c => String(c.empCode).trim() === empCodeStr);
                 
                 if (row) {
-                    // Cache lock internally right away
                     historyMap.add(`${empCodeStr}|${driveName}`);
-                    latestDateMap.set(`${empCodeStr}|${empCodeStr}`, dateStr);
+                    latestDateMap.set(`${empCodeStr}|${driveName}`, dateStr);
 
                     matrixBatchData.push({
                         empCode: empCodeStr,
@@ -1553,7 +1766,6 @@ function updateButton(cb) {
                 }
             });
 
-            // Agar main button click karne par checkmarks mile hain, tabhi array payload pass karo
             if (matrixBatchData.length > 0) {
                 promises.push(fetch(URL_MATRIX, { 
                     method: 'POST', 
@@ -1563,304 +1775,44 @@ function updateButton(cb) {
                 }));
             }
         }
-    }
- function toggleDeferredPopup(btn) {
-    const parentTd = btn.closest('td');
-    const popup = parentTd.querySelector('.drive-popup');
-    const empCode = parentTd.dataset.emp;
-    const date = parentTd.dataset.date;
-    
-    if (popup.innerHTML === "") {
-        const row = latestCrewData.find(c => String(c.empCode).trim() === empCode);
-        const empCodeStr = String(empCode).trim();
-        const totalDrives = DRIVE_LIST.length;
-        
-        let popupHTML = `
-            <div class="flex justify-between items-center border-b pb-2 mb-2">
-                <div class="text-[10px] text-slate-500 uppercase tracking-widest font-black">Select Drives (${totalDrives} Total)</div>
-                <button type="button" onclick="closePopup(this)" class="text-red-500 hover:text-red-700 font-bold text-lg leading-none px-2">✕</button>
-            </div>
-            <div class="flex flex-col gap-2 max-h-[320px] overflow-y-auto pr-2 mb-3">`;
-            
-        popupHTML += DRIVE_LIST.map(drive => {
-            const key = `${empCodeStr}|${drive}`;
-            const done = historyMap.has(key); 
-            const latestDate = latestDateMap.get(key) || ''; 
-            const isCurrentDateDone = done && (latestDate === date);
 
-            return `<label class="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${isCurrentDateDone ? 'bg-gray-100 border border-gray-200 opacity-60' : (done ? 'bg-emerald-50 border border-emerald-200' : 'hover:bg-slate-50 border border-transparent')}">
-                       <input type="checkbox" class="checkbox-custom tempDriveCheck matrix-active-check" 
-                           ${isCurrentDateDone ? 'checked disabled' : ''} 
-                           value="${drive}" 
-                           data-emp="${empCodeStr}"
-                           data-date="${date}"
-                           data-drive="${drive}">
-                        <div class="flex flex-col flex-1">
-                        ${DRIVE_PDF_LINKS[drive] ? `<a href="${DRIVE_PDF_LINKS[drive]}" target="_blank" rel="noopener noreferrer" class="text-xs font-bold underline flex items-start gap-1 break-words whitespace-normal leading-4 ${done ? 'text-emerald-700' : 'text-blue-600'}"><i data-lucide="file-text" class="w-3 h-3"></i>${drive}</a>` : `<span class="text-xs font-bold break-words whitespace-normal leading-4 ${done ? 'text-emerald-700' : 'text-slate-700'}">${drive}</span>`}
-                        ${done ? `<span class="text-[10px] font-bold text-amber-600 mt-0.5">Last Done: ${latestDate}</span>` : ''}
-                        </div>
-                    </label>`;
-        }).join('');
-        
-        popupHTML += `</div>
-            <div class="pt-2 border-t flex gap-2">
-                <button type="button" onclick="syncBatchDrivesFromPopup(this, '${empCodeStr}', '${date}')" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded text-xs tracking-wider uppercase shadow-md flex justify-center items-center gap-2">
-                    <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i> Sync Selected
-                </button>
-            </div>`;
-        
-        popup.innerHTML = popupHTML;
-        requestAnimationFrame(() => { lucide.createIcons({ root: popup }); });
-    }
-    togglePopup(btn);
-}
-async function syncBatchDrivesFromPopup(btnElement, empCode, date) {
-    const popup = btnElement.closest('.drive-popup');
-    const parentTd = btnElement.closest('td.relative');
-    const mainCellBtn = parentTd.querySelector('button[onclick="toggleDeferredPopup(this)"]');
-    
-    // Sirf wahi checkboxes uthao jo user ne manually tick kiye hain
-    const checkedBoxes = popup.querySelectorAll('.tempDriveCheck:checked:not(:disabled)');
-    if (checkedBoxes.length === 0) {
-        popup.classList.add('hidden');
-        return;
-    }
-
-    const row = latestCrewData.find(c => String(c.empCode).trim() === empCode);
-    if (!row) return;
-
-    // Popup button status update
-    const originalText = btnElement.innerHTML;
-    btnElement.disabled = true;
-    btnElement.innerText = "⏳ Syncing...";
-
-    // Batch Payload array collect karein
-    let batchPayload = [];
-    checkedBoxes.forEach(cb => {
-        const driveName = cb.dataset.drive;
-        
-        // Optimistic local cache push instantly
-        historyMap.add(`${empCode}|${driveName}`);
-        latestDateMap.set(`${empCode}|${driveName}`, date);
-
-        batchPayload.push({
-            empCode: empCode,
-            crewId: String(row.crewId || "").trim(),
-            crewName: String(row.crewName || "").trim(),
-            date: date,
-            drive: driveName,
-            cliName: String(document.getElementById('c_cli_name').value || row.cliName || "").trim(),
-            hq: String(row.hq || "").trim(),
-            desg: String(row.crewType || "").trim()
-        });
-    });
-
-    // Grid Counter live update
-    const totalDrives = DRIVE_LIST.length;
-    let currentDoneCount = 0;
-    DRIVE_LIST.forEach(d => { if(historyMap.has(`${empCode}|${d}`)) currentDoneCount++; });
-    
-    mainCellBtn.innerHTML = `<i class="w-3 h-3 border-2 border-current rounded-full inline-block mr-1"></i>${currentDoneCount}/${totalDrives}`;
-    mainCellBtn.className = 'w-full py-1 px-1 rounded text-[10px] font-bold flex justify-center items-center gap-1 transition-all bg-emerald-100 text-emerald-700 border border-emerald-300 font-bold shadow-sm';
-
-    // API Hit for immediate cell sync
-    try {
-        await fetch(URL_MATRIX, { 
-            method: 'POST', 
-            mode: 'no-cors', 
-            body: JSON.stringify(batchPayload),
-            headers: { 'Content-Type': 'text/plain' } 
-        });
-        
-        popup.innerHTML = ""; // Popup clean surface
-        popup.classList.add('hidden');
-    } catch (err) {
-        console.error("Batch Sync Drop Error:", err);
-        btnElement.disabled = false;
-        btnElement.innerHTML = originalText;
-        showCenterAlert("Network pipeline execution error.", "error");
-    }
-}
-
-async function processUnifiedSubmit() {
-    const form = document.getElementById('masterForm');
-    if(!form.checkValidity()) { form.reportValidity(); return; }
-
-    const checks = ['chk_ab','chk_lp','chk_alp','chk_od','chk_matrix'].map(id => document.getElementById(id).checked);
-    if(!checks.includes(true)) return showCenterAlert("Please select at least one section to submit.", "error");
-
-    // Dynamic Mathematical Validations
-    if (checks[0]) {
-        const fpWee = parseInt(document.getElementById('fpWeeHours').value) || 0;
-        const fpExcl = parseInt(document.getElementById('fpExcludingWee').value) || 0;
-        const fpCoaching = parseInt(document.getElementById('fpCoaching').value) || 0;
-        const fpMemu = parseInt(document.getElementById('fpMemu').value) || 0;
-        const fpGoods = parseInt(document.getElementById('fpGoods').value) || 0;
-
-        const sumLeftFp = fpWee + fpExcl;
-        const sumRightFp = fpCoaching + fpMemu + fpGoods;
-
-        if (sumLeftFp !== sumRightFp) {
-            showCenterAlert(`Validation Failed: Sum of Footplates mismatch!\n\n(Wee + Excl) = ${sumLeftFp}\n\nMust be equal to:\n(Coaching + MEMU + Goods) = ${sumRightFp}`, "error");
-            return;
-        }
-
-        const abWee = parseInt(document.getElementById('abWeeHours').value) || 0;
-        const abExcl = parseInt(document.getElementById('abExcludingWee').value) || 0;
-        const abCoaching = parseInt(document.getElementById('abCoachingCount').value) || 0;
-        const abMemu = parseInt(document.getElementById('abMemuCount').value) || 0;
-        const abGoods = parseInt(document.getElementById('abGoodsCount').value) || 0;
-        const abSecuring = parseInt(document.getElementById('abSecuringDriveCount').value) || 0;
-
-        const sumLeftAbn = abWee + abExcl;
-        const sumRightAbn = abCoaching + abMemu + abGoods;
-
-        if (sumLeftAbn !== sumRightAbn) {
-            showCenterAlert(`Validation Failed: Sum of Abnormalities mismatch!\n\n(Wee + Excl) = ${sumLeftAbn}\n\nMust be equal to:\n(Coaching + MEMU + Goods) = ${sumRightAbn}`, "error");
-            return;
-        }
-    }
-
-    const c_cli_id = document.getElementById('c_cli_id').value;
-    const c_cli_name = document.getElementById('c_cli_name').value;
-    const c_cli_hq = document.getElementById('c_cli_hq').value;
-    const c_date = document.getElementById('c_date').value;
-
-    const btn = document.getElementById('masterSubmitBtn');
-    const origText = btn.innerHTML;
-    btn.disabled = true; 
-    btn.innerHTML = '<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> SYNCING TO CLOUD...';
-    btn.classList.replace('bg-blue-600', 'bg-slate-400');
-    btn.classList.replace('hover:bg-blue-700', 'hover:bg-slate-500');
-    requestAnimationFrame(() => { lucide.createIcons(); });
-
-    let promises = [];
-
-    // 1. ABNORMALITY
-    if (checks[0]) {
-        let fd = new FormData(); 
-        fd.append("CLI ID", c_cli_id); 
-        fd.append("CLI NAME", c_cli_name); 
-        fd.append("CLI LOBBY", c_cli_hq); 
-        fd.append("DATE", c_date);
-        
-        document.querySelectorAll('#sec_ab [data-name]').forEach(el => {
-            const headerName = el.getAttribute('data-name');
-            fd.append(headerName, el.value);
-
-            if (ABN_DETAIL_CONTAINERS[headerName]) {
-                const containerId = ABN_DETAIL_CONTAINERS[headerName];
-                const targetDetailHeader = ABN_MAP_COUNT_TO_DETAIL_HEADER[headerName];
-                const combinedDetailString = getAbnormalityDetailString(containerId);
-                fd.append(targetDetailHeader, combinedDetailString);
-            }
-        });
-
-        const combinedFsdString = getFsdTableDetailString();
-        fd.append("ABNORMALITIES DETAIL ON FSD ROUTE SETTING AMBUSH", combinedFsdString);
-        promises.push(fetch(URL_AB, { method: 'POST', mode: 'no-cors', body: fd }));
-    }
-    
-    // 2. LP
-    if (checks[1]) {
-        let fd = new FormData(); fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name); fd.append("LP ID", document.getElementById('lp_id').value); fd.append("LP NAME", document.getElementById('lp_name').value); fd.append("DESG", document.getElementById('lp_desg').value); fd.append("HQ", document.getElementById('lp_hq').value); fd.append("EMP CODE", document.getElementById('lp_empcode').value); fd.append("MAJOR BEAT", document.getElementById('lp_major_beat').value);
-        const bv = document.getElementById('lp_beat').value; if(bv==='OTHER'){ fd.append("BEAT_OTHER","OTHER"); fd.append("BEAT",document.getElementById('lp_other_beat').value); }else{ fd.append("BEAT",bv); }
-        fd.append("LOCO NUMBER", document.getElementById('lp_loco').value); fd.append("TRAIN NUMBER", document.getElementById('lp_train').value); fd.append("DATE", c_date); fd.append("FROM TIME", document.getElementById('lp_from').value); fd.append("TO TIME", document.getElementById('lp_to').value);
-        promises.push(fetch(URL_LP, { method: 'POST', mode: 'no-cors', body: fd }));
-    }
-
-    // 3. ALP
-    if (checks[2]) {
-        let fd = new FormData(); fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name); fd.append("ALP ID", document.getElementById('alp_id').value); fd.append("ALP NAME", document.getElementById('alp_name').value); fd.append("DESG", document.getElementById('alp_desg').value); fd.append("HQ", document.getElementById('alp_hq').value);
-        const bv = document.getElementById('alp_beat').value; if(bv==='OTHER'){ fd.append("BEAT_OTHER","OTHER"); fd.append("BEAT",document.getElementById('alp_other_beat').value); }else{ fd.append("BEAT",bv); }
-        fd.append("DATE", c_date);
-        promises.push(fetch(URL_ALP, { method: 'POST', mode: 'no-cors', body: fd }));
-    }
-
-    // 4. OTHER DUTY
-    if (checks[3]) {
-        let fd = new FormData(); fd.append("CLI ID", c_cli_id); fd.append("CLI NAME", c_cli_name); fd.append("CLI LOBBY", c_cli_hq); fd.append("DATE", c_date); fd.append("FROM TIME", document.getElementById('od_fromTime').value); fd.append("TO TIME", document.getElementById('od_toTime').value);
-        let dt = document.getElementById('od_dutyType').value; if(dt==="OTHER DUTY") dt=`${document.getElementById('od_desc').value} (${document.getElementById('od_subType').value})`;
-        fd.append("DUTY TYPE", dt);
-        promises.push(fetch(URL_OD, { method: 'POST', mode: 'no-cors', body: fd }));
-    }
-
-    // 5. MASS MATRIX
-    if (checks[4]) {
-        let matrixBatchData = [];
-        document.querySelectorAll('.matrix-active-check:checked:not(:disabled)').forEach(cb => {
-            const empCodeStr = cb.dataset.emp;
-            const driveName = cb.dataset.drive;
-            const dateStr = cb.dataset.date;
-            const row = latestCrewData.find(c => String(c.empCode).trim() === empCodeStr);
-            
-            if (row) {
-                historyMap.add(`${empCodeStr}|${driveName}`);
-                latestDateMap.set(`${empCodeStr}|${driveName}`, dateStr);
-
-                matrixBatchData.push({
-                    empCode: empCodeStr,
-                    crewId: String(row.crewId || "").trim(),
-                    crewName: String(row.crewName || "").trim(),
-                    date: dateStr,
-                    drive: driveName,
-                    cliName: String(c_cli_name).trim(),
-                    hq: String(row.hq || "").trim(),
-                    desg: String(row.crewType || "").trim()
-                });
-            }
-        });
-
-        if (matrixBatchData.length > 0) {
-            promises.push(fetch(URL_MATRIX, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                body: JSON.stringify(matrixBatchData),
-                headers: { 'Content-Type': 'text/plain' } 
-            }));
-        }
-    }
-
-    // =========================================================
-    // MASTER BUTTON RENDER & COMPLETION HANDLING
-    // =========================================================
-    try {
-        if (promises.length === 0) {
-            showCenterAlert('✅ NO NEW ENTRIES TO SYNC!', 'info');
-            btn.disabled = false;
-            btn.innerHTML = origText;
-            btn.classList.replace('bg-slate-400', 'bg-blue-600');
-            btn.classList.replace('hover:bg-slate-500', 'hover:bg-blue-700');
-            return;
-        }
-
-        // High-Speed Racing Trigger
-        const fetchPromise = Promise.all(promises);
-        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve('FORCE_BYPASS'), 3500));
-        const finalResult = await Promise.race([fetchPromise, timeoutPromise]);
-
-        if (finalResult === 'FORCE_BYPASS') {
-            console.log("⚠️ Background pipeline crowded. Forcing frontend release.");
-        }
-
-        showCenterAlert('✅ ALL DATA DISPATCHED SUCCESSFULLY!', 'success');
-        setTimeout(() => { location.reload(); }, 1800);
-
-    } catch(e) { 
-        showCenterAlert('Sync Warning: Data triggered to cloud but response parsed with warning.', 'info'); 
-        console.error("Submission Engine Trace Error:", e);
-        setTimeout(() => { location.reload(); }, 2000);
-    } finally {
-        setTimeout(() => {
-            if (btn.disabled) {
+        // EXECUTION & COMPLETION HANDLING
+        try {
+            if (promises.length === 0) {
+                showCenterAlert('✅ NO NEW ENTRIES TO SYNC!', 'info');
                 btn.disabled = false;
                 btn.innerHTML = origText;
                 btn.classList.replace('bg-slate-400', 'bg-blue-600');
                 btn.classList.replace('hover:bg-slate-500', 'hover:bg-blue-700');
+                return;
             }
-        }, 4000);
+
+            const fetchPromise = Promise.all(promises);
+            const timeoutPromise = new Promise(resolve => setTimeout(() => resolve('FORCE_BYPASS'), 3500));
+            const finalResult = await Promise.race([fetchPromise, timeoutPromise]);
+
+            if (finalResult === 'FORCE_BYPASS') {
+                console.log("⚠️ Background pipeline crowded. Forcing frontend release.");
+            }
+
+            showCenterAlert('✅ ALL DATA DISPATCHED SUCCESSFULLY!', 'success');
+            setTimeout(() => { location.reload(); }, 1800);
+
+        } catch(e) { 
+            showCenterAlert('Sync Warning: Data triggered to cloud but response parsed with warning.', 'info'); 
+            console.error("Submission Engine Trace Error:", e);
+            setTimeout(() => { location.reload(); }, 2000);
+        } finally {
+            setTimeout(() => {
+                if (btn.disabled) {
+                    btn.disabled = false;
+                    btn.innerHTML = origText;
+                    btn.classList.replace('bg-slate-400', 'bg-blue-600');
+                    btn.classList.replace('hover:bg-slate-500', 'hover:bg-blue-700');
+                }
+            }, 4000);
+        }
     }
-}
 </script>
 </body>
 </html>
