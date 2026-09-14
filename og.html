@@ -665,23 +665,54 @@
             </div>
         </div>
 
-        <div class="clean-card overflow-hidden">
-            <label class="section-header">
-                <input type="checkbox" id="chk_alp" class="checkbox-custom" onchange="toggleSection('sec_alp', this.checked)">
-                <span class="font-bold text-slate-700 text-lg">3. END TO END ALP</span>
+      <!-- 3. QUARTERLY FP WITH GROUP ALP (HIGH PRIORITY) -->
+        <div class="clean-card overflow-hidden border-2 border-amber-400/80 shadow-md ring-1 ring-amber-400/30">
+            <label class="section-header bg-gradient-to-r from-amber-50 via-orange-50/50 to-white hover:from-amber-100/80 hover:via-orange-100/60 hover:to-amber-50/40 border-b border-amber-200 cursor-pointer p-4 md:p-5 flex items-center gap-3">
+                <input type="checkbox" id="chk_alp" class="checkbox-custom accent-amber-600 w-5 h-5 cursor-pointer mt-0.5" onchange="toggleSection('sec_alp', this.checked)">
+                
+                <div class="flex flex-col gap-1 w-full">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="font-extrabold text-amber-950 text-lg md:text-xl tracking-tight">
+                            3. QUARTERLY FOOTPLATE MONITORING (GROUP ALP)
+                        </span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-amber-600 text-white shadow-xs">
+                            CRITICAL MANDATORY
+                        </span>
+                    </div>
+                    <p class="text-xs md:text-sm font-semibold text-amber-900/90 leading-snug">
+                        ⚠️ <span class="underline underline-offset-2">Mandatory Compliance:</span> Assistant Loco Pilot (ALP) footplate data is not captured in CMS. All CLIs must record every Group ALP quarterly Footplate detail here without exception.
+                    </p>
+                </div>
             </label>
-            <div id="sec_alp" class="section-body hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+
+            <div id="sec_alp" class="section-body hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 bg-amber-50/20">
                 <div><label class="modern-label">ALP ID</label><select id="alp_id" class="modern-input req-alp font-mono" onchange="autoFillAlpDetails(this.value)"><option value="">Select ALP ID</option></select></div>
                 <div><label class="modern-label">ALP NAME</label><input type="text" id="alp_name" class="modern-input font-semibold" readonly></div>
                 <div><label class="modern-label">DESG</label><input type="text" id="alp_desg" class="modern-input" readonly></div>
                 <div><label class="modern-label">HQ</label><input type="text" id="alp_hq" class="modern-input" readonly></div>
+                <div><label class="modern-label">EMP CODE</label><input type="text" id="alp_empcode" class="modern-input font-mono" readonly></div>
                 
-                <div class="md:col-span-4"><label class="modern-label">BEAT</label>
+                <div>
+                    <label class="modern-label">TYPE OF FOOTPLATE</label>
+                    <select id="alp_type_fp" class="modern-input req-alp">
+                        <option value="">Select TYPE</option>
+                        <option value="FULL">FULL</option>
+                        <option value="PARTIAL">PARTIAL</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-2"><label class="modern-label">MAJOR BEAT</label><select id="alp_major_beat" class="modern-input req-alp"><option value="">Select MAJOR BEAT</option></select></div>
+                <div class="md:col-span-2"><label class="modern-label">BEAT</label>
                     <select id="alp_beat" class="modern-input req-alp" onchange="toggleOtherBeat(this, 'alp_other_beat')">
                         <option value="">Select BEAT</option><option value="AKT-USL">AKT-USL</option><option value="AKT-RIG">AKT-RIG</option><option value="AKT-KRBA">AKT-KRBA</option><option value="BSP-SDL">BSP-SDL</option><option value="BSP-RIG">BSP-RIG</option><option value="BSP-KRBA">BSP-KRBA</option><option value="BSP-DBEC">BSP-DBEC</option><option value="USL-NKJ">USL-NKJ</option><option value="USL-DBEC">USL-DBEC</option><option value="USL-RIG">USL-RIG</option><option value="USL-KRBA">USL-KRBA</option><option value="PND-BSP">PND-BSP</option><option value="PND-NKJ">PND-NKJ</option><option value="SDL-SGO">SDL-SGO</option><option value="SDL-BSP">SDL-BSP</option><option value="SDL-NKJ">SDL-NKJ</option><option value="NKJ-SDL">NKJ-SDL</option><option value="SDL-BJRI">SDL-BJRI</option><option value="BJRI-SDL">BJRI-SDL</option><option value="SDL-ABKP">SDL-ABKP</option><option value="KHS-USL">KHS-USL</option><option value="KHS-BRJN">KHS-BRJN</option><option value="KHS-DMJY">KHS-DMJY</option><option value="KHS-KRBA">KHS-KRBA</option><option value="BRJN-ROU">BRJN-ROU</option><option value="BRJN-RIG">BRJN-RIG</option><option value="BRJN-SBP">BRJN-SBP</option><option value="KRBA-DPK">KRBA-DPK</option><option value="KRBA-USL">KRBA-USL</option><option value="KRBA-RIG">KRBA-RIG</option><option value="BJRI-ABKP">BJRI-ABKP</option><option value="BJRI-BSP">BJRI-BSP</option><option value="BJRI-NKJ">BJRI-NKJ</option><option value="RIG-USL">RIG-USL</option><option value="RIG-ROU">RIG-ROU</option><option value="SJQ-ABKP-PSRS">SJQ-ABKP-PSRS</option><option value="SJQ-SDL">SJQ-SDL</option><option value="BSP-BJRI">BSP-BJRI</option><option value="USL-RSD">USL-RSD</option><option value="BSP-RSD">BSP-RSD</option><option value="BSP-NGP">BSP-NGP</option><option value="BSP-CKP">BSP-CKP</option><option value="BSP-TATA">BSP-TATA</option><option value="BSP-ROU">BSP-ROU</option><option value="BSP-SBP">BSP-SBP</option><option value="OTHER">OTHER BEAT</option>
                     </select>
                     <input type="text" id="alp_other_beat" class="modern-input hidden mt-2" placeholder="Enter other beat">
                 </div>
+
+                <div><label class="modern-label">LOCO NUMBER</label><input type="number" id="alp_loco" class="modern-input req-alp"></div>
+                <div><label class="modern-label">TRAIN NUMBER</label><input type="text" id="alp_train" class="modern-input req-alp"></div>
+                <div><label class="modern-label">FROM TIME</label><input type="time" id="alp_from" class="modern-input req-alp"></div>
+                <div><label class="modern-label">TO TIME</label><input type="time" id="alp_to" class="modern-input req-alp"></div>
             </div>
         </div>
         <div class="clean-card overflow-hidden">
@@ -873,7 +904,7 @@
     const URL_MATRIX = "https://script.google.com/macros/s/AKfycbz_FpTEVj4zgWHuGp7p_bazMeH3dFmdTsigh728hpdYF6mK5l2ZlF8Qv_Ps3i3fhmnr/exec";
     const URL_AB = "https://script.google.com/macros/s/AKfycbzTpR-XJHKJQUT0MnEjOTuh6iH9amkUDoI1pnZ29WdoAH8bDEJaAihhMGlhC4D9Yb5CUA/exec";
     const URL_OD = "https://script.google.com/macros/s/AKfycbzD319B272QFM5HK-3ejkl41n3zm1r_0F6bc9ZzJE1Z_6Tc-4wge65Ip16uQe9eDUmrUw/exec";
-    const URL_ALP = "https://script.google.com/macros/s/AKfycbwxnVSd3eGB4SvHVz2IINLEat031qB4xvNKbe8BcdPyg5BQpL0xkbQuAyu_B-fTdIqB0A/exec";
+    const URL_ALP = "https://script.google.com/macros/s/AKfycbylqEX4sPMeiGyice9u2sdti1zA0e9ylZrkBSlzhd2Ga5bDy-rft0DOP79sEMKf3xNE/exec";
     const URL_LP = "https://script.google.com/macros/s/AKfycbxbHiwAGtuvUh_0M3eGX3gQZ1SGA96ffn9Tw93aKGZbU-8fMtArUmpqzGgfI-CqSOyG/exec";
 
     let historyMap = new Set();
@@ -1352,13 +1383,20 @@
         }
     }
 
-    function autoFillAlpDetails(alpId) {
+function autoFillAlpDetails(alpId) {
         const data = latestCrewData.find(i => i.crewId === alpId);
         document.getElementById('alp_name').value = data ? data.crewName : "";
         document.getElementById('alp_desg').value = data ? data.crewType : "";
-        document.getElementById('alp_hq').value = data ? data.hq : "";
-    }
+        const hq = data ? data.hq : "";
+        document.getElementById('alp_hq').value = hq;
+        document.getElementById('alp_empcode').value = data ? data.empCode : "";
 
+        const mb = document.getElementById('alp_major_beat');
+        mb.innerHTML = '<option value="">Select MAJOR BEAT</option>';
+        if (hq) {
+            majorBeatData.filter(i => i['HQ'] === hq).forEach(i => mb.appendChild(new Option(i['BEAT'], i['BEAT'])));
+        }
+    }
     function toggleOtherBeat(select, targetId) { const input = document.getElementById(targetId); if(select.value === 'OTHER') { input.classList.remove('hidden'); input.required = true; } else { input.classList.add('hidden'); input.required = false; input.value = ''; } }
     function toggleODFields() { document.getElementById('od_extra_group').style.display = (document.getElementById('od_dutyType').value === "OTHER DUTY") ? 'block' : 'none'; }
 
@@ -1755,7 +1793,7 @@
             promises.push(fetch(URL_LP, { method: 'POST', mode: 'no-cors', body: fd }));
         }
 
-        // 3. ALP SECTION
+// 3. ALP SECTION
         if (checks[2]) {
             let fd = new FormData(); 
             fd.append("CLI ID", c_cli_id); 
@@ -1764,16 +1802,24 @@
             fd.append("ALP NAME", document.getElementById('alp_name').value); 
             fd.append("DESG", document.getElementById('alp_desg').value); 
             fd.append("HQ", document.getElementById('alp_hq').value);
+            fd.append("EMP CODE", document.getElementById('alp_empcode').value);
+            fd.append("TYPE OF FOOTPLATE", document.getElementById('alp_type_fp').value);
+            fd.append("MAJOR BEAT", document.getElementById('alp_major_beat').value);
             
             const bv = document.getElementById('alp_beat').value; 
-            if(bv==='OTHER'){ 
-                fd.append("BEAT_OTHER","OTHER"); 
-                fd.append("BEAT",document.getElementById('alp_other_beat').value); 
+            if(bv === 'OTHER'){ 
+                fd.append("BEAT_OTHER", "OTHER"); 
+                fd.append("BEAT", document.getElementById('alp_other_beat').value); 
             } else { 
-                fd.append("BEAT",bv); 
+                fd.append("BEAT", bv); 
             }
             
+            fd.append("LOCO NUMBER", document.getElementById('alp_loco').value);
+            fd.append("TRAIN NUMBER", document.getElementById('alp_train').value);
             fd.append("DATE", c_date);
+            fd.append("FROM TIME", document.getElementById('alp_from').value);
+            fd.append("TO TIME", document.getElementById('alp_to').value);
+            
             promises.push(fetch(URL_ALP, { method: 'POST', mode: 'no-cors', body: fd }));
         }
 
