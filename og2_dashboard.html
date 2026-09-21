@@ -43,7 +43,6 @@
             position: relative;
         }
 
-        /* Ambient Background Animations */
         .ambient-bg {
             position: fixed;
             inset: 0;
@@ -53,7 +52,6 @@
                         radial-gradient(circle at 85% 30%, rgba(8, 145, 178, 0.1), transparent 35%);
         }
 
-        /* Glassmorphism */
         .glass {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
@@ -63,38 +61,32 @@
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
         }
 
-        /* Gradient Text */
         .gradient-text {
             background: linear-gradient(135deg, #ffffff 0%, #67e8f9 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        /* Custom Scrollbars */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.4); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.8); }
 
-        /* Tables */
-.table-container {
-    width: 100%;
-    overflow-x: auto;
-    border-radius: 1rem;
-
-    will-change: transform;
-
-    transform: translateZ(0);
-
-    backface-visibility: hidden;
-}
-       table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-
-    contain: content;
-}
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 1rem;
+            will-change: transform;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            contain: content;
+        }
         
         th {
             background: rgba(15, 23, 42, 0.95);
@@ -118,7 +110,6 @@
         
         tr:hover td { background: rgba(37, 99, 235, 0.1); }
 
-        /* Sticky Columns */
         .sticky-col {
             position: sticky;
             left: 0;
@@ -128,39 +119,6 @@
         }
         th.sticky-col { z-index: 20; }
 
-        /* Popups & Modals */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            z-index: 50;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        
-        .drive-popup {
-            background: rgba(15, 23, 42, 0.98);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-            border-radius: 1rem;
-            animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        /* Inputs & Buttons */
         .modern-input {
             width: 100%;
             padding: 0.75rem 1rem;
@@ -192,9 +150,32 @@
         }
         .btn-primary { background: linear-gradient(135deg, #2563eb, #0ea5e9); color: white; }
         .btn-primary:hover { box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); transform: translateY(-1px); }
-        .btn-success { background: linear-gradient(135deg, #059669, #10b981); color: white; }
-        .btn-success:hover { box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); transform: translateY(-1px); }
-        
+
+        .nav-tab-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 23, 42, 0.5);
+            color: #94a3b8;
+        }
+        .nav-tab-btn.active {
+            background: linear-gradient(135deg, #2563eb, #0ea5e9);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+        }
+        .nav-tab-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+        }
+
         .toast-card {
             background: rgba(15, 23, 42, 0.95);
             border-left: 4px solid var(--primary);
@@ -213,10 +194,10 @@
 <!-- Toasts -->
 <div id="toastContainer" class="fixed bottom-6 right-6 z-[99999] flex flex-col gap-3"></div>
 
-<div class="p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto">
+<div class="p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto space-y-6">
 
     <!-- Header -->
-    <header class="glass p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+    <header class="glass p-5 flex flex-col md:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-4 w-full md:w-auto">
             <div class="bg-blue-600 p-3 rounded-xl shadow-lg shadow-blue-500/30 hidden sm:block">
                 <i data-lucide="train-front" class="w-7 h-7 text-white"></i>
@@ -225,7 +206,7 @@
                 <h1 class="text-xl md:text-2xl font-bold gradient-text">Crew Counselling System</h1>
                 <p class="text-slate-400 text-xs md:text-sm font-medium flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    Live Data Synchronization
+                    Live Data Synchronization (Multi-Sheet Active)
                 </p>
             </div>
         </div>
@@ -236,8 +217,21 @@
             </div>
         </div>
     </header>
-    <!-- DASHBOARD SECTION -->
-    <div id="dashboardSection" class="space-y-6">
+
+    <!-- Navigation Tabs -->
+    <div class="flex items-center gap-3 flex-wrap">
+        <button id="tabBtnDashboard" onclick="switchTab('dashboard')" class="nav-tab-btn active">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Analytics Dashboard
+        </button>
+        <button id="tabBtnCrewDetail" onclick="switchTab('crewDetail')" class="nav-tab-btn">
+            <i data-lucide="user-search" class="w-4 h-4"></i> Crew Counselling Detail (ID / Name)
+        </button>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- TAB 1: MAIN DASHBOARD & SUMMARY VIEW                     -->
+    <!-- ======================================================== -->
+    <div id="tabContentDashboard" class="space-y-6">
         
         <!-- Filter Bar -->
         <div class="glass p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -248,7 +242,6 @@
                 <label class="text-sm font-medium text-slate-400 whitespace-nowrap">Filter by HQ:</label>
                 <select id="hqFilter" onchange="debounceDashboard()" class="modern-input py-1.5 min-w-[150px]">
                     <option value="ALL">All Headquarters</option>
-                    <!-- Populated dynamically -->
                 </select>
             </div>
         </div>
@@ -288,256 +281,290 @@
                 <div class="h-[250px]"><canvas id="hqChart"></canvas></div>
             </div>
         </div>
-<!-- Pending Analysis -->
-<!-- Pending Analysis -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
 
-    <div class="glass p-5 h-[420px] flex flex-col">
-<div class="flex items-center justify-between mb-4">
-    <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wide">
-        Pending By Category
-    </h3>
+        <!-- Pending Analysis -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+            <div class="glass p-5 h-[420px] flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wide">Pending By Category</h3>
+                    <select id="pendingCategoryDriveFilter" onchange="debounceDashboard()" class="modern-input py-1 px-2 text-xs w-[220px]">
+                        <option value="ALL">All Drives</option>
+                    </select>
+                </div>
+                <div class="flex-1 min-h-0">
+                    <canvas id="pendingCategoryChart"></canvas>
+                </div>
+            </div>
 
-<select id="pendingCategoryDriveFilter"
-    onchange="debounceDashboard()"
-    class="modern-input py-1 px-2 text-xs w-[220px]">
-
-    <option value="ALL">All Drives</option>
-
-</select>
-</div>
-        <div class="flex-1 min-h-0">
-            <canvas id="pendingCategoryChart"></canvas>
-        </div>
-    </div>
-<div class="glass p-5 h-[420px] flex flex-col">
-
-    <div class="flex items-center justify-between mb-4">
-
-        <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wide">
-            Pending By HQ
-        </h3>
-
-        <select id="pendingHQDriveFilter"
-            onchange="debounceDashboard()"
-            class="modern-input py-1 px-2 text-xs w-[220px]">
-
-            <option value="ALL">All Drives</option>
-
-        </select>
-
-    </div>
-
-    <div class="flex-1 min-h-0">
-        <canvas id="pendingHQChart"></canvas>
-    </div>
-
-</div>
-
-<!-- YE AB ALAG BLOCK HAI -->
-<div class="lg:col-span-2">
-<div class="lg:col-span-2">
-
-    <div class="glass p-5">
-
-        <div class="flex items-center justify-between mb-4">
-
-            <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wide">
-                Pending By Drive
-            </h3>
-
-            <select id="pendingDriveHQFilter"
-                onchange="debounceDashboard()"
-                class="modern-input py-1 px-2 text-xs w-[220px]">
-
-                <option value="ALL">All HQ</option>
-
-            </select>
-
+            <div class="glass p-5 h-[420px] flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wide">Pending By HQ</h3>
+                    <select id="pendingHQDriveFilter" onchange="debounceDashboard()" class="modern-input py-1 px-2 text-xs w-[220px]">
+                        <option value="ALL">All Drives</option>
+                    </select>
+                </div>
+                <div class="flex-1 min-h-0">
+                    <canvas id="pendingHQChart"></canvas>
+                </div>
+            </div>
         </div>
 
-        <div class="overflow-auto max-h-[550px]">
-
-            <table class="w-full text-sm border border-white/10">
-
-                <thead id="pendingDriveHead"></thead>
-
-                <tbody id="pendingDriveBody"></tbody>
-
-            </table>
-
+        <!-- Pending By Drive Table -->
+        <div class="glass p-5">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wide">Pending By Drive</h3>
+                <select id="pendingDriveHQFilter" onchange="debounceDashboard()" class="modern-input py-1 px-2 text-xs w-[220px]">
+                    <option value="ALL">All HQ</option>
+                </select>
+            </div>
+            <div class="overflow-auto max-h-[550px]">
+                <table class="w-full text-sm border border-white/10">
+                    <thead id="pendingDriveHead"></thead>
+                    <tbody id="pendingDriveBody"></tbody>
+                </table>
+            </div>
         </div>
 
-    </div>
-
-</div>
-
-</div>
         <!-- CLI Matrix Table -->
         <div class="glass p-5">
             <h3 class="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wide flex items-center gap-2">
                 <i data-lucide="table-2" class="w-4 h-4 text-emerald-400"></i> CLI-Wise Counselling Matrix
             </h3>
             <div class="table-container border border-white/10">
-                <table id="cliMatrixTable" class="w-full text-sm">
-                    <!-- Matrix dynamically generated here -->
+                <table id="cliMatrixTable" class="w-full text-sm"></table>
+            </div>
+        </div>
+
+        <!-- CLI Summary Section -->
+        <div class="glass p-5">
+            <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+                <h3 class="text-lg font-bold text-slate-200 flex items-center gap-2">
+                    <i data-lucide="table-properties" class="w-5 h-5 text-cyan-400"></i> CLI Wise Counselling Summary
+                </h3>
+                <select id="summaryDriveFilter" onchange="debounceDashboard()" class="modern-input py-2 px-3 text-sm w-[250px]">
+                    <option value="ALL">All Drives</option>
+                </select>
+            </div>
+            <div class="overflow-auto max-h-[75vh] border border-white/10 rounded-xl">
+                <table class="w-full text-sm">
+                    <thead id="cliSummaryHead"></thead>
+                    <tbody id="cliSummaryBody"></tbody>
                 </table>
             </div>
         </div>
+
     </div>
-   <!-- SUMMARY SECTION -->
-<div id="summarySection" class="space-y-6">
 
-    <div class="glass p-5">
+    <!-- ======================================================== -->
+    <!-- TAB 2: CREW COUNSELLING DETAIL (ID / NAME SEARCH)        -->
+    <!-- ======================================================== -->
+    <div id="tabContentCrewDetail" class="space-y-6 hidden">
+        
+        <!-- Search Card -->
+        <div class="glass p-6">
+            <div class="max-w-2xl mx-auto space-y-4">
+                <div class="text-center space-y-1">
+                    <h2 class="text-xl font-bold gradient-text flex items-center justify-center gap-2">
+                        <i data-lucide="user-check-2" class="w-6 h-6 text-cyan-400"></i> Crew Counselling Search
+                    </h2>
+                    <p class="text-slate-400 text-sm">
+                        Search by <span class="text-cyan-300 font-semibold">Crew ID (Col B)</span> or <span class="text-cyan-300 font-semibold">Crew Name (Col C)</span> across all sheets
+                    </p>
+                </div>
+                
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="crewSearchInput" 
+                        oninput="handleCrewSearch(this.value)" 
+                        placeholder="Type Crew ID (e.g. BIA...) or Crew Name..." 
+                        class="modern-input text-base py-3.5 px-4 pr-12 rounded-xl"
+                        autocomplete="off"
+                    />
+                    <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
 
-<div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+                    <!-- Autocomplete suggestion list -->
+                    <div id="crewSuggestionsBox" class="absolute left-0 right-0 top-full mt-2 bg-slate-900/95 border border-white/15 rounded-xl shadow-2xl overflow-hidden max-h-64 overflow-y-auto z-50 hidden">
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <h3 class="text-lg font-bold text-slate-200 flex items-center gap-2">
+        <!-- Initial Placeholder State -->
+        <div id="crewEmptyState" class="glass p-12 text-center text-slate-400 space-y-3">
+            <div class="w-16 h-16 rounded-full bg-blue-500/10 text-blue-400 mx-auto flex items-center justify-center">
+                <i data-lucide="search" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-white">Search for a Crew Member</h3>
+            <p class="text-sm text-slate-400 max-w-md mx-auto">Enter Crew ID or Crew Name above to check which drives they have attended, how many times, and on which dates.</p>
+        </div>
 
-        <i data-lucide="table-properties"
-           class="w-5 h-5 text-cyan-400"></i>
+        <!-- Crew Detail Display Card & Table -->
+        <div id="crewResultContainer" class="space-y-6 hidden">
+            
+            <!-- Crew Info Profile Header -->
+            <div class="glass p-6 border-l-4 border-cyan-400">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-5">
+                    <div class="flex items-center gap-4">
+                        <div id="crewAvatar" class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-cyan-500/20">
+                            C
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <h3 id="crewCardName" class="text-xl font-bold text-white">-</h3>
+                                <span id="crewCardGrade" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Grade</span>
+                            </div>
+                            <p class="text-slate-400 text-sm flex items-center gap-2 mt-1 flex-wrap">
+                                <span>Crew ID: <strong id="crewCardId" class="text-cyan-300 font-mono"></strong></span>
+                                <span>•</span>
+                                <span>HRMS: <strong id="crewCardHrms" class="text-slate-200"></strong></span>
+                                <span>•</span>
+                                <span>Emp Code: <strong id="crewCardEmp" class="text-slate-200"></strong></span>
+                            </p>
+                        </div>
+                    </div>
 
-        CLI Wise Counselling Summary
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <div class="bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-center">
+                            <span class="text-xs text-slate-400 block">Designation</span>
+                            <span id="crewCardDesg" class="text-sm font-bold text-cyan-300">-</span>
+                        </div>
+                        <div class="bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-center">
+                            <span class="text-xs text-slate-400 block">Headquarters</span>
+                            <span id="crewCardHQ" class="text-sm font-bold text-amber-300">-</span>
+                        </div>
+                        <div class="bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-center">
+                            <span class="text-xs text-slate-400 block">Assigned CLI</span>
+                            <span id="crewCardCLI" class="text-sm font-bold text-emerald-300">-</span>
+                        </div>
+                    </div>
+                </div>
 
-    </h3>
+                <div class="mt-5 pt-4 border-t border-white/10 flex items-center gap-4 flex-wrap">
+                    <div class="text-xs font-medium text-slate-400">
+                        Total Drives Tracked: <strong id="crewStatTotal" class="text-white">0</strong>
+                    </div>
+                    <div class="text-xs font-medium text-slate-400">
+                        Drives Completed: <strong id="crewStatDone" class="text-emerald-400">0</strong>
+                    </div>
+                    <div class="text-xs font-medium text-slate-400">
+                        Drives Pending: <strong id="crewStatPending" class="text-amber-400">0</strong>
+                    </div>
+                    <div class="text-xs font-medium text-slate-400">
+                        Total Sessions Attended: <strong id="crewStatTotalSessions" class="text-cyan-400">0</strong>
+                    </div>
+                </div>
+            </div>
 
-    <select id="summaryDriveFilter"
-        onchange="debounceDashboard()"
-        class="modern-input py-2 px-3 text-sm w-[250px]">
+            <!-- Complete Counselling Table with Specific Drive Filter -->
+            <div class="glass p-5">
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-4">
+                    <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wide flex items-center gap-2">
+                        <i data-lucide="clipboard-check" class="w-4 h-4 text-emerald-400"></i> Drive-Wise Counselling Status & History
+                    </h3>
 
-        <option value="ALL">
-            All Drives
-        </option>
+                    <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <label class="text-xs font-semibold text-slate-400 whitespace-nowrap">Filter by Drive:</label>
+                        <select id="crewSelectedDriveFilter" onchange="renderCrewTableForCurrentCrew()" class="modern-input py-1.5 px-3 text-xs min-w-[220px]">
+                            <option value="ALL">All Drives</option>
+                        </select>
+                    </div>
+                </div>
 
-    </select>
-
-</div>
-
-        <div class="overflow-auto max-h-[75vh] border border-white/10 rounded-xl">
-
-            <table class="w-full text-sm">
-
-                <thead id="cliSummaryHead"></thead>
-
-                <tbody id="cliSummaryBody"></tbody>
-
-            </table>
+                <div class="table-container border border-white/10">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr>
+                                <th class="w-12 text-center">#</th>
+                                <th>Safety Drive</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Total Times (Count)</th>
+                                <th>Counselling Date(s)</th>
+                                <th>Counselled By (CLI)</th>
+                                <th>HQ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="crewCounsellingTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
         </div>
 
     </div>
 
 </div>
-</div>
 
 <script>
-    // Icons Init
-    requestAnimationFrame(() => {
-    lucide.createIcons();
-});
-
     /* Google Sheets config */
     const API_KEY = "AIzaSyAw23pJz0K9fZb2rRRAe2C2cJDilRc0Kac";
     const SHEET_ID = "1EXYvdvs9OGwgXwvK_DmMpgFQ39nh-g5LWDk0-cZhl0A";
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxmbolJU4ozd61W9rMFyoAfiLATEvLV1lIR1eVzSTslsKjzDfg6Cm-bTZ0YWf_j2f_F/exec";
-    // ===============================
-// CREW STATUS SHEET CONFIG
-// ===============================
+    
+    // CREW ROSTER COMBINE SHEET
+    const CREW_SHEET_ID = "1c5niOafzh20MEepDrnwjZSXBWfJoD87_efAoC1mwxb8";
+    const CREW_RANGE = "'COMBINE'!A:L";
+    const CREW_API = `https://sheets.googleapis.com/v4/spreadsheets/${CREW_SHEET_ID}/values/${encodeURIComponent(CREW_RANGE)}?key=${API_KEY}`;
 
-const CREW_SHEET_ID = "1c5niOafzh20MEepDrnwjZSXBWfJoD87_efAoC1mwxb8";
-
-const CREW_RANGE = "'COMBINE'!A:L";
-
-const CREW_API =
-`https://sheets.googleapis.com/v4/spreadsheets/${CREW_SHEET_ID}/values/${encodeURIComponent(CREW_RANGE)}?key=${API_KEY}`;
+    // DOOSRI GOOGLE SHEET (ARCHIVE / MONTHLY SHEETS)
+    const ARCHIVE_SHEET_ID = "1YCYFeYhhCyxtA6FP8dTbeQuP72TzFOQIG8F0MNXDOmg";
 
     /* State Variables */
     let historyData = [];
     let DRIVE_LIST = [];
     let latestCrewData = [];
     let driveBreakdownData = {};
-    let historyMap = new Set();
+    const historyMap = new Set();
     let crewMapByEmp = {};
-    let dashboardTimer;
+    let dashboardTimer = null;
+    let currentSelectedCrew = null;
 
-    /* Initialize Drives */
-async function initDrives() {
+    /* Chart instances */
+    let driveChart = null;
+    let hqChart = null;
+    let pendingCategoryChart = null;
+    let pendingHQChart = null;
 
-    try {
+    /* Tab Switching Logic */
+    function switchTab(tabName) {
+        const tabDash = document.getElementById('tabContentDashboard');
+        const tabCrew = document.getElementById('tabContentCrewDetail');
+        const btnDash = document.getElementById('tabBtnDashboard');
+        const btnCrew = document.getElementById('tabBtnCrewDetail');
 
-        const url =
-        `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/DRIVE_MASTER!A:B?key=${API_KEY}`;
-
-        const response =
-        await fetch(url);
-
-        const data =
-        await response.json();
-
-        const rows =
-        data.values || [];
-
-        DRIVE_LIST =
-        rows
-        .slice(1)
-        .filter(row =>
-            (row[1] || "")
-            .toUpperCase()
-            ===
-            "ACTIVE"
-        )
-        .map(row => row[0])
-        .filter(Boolean);
-
-console.log(
-    "ACTIVE DRIVES:",
-    DRIVE_LIST
-);
-
-    } catch (err) {
-
-        console.error(
-            "DRIVE MASTER ERROR:",
-            err
-        );
-
-        toast(
-            "Drive Master Load Failed",
-            "error"
-        );
+        if (tabName === 'crewDetail') {
+            tabDash.classList.add('hidden');
+            tabCrew.classList.remove('hidden');
+            btnDash.classList.remove('active');
+            btnCrew.classList.add('active');
+            const searchInput = document.getElementById('crewSearchInput');
+            if (searchInput) searchInput.focus();
+        } else {
+            tabCrew.classList.add('hidden');
+            tabDash.classList.remove('hidden');
+            btnCrew.classList.remove('active');
+            btnDash.classList.add('active');
+        }
+        lucide.createIcons();
     }
-}
-    /* Drive Management UI Logic */
 
-function addDrive() {
-
-    toast(
-        "Add drive from DRIVE_MASTER sheet",
-        "info"
-    );
-}
-
-function removeDrive(index) {
-
-    toast(
-        "Delete drive from DRIVE_MASTER sheet",
-        "info"
-    );
-}
-    function debounceDashboard() {
-
-    clearTimeout(dashboardTimer);
-
-    dashboardTimer = setTimeout(() => {
-
-        loadDashboard(true);
-
-    }, 150);
-}
+    /* Live Clock */
+    setInterval(() => {
+        const now = new Date();
+        const clockEl = document.getElementById('liveClock');
+        if (clockEl) {
+            clockEl.innerText = now.toLocaleString('en-IN', {
+                weekday: 'short', day: '2-digit', month: 'short', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+        }
+    }, 1000);
 
     /* Professional Toast */
     function toast(msg, type = 'info') {
         const container = document.getElementById('toastContainer');
+        if (!container) return;
         const div = document.createElement('div');
         
         let icon = `<i data-lucide="${type==='success'?'check-circle':type==='error'?'alert-circle':'info'}" 
@@ -547,182 +574,597 @@ function removeDrive(index) {
         div.innerHTML = `${icon} <span class="font-medium text-sm text-white">${msg}</span>`;
         
         container.appendChild(div);
-        requestAnimationFrame(() => {
-    lucide.createIcons({ root: div });
-});
+        lucide.createIcons({ root: div });
         setTimeout(() => {
             div.style.opacity = '0'; div.style.transform = 'translateY(10px)'; div.style.transition = 'all 0.3s ease';
             setTimeout(() => div.remove(), 300);
         }, 3000);
     }
 
-    /* Clock */
-    setInterval(() => {
-        const now = new Date();
-        document.getElementById('liveClock').innerText = now.toLocaleString('en-IN', {
-            weekday: 'short', day: '2-digit', month: 'short', year: 'numeric',
-            hour: '2-digit', minute: '2-digit', second: '2-digit'
-        });
-    }, 1000);
-    /* Fetch History Data */
-async function loadHistory() {
-
-    try {
-
-        const res =
-        await fetch(WEB_APP_URL);
-
-        const data =
-        await res.json();
-
-        historyData =
-        data.slice(1).map(r => ({
-
-            empCode:
-            String(r[0] || '').trim(),
-
-            crewId:
-            String(r[1] || '').trim(),
-
-            crewName:
-            String(r[2] || '').trim(),
-
-            date:
-            normalizeDate(r[3]),
-
-            drive:
-            String(r[4] || '').trim(),
-
-            cliName:
-            String(r[5] || '').trim(),
-
-            hq:
-            String(r[6] || '').trim(),
-
-            desg:
-            String(r[7] || '').trim()
-
-        }));
-
-        console.log(
-            "History Loaded:",
-            historyData.length
-        );
-        // FAST LOOKUP MAP
-
-historyMap.clear();
-
-historyData.forEach(h => {
-
-    historyMap.add(
-        `${String(h.empCode).trim()}|${String(h.drive).trim()}`
-    );
-
-});
-
-    } catch (err) {
-
-        console.warn(
-            "API Note: Data fetch failed.",
-            err
-        );
+    function debounceDashboard() {
+        clearTimeout(dashboardTimer);
+        dashboardTimer = setTimeout(() => {
+            loadDashboard(true);
+        }, 150);
     }
-}
-  // =====================================
-// LOAD LATEST CREW FROM COMBINE SHEET
-// =====================================
 
-async function loadLatestCrewData() {
+    /* BULLETPROOF DATE NORMALIZATION */
+    function normalizeDate(dateStr) {
+        if (!dateStr) return '';
+        dateStr = String(dateStr).trim();
 
-    try {
+        if (dateStr.includes('/')) {
+            const parts = dateStr.split(' ')[0].split('/');
+            if (parts.length === 3) {
+                let day = parts[0].trim().padStart(2, '0');
+                let month = parts[1].trim().padStart(2, '0');
+                let year = parts[2].trim();
+                if (year.length === 2) year = '20' + year;
+                return `${day}/${month}/${year}`;
+            }
+        }
 
-        const response = await fetch(CREW_API);
+        if (dateStr.includes('T') || (dateStr.includes('-') && dateStr.length >= 10)) {
+            const d = new Date(dateStr);
+            if (!isNaN(d.getTime())) {
+                const istTime = new Date(d.getTime() + (5.5 * 60 * 60 * 1000));
+                let rawDay = istTime.getUTCDate();
+                let rawMonth = istTime.getUTCMonth() + 1;
+                const year = istTime.getUTCFullYear();
 
-        const data = await response.json();
+                let day = rawMonth;
+                let month = rawDay;
 
-        const rows = data.values || [];
+                return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+            }
+        }
 
-        const records = rows.slice(1);
+        return dateStr;
+    }
 
-        const crewMap = {};
+    /* Initialize Active Drives */
+    async function initDrives() {
+        try {
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/DRIVE_MASTER!A:B?key=${API_KEY}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            const rows = data.values || [];
 
-        records.forEach(row => {
+            DRIVE_LIST = rows
+                .slice(1)
+                .filter(row => (row[1] || "").toUpperCase() === "ACTIVE")
+                .map(row => String(row[0] || '').trim())
+                .filter(Boolean);
 
-            const obj = {
+            console.log("ACTIVE DRIVES:", DRIVE_LIST);
+        } catch (err) {
+            console.error("DRIVE MASTER ERROR:", err);
+            toast("Drive Master Load Failed", "error");
+        }
+    }
 
-                crewId: row[0] || "",
-                crewName: row[1] || "",
-                hrmsId: row[2] || "",
-                crewType: row[3] || "",
-                empCode: row[4] || "",
-                crewGrade: row[5] || "",
-                cliName: row[6] || "",
-                hq: row[7] || "",
-                updateDate: row[8] || "",
-                allotmentType: row[9] || "Permanent",
-                originalCLI: row[10] || "",
-                status: (row[11] || "ACTIVE").toUpperCase()
+    /* Fetch All Worksheets Data from Doosri Google Sheet */
+    async function loadArchiveSheetData() {
+        try {
+            // 1. Fetch metadata to get all worksheet/tab names
+            const metaUrl = `https://sheets.googleapis.com/v4/spreadsheets/${ARCHIVE_SHEET_ID}?fields=sheets(properties(title))&key=${API_KEY}`;
+            const metaRes = await fetch(metaUrl);
+            const metaData = await metaRes.json();
 
-            };
-
-            if (!obj.empCode) return;
-
-            if (!crewMap[obj.empCode]) {
-                crewMap[obj.empCode] = [];
+            if (!metaData.sheets || metaData.sheets.length === 0) {
+                console.warn("No worksheets found in Archive Google Sheet");
+                return [];
             }
 
-            crewMap[obj.empCode].push(obj);
+            const sheetTitles = metaData.sheets.map(s => s.properties.title);
+            console.log("Archive Worksheets Found:", sheetTitles);
 
-        });
+            // 2. Fetch every worksheet's data in parallel
+            const fetchPromises = sheetTitles.map(async (sheetName) => {
+                try {
+                    const range = encodeURIComponent(`'${sheetName}'!A2:H`);
+                    const sheetUrl = `https://sheets.googleapis.com/v4/spreadsheets/${ARCHIVE_SHEET_ID}/values/${range}?key=${API_KEY}`;
+                    const res = await fetch(sheetUrl);
+                    const json = await res.json();
+                    const rows = json.values || [];
 
-        latestCrewData = Object.values(crewMap).map(records => {
-            return records[records.length - 1];
-        });
+                    return rows.map(r => ({
+                        empCode: String(r[0] || '').trim(),
+                        crewId: String(r[1] || '').trim(),
+                        crewName: String(r[2] || '').trim(),
+                        date: normalizeDate(r[3]),
+                        drive: String(r[4] || '').trim(),
+                        cliName: String(r[5] || '').trim(),
+                        hq: String(r[6] || '').trim(),
+                        desg: String(r[7] || '').trim(),
+                        sourceSheet: sheetName
+                    })).filter(item => item.empCode || item.crewId);
+                } catch (e) {
+                    console.error(`Error loading sheet: ${sheetName}`, e);
+                    return [];
+                }
+            });
 
-        console.log(
-            "Latest Crew Loaded:",
-            latestCrewData.length
-        );
-        // FAST CREW LOOKUP
-
-crewMapByEmp = {};
-
-latestCrewData.forEach(c => {
-
-    crewMapByEmp[
-        String(c.empCode).trim()
-    ] = c;
-
-});
-
-    } catch (err) {
-
-        console.error(
-            "Crew Fetch Error:",
-            err
-        );
-
+            const results = await Promise.all(fetchPromises);
+            const flatResults = results.flat();
+            console.log(`Total Records loaded from Archive Sheet (${sheetTitles.length} tabs):`, flatResults.length);
+            return flatResults;
+        } catch (err) {
+            console.error("Archive Sheet Master Load Failed:", err);
+            return [];
+        }
     }
+
+    /* Fetch Main History + Doosri Google Sheet ki Saari Worksheets */
+    async function loadHistory() {
+        try {
+            // 1. Fetch primary live data from Web App
+            let primaryRecords = [];
+            try {
+                const res = await fetch(WEB_APP_URL);
+                const data = await res.json();
+                primaryRecords = data.slice(1).map(r => ({
+                    empCode: String(r[0] || '').trim(),
+                    crewId: String(r[1] || '').trim(),
+                    crewName: String(r[2] || '').trim(),
+                    date: normalizeDate(r[3]),
+                    drive: String(r[4] || '').trim(),
+                    cliName: String(r[5] || '').trim(),
+                    hq: String(r[6] || '').trim(),
+                    desg: String(r[7] || '').trim(),
+                    sourceSheet: 'Live'
+                }));
+            } catch (err) {
+                console.warn("Primary Web App Data fetch warning:", err);
+            }
+
+            // 2. Fetch doosri Google sheet ke saare sheets ka data
+            const archiveRecords = await loadArchiveSheetData();
+
+            // 3. Merge both sheets data
+            historyData = [...primaryRecords, ...archiveRecords];
+
+            console.log("Combined All-Sheets History Loaded:", historyData.length);
+            historyMap.clear();
+            historyData.forEach(h => {
+                if (h.empCode && h.drive) {
+                    historyMap.add(`${h.empCode}|${h.drive}`);
+                }
+            });
+        } catch (err) {
+            console.warn("History Load Total Failed:", err);
+        }
+    }
+
+    /* Load Latest Crew Data from Combine Sheet */
+    async function loadLatestCrewData() {
+        try {
+            const response = await fetch(CREW_API);
+            const data = await response.json();
+            const rows = data.values || [];
+            const records = rows.slice(1);
+            const crewMap = {};
+
+            records.forEach(row => {
+                const empCode = String(row[4] || "").trim();
+                if (!empCode) return;
+
+                const obj = {
+                    crewId: String(row[0] || "").trim(),
+                    crewName: String(row[1] || "").trim(),
+                    hrmsId: String(row[2] || "").trim(),
+                    crewType: String(row[3] || "").trim(),
+                    empCode: empCode,
+                    crewGrade: String(row[5] || "").trim(),
+                    cliName: String(row[6] || "").trim(),
+                    hq: String(row[7] || "").trim(),
+                    updateDate: row[8] || "",
+                    allotmentType: row[9] || "Permanent",
+                    originalCLI: row[10] || "",
+                    status: (row[11] || "ACTIVE").toUpperCase().trim()
+                };
+
+                if (!crewMap[empCode]) {
+                    crewMap[empCode] = [];
+                }
+                crewMap[empCode].push(obj);
+            });
+
+            latestCrewData = Object.values(crewMap).map(records => records[records.length - 1]);
+            console.log("Latest Crew Loaded:", latestCrewData.length);
+
+            crewMapByEmp = {};
+            latestCrewData.forEach(c => {
+                crewMapByEmp[String(c.empCode).trim()] = c;
+            });
+        } catch (err) {
+            console.error("Crew Fetch Error:", err);
+        }
+    }
+
+    /* CREW SEARCH & DETAIL TAB LOGIC */
+    function handleCrewSearch(query) {
+        const queryClean = String(query || '').trim().toLowerCase();
+        const suggestionsBox = document.getElementById('crewSuggestionsBox');
+
+        if (!queryClean || queryClean.length < 1) {
+            suggestionsBox.innerHTML = '';
+            suggestionsBox.classList.add('hidden');
+            return;
+        }
+
+        const matched = [];
+        const seenEmp = new Set();
+
+        latestCrewData.forEach(c => {
+            const idMatch = c.crewId.toLowerCase().includes(queryClean);
+            const nameMatch = c.crewName.toLowerCase().includes(queryClean);
+            const empMatch = c.empCode.toLowerCase().includes(queryClean);
+
+            if ((idMatch || nameMatch || empMatch) && !seenEmp.has(c.empCode)) {
+                seenEmp.add(c.empCode);
+                matched.push(c);
+            }
+        });
+
+        historyData.forEach(h => {
+            const idMatch = h.crewId.toLowerCase().includes(queryClean);
+            const nameMatch = h.crewName.toLowerCase().includes(queryClean);
+            const empMatch = h.empCode.toLowerCase().includes(queryClean);
+
+            if ((idMatch || nameMatch || empMatch) && !seenEmp.has(h.empCode)) {
+                seenEmp.add(h.empCode);
+                matched.push({
+                    crewId: h.crewId,
+                    crewName: h.crewName,
+                    hrmsId: '-',
+                    crewType: h.desg || 'LP/ALP',
+                    empCode: h.empCode,
+                    crewGrade: '-',
+                    cliName: h.cliName,
+                    hq: h.hq,
+                    status: 'ACTIVE'
+                });
+            }
+        });
+
+        if (matched.length === 0) {
+            suggestionsBox.innerHTML = `<div class="p-4 text-sm text-slate-400 text-center">No crew found matching "${query}"</div>`;
+            suggestionsBox.classList.remove('hidden');
+            return;
+        }
+
+        let html = '';
+        matched.slice(0, 12).forEach(c => {
+            html += `
+                <div onclick="selectCrew('${c.empCode}')" class="p-3 hover:bg-blue-600/30 cursor-pointer border-b border-white/5 transition flex items-center justify-between">
+                    <div>
+                        <span class="font-bold text-white text-sm">${c.crewName}</span>
+                        <span class="ml-2 px-2 py-0.5 rounded bg-blue-500/20 text-cyan-300 font-mono text-xs font-semibold">${c.crewId || c.empCode}</span>
+                    </div>
+                    <div class="text-xs text-slate-400">
+                        <span>${c.crewType || ''}</span> | <span class="text-amber-300">${c.hq || ''}</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        suggestionsBox.innerHTML = html;
+        suggestionsBox.classList.remove('hidden');
+    }
+
+    /* ======================================================== */
+/* FLEXIBLE HYBRID CREW SELECTION (EMP CODE + CREW ID)      */
+/* ======================================================== */
+function selectCrew(identifier) {
+    document.getElementById('crewSuggestionsBox').classList.add('hidden');
+    
+    const targetKey = String(identifier || '').trim().toLowerCase();
+    if (!targetKey) return;
+
+    // 1. Roster me EMP CODE ya CREW ID dono se match dhundo
+    let crew = latestCrewData.find(c => 
+        (c.empCode && String(c.empCode).trim().toLowerCase() === targetKey) ||
+        (c.crewId && String(c.crewId).trim().toLowerCase() === targetKey)
+    );
+
+    // 2. Agar Roster me na mile toh History records me search karo
+    if (!crew) {
+        const hist = historyData.find(h => 
+            (h.empCode && String(h.empCode).trim().toLowerCase() === targetKey) ||
+            (h.crewId && String(h.crewId).trim().toLowerCase() === targetKey)
+        );
+        if (hist) {
+            crew = {
+                crewId: hist.crewId || '-',
+                crewName: hist.crewName || 'Unknown',
+                hrmsId: '-',
+                crewType: hist.desg || '-',
+                empCode: hist.empCode || '',
+                crewGrade: '-',
+                cliName: hist.cliName || '-',
+                hq: hist.hq || '-',
+                status: 'ACTIVE'
+            };
+        }
+    }
+
+    if (!crew) return;
+    currentSelectedCrew = crew;
+
+    // Search bar text setting (agar emp code na ho toh sirf Crew ID show kare)
+    const empDisplay = crew.empCode ? `EMP: ${crew.empCode}` : 'EMP: N/A';
+    const idDisplay = crew.crewId ? `ID: ${crew.crewId}` : 'ID: N/A';
+    document.getElementById('crewSearchInput').value = `${crew.crewName} (${idDisplay} | ${empDisplay})`;
+
+    // Profile Card Populate karein
+    document.getElementById('crewCardName').innerText = crew.crewName || 'Unknown';
+    document.getElementById('crewCardId').innerText = crew.crewId || 'N/A';
+    document.getElementById('crewCardHrms').innerText = crew.hrmsId || '-';
+    document.getElementById('crewCardEmp').innerText = crew.empCode || 'Not Available';
+    document.getElementById('crewCardDesg').innerText = crew.crewType || '-';
+    document.getElementById('crewCardHQ').innerText = crew.hq || '-';
+    document.getElementById('crewCardCLI').innerText = crew.cliName || '-';
+    document.getElementById('crewCardGrade').innerText = crew.crewGrade || 'Grade A';
+    document.getElementById('crewAvatar').innerText = (crew.crewName || 'C').charAt(0).toUpperCase();
+
+    // Drive filter dropdown setup
+    const driveFilterEl = document.getElementById('crewSelectedDriveFilter');
+    driveFilterEl.innerHTML = '<option value="ALL">All Drives</option>';
+    DRIVE_LIST.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = d;
+        driveFilterEl.appendChild(opt);
+    });
+
+    // Flexible Table render
+    renderCrewTableForCurrentCrew();
+
+    document.getElementById('crewEmptyState').classList.add('hidden');
+    document.getElementById('crewResultContainer').classList.remove('hidden');
+    lucide.createIcons();
 }
-    /* DASHBOARD LOGIC (Includes HQ Filter & Matrix) */
-let driveChart = null,
-    hqChart = null,
-    pendingCategoryChart = null,
-    pendingHQChart = null;
 
-async function loadDashboard(skipFetch = true) {
+/* ======================================================== */
+/* FLEXIBLE TABLE RENDERING (EMP CODE + FALLBACK CREW ID)  */
+/* ======================================================== */
+function renderCrewTableForCurrentCrew() {
+    if (!currentSelectedCrew) return;
 
-    if (!skipFetch) {
-        await loadHistory();
-        await loadLatestCrewData();
+    const crew = currentSelectedCrew;
+    const targetEmp = String(crew.empCode || '').trim().toLowerCase();
+    const targetCrewId = String(crew.crewId || '').trim().toLowerCase();
+    const selectedDrive = document.getElementById('crewSelectedDriveFilter')?.value || 'ALL';
+
+    // Flexible Filter: Agar EMP Code hai toh usse trace karo, nahi toh Crew ID se trace karo
+    const crewHistory = historyData.filter(h => {
+        const rowEmp = String(h.empCode || '').trim().toLowerCase();
+        const rowCrewId = String(h.crewId || '').trim().toLowerCase();
+
+        // 1. Agar dono me EMP Code hai aur match hota hai
+        if (targetEmp && rowEmp && targetEmp === rowEmp) {
+            return true;
+        }
+
+        // 2. Agar EMP Code missing/blank hai toh Crew ID match karo
+        if (targetCrewId && rowCrewId && targetCrewId === rowCrewId) {
+            return true;
+        }
+
+        return false;
+    });
+
+    // Group history records by Drive Name
+    const driveHistoryMap = {};
+    crewHistory.forEach(record => {
+        const driveKey = String(record.drive || '').trim();
+        if (!driveKey) return;
+        if (!driveHistoryMap[driveKey]) {
+            driveHistoryMap[driveKey] = [];
+        }
+        driveHistoryMap[driveKey].push(record);
+    });
+
+    let doneDrivesCount = 0;
+    let pendingDrivesCount = 0;
+    let totalSessionsCount = 0;
+    let tableRowsHtml = '';
+
+    let drivesToDisplay = [...DRIVE_LIST];
+
+    // Past drives jo ab active nahi hain unko bhi list me layein
+    Object.keys(driveHistoryMap).forEach(d => {
+        if (!drivesToDisplay.includes(d)) {
+            drivesToDisplay.push(d);
+        }
+    });
+
+    if (selectedDrive !== 'ALL') {
+        drivesToDisplay = drivesToDisplay.filter(d => d === selectedDrive);
     }
+
+    drivesToDisplay.forEach((driveName, index) => {
+        const records = driveHistoryMap[driveName] || [];
+        const count = records.length;
+        const isDone = count > 0;
+        const isPast = !DRIVE_LIST.includes(driveName);
+
+        if (isDone) {
+            doneDrivesCount++;
+            totalSessionsCount += count;
+
+            // Dates badges with HQ and Source
+            const datesHtml = records.map(r => `
+                <div class="inline-flex items-center gap-1 bg-cyan-500/10 text-cyan-300 px-2.5 py-1 rounded-md border border-cyan-500/30 text-xs font-mono font-semibold my-0.5">
+                    <i data-lucide="calendar" class="w-3 h-3"></i> ${r.date || 'N/A'}
+                    <span class="text-[10px] text-amber-300 font-semibold bg-amber-500/10 px-1 rounded ml-1">${r.hq || 'Lobby'}</span>
+                    ${r.sourceSheet && r.sourceSheet !== 'Live' ? `<span class="text-[10px] text-slate-400">(${r.sourceSheet})</span>` : ''}
+                </div>
+            `).join(' ');
+
+            const clisHtml = [...new Set(records.map(r => r.cliName).filter(Boolean))].join(', ') || '-';
+            const hqsHtml = [...new Set(records.map(r => r.hq).filter(Boolean))].join(', ') || '-';
+
+            tableRowsHtml += `
+                <tr>
+                    <td class="text-center font-mono text-slate-400">${index + 1}</td>
+                    <td class="font-semibold text-white">
+                        ${driveName}
+                        ${isPast ? '<span class="text-[10px] text-purple-400 border border-purple-500/30 px-1 rounded ml-1">Past</span>' : ''}
+                    </td>
+                    <td class="text-center">
+                        <span class="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full text-xs font-bold">
+                            <i data-lucide="check" class="w-3 h-3"></i> Done
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                            ${count}x Times
+                        </span>
+                    </td>
+                    <td class="text-slate-200">
+                        <div class="flex flex-wrap gap-1.5">${datesHtml}</div>
+                    </td>
+                    <td class="text-slate-200">${clisHtml}</td>
+                    <td class="text-amber-300 font-medium">${hqsHtml}</td>
+                </tr>
+            `;
+        } else {
+            pendingDrivesCount++;
+            tableRowsHtml += `
+                <tr>
+                    <td class="text-center font-mono text-slate-400">${index + 1}</td>
+                    <td class="font-semibold text-slate-300">${driveName}</td>
+                    <td class="text-center">
+                        <span class="inline-flex items-center gap-1 bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-full text-xs font-bold">
+                            <i data-lucide="clock" class="w-3 h-3"></i> Pending
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-white/5">
+                            0x
+                        </span>
+                    </td>
+                    <td class="text-slate-500 text-center">-</td>
+                    <td class="text-slate-500">-</td>
+                    <td class="text-slate-500">-</td>
+                </tr>
+            `;
+        }
+    });
+
+    if (drivesToDisplay.length === 0) {
+        tableRowsHtml = `<tr><td colspan="7" class="text-center py-6 text-slate-400">No drive records found for selected filter.</td></tr>`;
+    }
+
+    // Top counters calculation
+    let allDone = 0;
+    let allSessions = 0;
+    DRIVE_LIST.forEach(d => {
+        const count = (driveHistoryMap[d] || []).length;
+        if (count > 0) {
+            allDone++;
+            allSessions += count;
+        }
+    });
+
+    document.getElementById('crewStatTotal').innerText = DRIVE_LIST.length;
+    document.getElementById('crewStatDone').innerText = allDone;
+    document.getElementById('crewStatPending').innerText = DRIVE_LIST.length - allDone;
+    document.getElementById('crewStatTotalSessions').innerText = allSessions;
+
+    document.getElementById('crewCounsellingTableBody').innerHTML = tableRowsHtml;
+    lucide.createIcons();
+}
+
+/* ======================================================== */
+/* UPDATED SUGGESTION BOX CALL (PASSES EMP OR CREW ID)      */
+/* ======================================================== */
+function handleCrewSearch(query) {
+    const queryClean = String(query || '').trim().toLowerCase();
+    const suggestionsBox = document.getElementById('crewSuggestionsBox');
+
+    if (!queryClean || queryClean.length < 1) {
+        suggestionsBox.innerHTML = '';
+        suggestionsBox.classList.add('hidden');
+        return;
+    }
+
+    const matched = [];
+    const seenIdentifier = new Set();
+
+    // Latest Roster search
+    latestCrewData.forEach(c => {
+        const idMatch = c.crewId && c.crewId.toLowerCase().includes(queryClean);
+        const nameMatch = c.crewName && c.crewName.toLowerCase().includes(queryClean);
+        const empMatch = c.empCode && c.empCode.toLowerCase().includes(queryClean);
+
+        const primaryKey = c.empCode || c.crewId;
+        if ((idMatch || nameMatch || empMatch) && primaryKey && !seenIdentifier.has(primaryKey)) {
+            seenIdentifier.add(primaryKey);
+            matched.push(c);
+        }
+    });
+
+    // History data search (agar kisi ka roster me na ho)
+    historyData.forEach(h => {
+        const idMatch = h.crewId && h.crewId.toLowerCase().includes(queryClean);
+        const nameMatch = h.crewName && h.crewName.toLowerCase().includes(queryClean);
+        const empMatch = h.empCode && h.empCode.toLowerCase().includes(queryClean);
+
+        const primaryKey = h.empCode || h.crewId;
+        if ((idMatch || nameMatch || empMatch) && primaryKey && !seenIdentifier.has(primaryKey)) {
+            seenIdentifier.add(primaryKey);
+            matched.push({
+                crewId: h.crewId || '-',
+                crewName: h.crewName || 'Unknown',
+                hrmsId: '-',
+                crewType: h.desg || 'LP/ALP',
+                empCode: h.empCode || '',
+                crewGrade: '-',
+                cliName: h.cliName || '-',
+                hq: h.hq || '-',
+                status: 'ACTIVE'
+            });
+        }
+    });
+
+    if (matched.length === 0) {
+        suggestionsBox.innerHTML = `<div class="p-4 text-sm text-slate-400 text-center">No crew found matching "${query}"</div>`;
+        suggestionsBox.classList.remove('hidden');
+        return;
+    }
+
+    let html = '';
+    matched.slice(0, 12).forEach(c => {
+        const passParam = c.empCode ? c.empCode : c.crewId;
+        html += `
+            <div onclick="selectCrew('${passParam}')" class="p-3 hover:bg-blue-600/30 cursor-pointer border-b border-white/5 transition flex items-center justify-between">
+                <div>
+                    <span class="font-bold text-white text-sm">${c.crewName}</span>
+                    <span class="ml-2 px-2 py-0.5 rounded bg-blue-500/20 text-cyan-300 font-mono text-xs font-semibold">${c.crewId || 'NO-ID'}</span>
+                    ${c.empCode ? `<span class="ml-1 text-[11px] text-slate-400 font-mono">(${c.empCode})</span>` : ''}
+                </div>
+                <div class="text-xs text-slate-400">
+                    <span>${c.crewType || ''}</span> | <span class="text-amber-300">${c.hq || ''}</span>
+                </div>
+            </div>
+        `;
+    });
+
+    suggestionsBox.innerHTML = html;
+    suggestionsBox.classList.remove('hidden');
+}
+
+    /* DASHBOARD LOGIC */
+    async function loadDashboard(skipFetch = true) {
+        if (!skipFetch) {
+            await Promise.all([loadHistory(), loadLatestCrewData()]);
+        }
         
-        // Populate HQ Dropdown if empty
         const hqFilterEl = document.getElementById('hqFilter');
-        const uniqueHQs =
-[...new Set(latestCrewData.map(h => h.hq))]
-.filter(Boolean)
-.sort();
+        const uniqueHQs = [...new Set(latestCrewData.map(h => h.hq))].filter(Boolean).sort();
         
         if (hqFilterEl.options.length <= 1) {
             uniqueHQs.forEach(hq => {
@@ -731,733 +1173,299 @@ async function loadDashboard(skipFetch = true) {
                 hqFilterEl.appendChild(opt);
             });
         }
-const categoryDriveFilter =
-document.getElementById(
-'pendingCategoryDriveFilter'
-);
 
-const hqDriveFilter =
-document.getElementById(
-'pendingHQDriveFilter'
-);
+        const categoryDriveFilter = document.getElementById('pendingCategoryDriveFilter');
+        const hqDriveFilter = document.getElementById('pendingHQDriveFilter');
 
-if (
-categoryDriveFilter &&
-categoryDriveFilter.options.length <= 1
-) {
+        if (categoryDriveFilter && categoryDriveFilter.options.length <= 1) {
+            DRIVE_LIST.forEach(drive => {
+                const opt = document.createElement('option');
+                opt.value = drive; opt.textContent = drive;
+                categoryDriveFilter.appendChild(opt);
+            });
+        }
 
-DRIVE_LIST.forEach(drive => {
+        if (hqDriveFilter && hqDriveFilter.options.length <= 1) {
+            DRIVE_LIST.forEach(drive => {
+                const opt = document.createElement('option');
+                opt.value = drive; opt.textContent = drive;
+                hqDriveFilter.appendChild(opt);
+            });
+        }
 
-        const opt =
-        document.createElement('option');
+        const pendingDriveHQFilter = document.getElementById('pendingDriveHQFilter');
+        const summaryDriveFilter = document.getElementById('summaryDriveFilter');
 
-        opt.value = drive;
+        if (summaryDriveFilter && summaryDriveFilter.options.length <= 1) {
+            DRIVE_LIST.forEach(drive => {
+                const opt = document.createElement('option');
+                opt.value = drive; opt.textContent = drive;
+                summaryDriveFilter.appendChild(opt);
+            });
+        }
 
-        opt.textContent = drive;
+        if (pendingDriveHQFilter && pendingDriveHQFilter.options.length <= 1) {
+            uniqueHQs.forEach(hq => {
+                const opt = document.createElement('option');
+                opt.value = hq; opt.textContent = hq;
+                pendingDriveHQFilter.appendChild(opt);
+            });
+        }
 
-        categoryDriveFilter.appendChild(opt);
-    });
-}
+        const selectedHQ = hqFilterEl.value;
+        const selectedPendingCategoryDrive = document.getElementById('pendingCategoryDriveFilter')?.value || 'ALL';
+        const selectedPendingHQDrive = document.getElementById('pendingHQDriveFilter')?.value || 'ALL';
+        const selectedPendingDriveHQ = document.getElementById('pendingDriveHQFilter')?.value || 'ALL';
+        const selectedSummaryDrive = document.getElementById('summaryDriveFilter')?.value || 'ALL';
 
-if (
-hqDriveFilter &&
-hqDriveFilter.options.length <= 1
-) {
+        const filteredData = (selectedHQ === "ALL" ? historyData : historyData.filter(d => d.hq === selectedHQ))
+            .filter(d => DRIVE_LIST.includes(d.drive));
 
-    DRIVE_LIST.forEach(drive => {
-
-        const opt =
-        document.createElement('option');
-
-        opt.value = drive;
-
-        opt.textContent = drive;
-
-        hqDriveFilter.appendChild(opt);
-    });
-}
-
-const pendingDriveHQFilter =
-document.getElementById(
-'pendingDriveHQFilter'
-);
-const summaryDriveFilter =
-document.getElementById(
-'summaryDriveFilter'
-);
-
-if (
-summaryDriveFilter &&
-summaryDriveFilter.options.length <= 1
-) {
-
-    DRIVE_LIST.forEach(drive => {
-
-        const opt =
-        document.createElement('option');
-
-        opt.value = drive;
-
-        opt.textContent = drive;
-
-        summaryDriveFilter.appendChild(opt);
-
-    });
-}
-if (
-pendingDriveHQFilter &&
-pendingDriveHQFilter.options.length <= 1
-) {
-
-    uniqueHQs.forEach(hq => {
-
-        const opt =
-        document.createElement('option');
-
-        opt.value = hq;
-
-        opt.textContent = hq;
-
-        pendingDriveHQFilter.appendChild(opt);
-    });
-}
-const selectedHQ = hqFilterEl.value;
-const selectedPendingCategoryDrive =
-document.getElementById(
-'pendingCategoryDriveFilter'
-)?.value || 'ALL';
-
-const selectedPendingHQDrive =
-document.getElementById(
-'pendingHQDriveFilter'
-)?.value || 'ALL';
-
-const selectedPendingDriveHQ =
-document.getElementById(
-'pendingDriveHQFilter'
-)?.value || 'ALL';
-const selectedSummaryDrive =
-document.getElementById(
-'summaryDriveFilter'
-)?.value || 'ALL';
-const filteredData =
-(
-    selectedHQ === "ALL"
-    ? historyData
-    : historyData.filter(
-        d => d.hq === selectedHQ
-    )
-)
-.filter(d =>
-    DRIVE_LIST.includes(d.drive)
-);
-
-        // Update Stat Cards
         document.getElementById('statTotal').innerText = filteredData.length;
         document.getElementById('statCLI').innerText = new Set(filteredData.map(h => h.cliName)).size;
         document.getElementById('statHQ').innerText = new Set(filteredData.map(h => h.hq)).size;
         document.getElementById('statDrives').innerText = new Set(filteredData.map(h => h.drive)).size;
 
-// =========================================
-// DRIVE CATEGORY GRAPH
-// =========================================
+        const LP_TYPES = ['LPP', 'LPM', 'LPG'];
+        const ALP_TYPES = ['ALP', 'SALP', 'SHT', 'SSHT'];
 
-const LP_TYPES = [
-    'LPP',
-    'LPM',
-    'LPG'
-];
+        const driveStats = {};
+        driveBreakdownData = {};
 
-const ALP_TYPES = [
-    'ALP',
-    'SALP',
-    'SHT',
-    'SSHT'
-];
+        filteredData.forEach(entry => {
+            const drive = String(entry.drive || '').trim();
+            if (!drive) return;
 
-const driveStats = {};
+            const crew = crewMapByEmp[String(entry.empCode).trim()];
+            if (!crew) return;
 
-driveBreakdownData = {};
+            const type = (crew.crewType || '').toUpperCase().trim();
 
-filteredData.forEach(entry => {
-
-  const drive =
-String(entry.drive || '')
-.trim();
-
-if (!drive) return;
-
-const crew =
-crewMapByEmp[
-    String(entry.empCode).trim()
-];
-
-    if (!crew) return;
-
-    const type =
-    (crew.crewType || '')
-    .toUpperCase()
-    .trim();
-
-    if (!driveStats[drive]) {
-
-        driveStats[drive] = {
-            LP: 0,
-            ALP: 0
-        };
-
-        driveBreakdownData[drive] = {
-            LPP: 0,
-            LPM: 0,
-            LPG: 0,
-            ALP: 0,
-            SALP: 0,
-            SHT: 0,
-            SSHT: 0
-        };
-    }
-
-    if (LP_TYPES.includes(type)) {
-        driveStats[drive].LP++;
-    }
-
-    if (ALP_TYPES.includes(type)) {
-        driveStats[drive].ALP++;
-    }
-
-    if (
-        driveBreakdownData[drive][type]
-        !==
-        undefined
-    ) {
-        driveBreakdownData[drive][type]++;
-    }
-
-});
-
-const fullLabels =
-Object.keys(driveStats);
-
-const labels =
-fullLabels.map((d, i) =>
-    `D${i + 1}`
-);
-
-const lpData =
-fullLabels.map(
-    d => driveStats[d].LP
-);
-
-const alpData =
-fullLabels.map(
-    d => driveStats[d].ALP
-);
-
-if (driveChart) {
-
-    driveChart.data.labels = labels;
-
-    driveChart.data.datasets[0].data = lpData;
-
-    driveChart.data.datasets[1].data = alpData;
-
-    driveChart.update();
-
-} else {
-
-    const ctxD =
-    document
-    .getElementById('driveChart')
-    .getContext('2d');
-
-    driveChart = new Chart(ctxD, {
-
-        type: 'bar',
-
-        data: {
-
-            labels: labels,
-
-            datasets: [
-                {
-                    label: 'LP',
-                    data: lpData,
-                    backgroundColor: '#3b82f6',
-                    borderRadius: 6
-                },
-                {
-                    label: 'ALP',
-                    data: alpData,
-                    backgroundColor: '#10b981',
-                    borderRadius: 6
-                }
-            ]
-        },
-
-        options: {
-
-            responsive: true,
-
-            maintainAspectRatio: false,
-
-            onClick: (evt, elements) => {
-
-                if (!elements.length) return;
-
-                const index =
-                elements[0].index;
-
-                const driveName =
-                fullLabels[index];
-
-                const detail =
-                driveBreakdownData[driveName];
-
-                alert(
-                    `Drive: ${driveName}\n\n` +
-                    `LPP : ${detail.LPP}\n` +
-                    `LPM : ${detail.LPM}\n` +
-                    `LPG : ${detail.LPG}\n\n` +
-                    `ALP : ${detail.ALP}\n` +
-                    `SALP : ${detail.SALP}\n` +
-                    `SHT : ${detail.SHT}\n` +
-                    `SSHT : ${detail.SSHT}`
-                );
-            },
-
-            plugins: {
-
-                legend: {
-                    display: true,
-                    labels: {
-                        color: '#ffffff'
-                    }
-                }
-            },
-
-            scales: {
-
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color:
-                        'rgba(255,255,255,0.05)'
-                    }
-                },
-
-                x: {
-
-                    ticks: {
-
-                        color: '#94a3b8',
-
-                        maxRotation: 0,
-
-                        minRotation: 0,
-
-                        font: {
-                            size: 11
-                        }
-                    },
-
-                    grid: {
-                        display: false
-                    }
-                }
+            if (!driveStats[drive]) {
+                driveStats[drive] = { LP: 0, ALP: 0 };
+                driveBreakdownData[drive] = { LPP: 0, LPM: 0, LPG: 0, ALP: 0, SALP: 0, SHT: 0, SSHT: 0 };
             }
-        }
-    });
 
-}
-        // HQ Chart
+            if (LP_TYPES.includes(type)) driveStats[drive].LP++;
+            if (ALP_TYPES.includes(type)) driveStats[drive].ALP++;
+            if (driveBreakdownData[drive][type] !== undefined) {
+                driveBreakdownData[drive][type]++;
+            }
+        });
+
+        const fullLabels = Object.keys(driveStats);
+        const labels = fullLabels.map((d, i) => `D${i + 1}`);
+        const lpData = fullLabels.map(d => driveStats[d].LP);
+        const alpData = fullLabels.map(d => driveStats[d].ALP);
+
+        if (driveChart) {
+            driveChart.data.labels = labels;
+            driveChart.data.datasets[0].data = lpData;
+            driveChart.data.datasets[1].data = alpData;
+            driveChart.update();
+        } else {
+            const ctxD = document.getElementById('driveChart').getContext('2d');
+            driveChart = new Chart(ctxD, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'LP', data: lpData, backgroundColor: '#3b82f6', borderRadius: 6 },
+                        { label: 'ALP', data: alpData, backgroundColor: '#10b981', borderRadius: 6 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    onClick: (evt, elements) => {
+                        if (!elements.length) return;
+                        const index = elements[0].index;
+                        const driveName = fullLabels[index];
+                        const detail = driveBreakdownData[driveName];
+                        alert(
+                            `Drive: ${driveName}\n\n` +
+                            `LPP : ${detail.LPP}\n` +
+                            `LPM : ${detail.LPM}\n` +
+                            `LPG : ${detail.LPG}\n\n` +
+                            `ALP : ${detail.ALP}\n` +
+                            `SALP : ${detail.SALP}\n` +
+                            `SHT : ${detail.SHT}\n` +
+                            `SSHT : ${detail.SSHT}`
+                        );
+                    },
+                    plugins: {
+                        legend: { display: true, labels: { color: '#ffffff' } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: {
+                            ticks: { color: '#94a3b8', maxRotation: 0, minRotation: 0, font: { size: 11 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
         const hqCounts = {};
         filteredData.forEach(h => hqCounts[h.hq] = (hqCounts[h.hq] || 0) + 1);
         if (hqChart) {
-
-    hqChart.data.labels =
-    Object.keys(hqCounts).length
-    ? Object.keys(hqCounts)
-    : ['No Data'];
-
-    hqChart.data.datasets[0].data =
-    Object.values(hqCounts).length
-    ? Object.values(hqCounts)
-    : [1];
-
-    hqChart.update();
-
-} else {
-
-hqChart = new Chart(document.getElementById('hqChart'), {
-
-    type: 'doughnut',
-
-    data: {
-
-        labels:
-        Object.keys(hqCounts).length
-        ? Object.keys(hqCounts)
-        : ['No Data'],
-
-        datasets: [{
-            data:
-            Object.values(hqCounts).length
-            ? Object.values(hqCounts)
-            : [1],
-
-            backgroundColor: [
-                '#3b82f6',
-                '#06b6d4',
-                '#10b981',
-                '#f59e0b',
-                '#8b5cf6'
-            ],
-
-            borderWidth: 0,
-            hoverOffset: 4
-        }]
-    },
-
-    options: {
-
-        responsive: true,
-
-        maintainAspectRatio: false,
-
-        cutout: '75%',
-
-        plugins: {
-
-            legend: {
-
-                position: 'right',
-
-                labels: {
-                    color: '#e2e8f0'
-                }
-            }
-        }
-    }
-});
-}
-        // Generate CLI-Wise Matrix
-        renderCLIMatrix(filteredData);
-        // ======================================
-// PENDING COUNSELLING ANALYSIS
-// ======================================
-const pendingHQ = {};
-const pendingDrive = {};
-const pendingCategory = {};
-
-latestCrewData.forEach(crew => {
-
-    const emp =
-    String(crew.empCode || '').trim();
-
-    const cli =
-    String(crew.cliName || 'UNKNOWN').trim();
-
-    const hq =
-    String(crew.hq || 'UNKNOWN').trim();
-
-    const category =
-    String(crew.crewType || 'UNKNOWN').trim();
-
-    DRIVE_LIST.forEach(drive => {
-     const categoryDriveMatch =
-selectedPendingCategoryDrive === 'ALL'
-||
-drive === selectedPendingCategoryDrive;
-
-const hqDriveMatch =
-selectedPendingHQDrive === 'ALL'
-||
-drive === selectedPendingHQDrive;
-
-const completed =
-historyMap.has(
-    `${emp}|${drive}`
-);
-
-       if (!completed) {
-
-    if (categoryDriveMatch) {
-
-        pendingCategory[category] =
-        (pendingCategory[category] || 0) + 1;
-    }
-
-    if (hqDriveMatch) {
-
-        pendingHQ[hq] =
-        (pendingHQ[hq] || 0) + 1;
-    }
-
-    pendingDrive[drive] =
-    (pendingDrive[drive] || 0) + 1;
-}
-    });
-});
-
-// ================= CATEGORY =================
-
-if (pendingCategoryChart)
-pendingCategoryChart.destroy();
-
-pendingCategoryChart =
-new Chart(
-document.getElementById('pendingCategoryChart'),
-{
-    type: 'doughnut',
-
-    data: {
-        labels: Object.keys(pendingCategory),
-        datasets: [{
-            data: Object.values(pendingCategory)
-        }]
-    },
-
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
-    }
-});
-
-// ================= HQ =================
-
-if (pendingHQChart)
-pendingHQChart.destroy();
-
-pendingHQChart =
-new Chart(
-document.getElementById('pendingHQChart'),
-{
-    type: 'bar',
-
-    data: {
-        labels: Object.keys(pendingHQ),
-        datasets: [{
-            label: 'Pending',
-            data: Object.values(pendingHQ)
-        }]
-    },
-
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
-    }
-});
-// ================= DRIVE TABLE =================
-
-const categories =
-[
-    'ALP',
-    'SALP',
-    'LPP',
-    'LPG',
-    'LPM',
-    'SHT',
-    'SSHT'
-];
-
-let headHtml =
-'<tr><th>Drive</th>';
-
-categories.forEach(cat => {
-    headHtml += `<th>${cat}</th>`;
-});
-
-headHtml += '</tr>';
-
-document.getElementById(
-'pendingDriveHead'
-).innerHTML = headHtml;
-
-let bodyHtml = '';
-
-DRIVE_LIST.forEach(drive => {
-
-    let row =
-    `<tr>
-        <td class="font-medium text-white">
-            ${drive}
-        </td>`;
-
-    categories.forEach(cat => {
-
-        const count =
-        latestCrewData.filter(crew => {
-
-            if (
-                selectedPendingDriveHQ !== 'ALL'
-                &&
-                crew.hq !== selectedPendingDriveHQ
-            ) {
-                return false;
-            }
-
-const completed =
-historyMap.has(
-    `${String(crew.empCode).trim()}|${drive}`
-);
-
-            return (
-                !completed
-                &&
-                String(crew.crewType)
-                .trim()
-                .toUpperCase()
-                ===
-                cat
-            );
-
-        }).length;
-
-        row += `
-        <td class="text-center">
-            ${count}
-        </td>`;
-    });
-
-    row += '</tr>';
-
-    bodyHtml += row;
-});
-
-document.getElementById(
-'pendingDriveBody'
-).innerHTML = bodyHtml;
-// ======================================
-// CLI WISE COUNSELLING SUMMARY
-// ======================================
-
-const cliSummaryMap = {};
-
-latestCrewData.forEach(crew => {
-
-    const cli =
-    String(crew.cliName || 'UNKNOWN').trim();
-
-    const emp =
-    String(crew.empCode || '').trim();
-
-    if (!cliSummaryMap[cli]) {
-
-        cliSummaryMap[cli] = {
-            totalCrewSet: new Set(),
-            drives: {}
-        };
-    }
-
-    cliSummaryMap[cli]
-    .totalCrewSet
-    .add(emp);
-
-    DRIVE_LIST.forEach(drive => {
-
-        if (!cliSummaryMap[cli].drives[drive]) {
-
-            cliSummaryMap[cli].drives[drive] = {
-                done: 0,
-                pending: 0
-            };
-        }
-
-const completed =
-historyMap.has(
-    `${emp}|${drive}`
-);
-
-        if (completed) {
-
-            cliSummaryMap[cli]
-            .drives[drive]
-            .done++;
-
+            hqChart.data.labels = Object.keys(hqCounts).length ? Object.keys(hqCounts) : ['No Data'];
+            hqChart.data.datasets[0].data = Object.values(hqCounts).length ? Object.values(hqCounts) : [1];
+            hqChart.update();
         } else {
-
-            cliSummaryMap[cli]
-            .drives[drive]
-            .pending++;
+            hqChart = new Chart(document.getElementById('hqChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(hqCounts).length ? Object.keys(hqCounts) : ['No Data'],
+                    datasets: [{
+                        data: Object.values(hqCounts).length ? Object.values(hqCounts) : [1],
+                        backgroundColor: ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#8b5cf6'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#e2e8f0' } }
+                    }
+                }
+            });
         }
-    });
-});
 
-// TABLE HEADER
+        renderCLIMatrix(filteredData);
 
-document.getElementById(
-'cliSummaryHead'
-).innerHTML = `
-<tr>
-    <th>CLI</th>
-    <th>Total Crew</th>
-    <th>Drive</th>
-    <th>Done</th>
-    <th>Pending</th>
-</tr>
-`;
+        const pendingHQ = {};
+        const pendingDrive = {};
+        const pendingCategory = {};
 
-// TABLE BODY
+        latestCrewData.forEach(crew => {
+            const emp = String(crew.empCode || '').trim();
+            const hq = String(crew.hq || 'UNKNOWN').trim();
+            const category = String(crew.crewType || 'UNKNOWN').trim();
 
-let cliSummaryHtml = '';
+            DRIVE_LIST.forEach(drive => {
+                const categoryDriveMatch = selectedPendingCategoryDrive === 'ALL' || drive === selectedPendingCategoryDrive;
+                const hqDriveMatch = selectedPendingHQDrive === 'ALL' || drive === selectedPendingHQDrive;
+                const completed = historyMap.has(`${emp}|${drive}`);
 
-Object.keys(cliSummaryMap)
-.sort()
-.forEach(cli => {
+                if (!completed) {
+                    if (categoryDriveMatch) {
+                        pendingCategory[category] = (pendingCategory[category] || 0) + 1;
+                    }
+                    if (hqDriveMatch) {
+                        pendingHQ[hq] = (pendingHQ[hq] || 0) + 1;
+                    }
+                    pendingDrive[drive] = (pendingDrive[drive] || 0) + 1;
+                }
+            });
+        });
 
-    const totalCrew =
-    cliSummaryMap[cli]
-    .totalCrewSet.size;
+        if (pendingCategoryChart) pendingCategoryChart.destroy();
+        pendingCategoryChart = new Chart(document.getElementById('pendingCategoryChart'), {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(pendingCategory),
+                datasets: [{ data: Object.values(pendingCategory) }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
 
-   DRIVE_LIST
-.filter(drive =>
+        if (pendingHQChart) pendingHQChart.destroy();
+        pendingHQChart = new Chart(document.getElementById('pendingHQChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(pendingHQ),
+                datasets: [{ label: 'Pending', data: Object.values(pendingHQ) }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
 
-    selectedSummaryDrive === 'ALL'
-    ||
-    drive === selectedSummaryDrive
+        const categories = ['ALP', 'SALP', 'LPP', 'LPG', 'LPM', 'SHT', 'SSHT'];
+        let headHtml = '<tr><th>Drive</th>';
+        categories.forEach(cat => headHtml += `<th>${cat}</th>`);
+        headHtml += '</tr>';
+        document.getElementById('pendingDriveHead').innerHTML = headHtml;
 
-)
-.forEach(drive => {
+        let bodyHtml = '';
+        DRIVE_LIST.forEach(drive => {
+            let row = `<tr><td class="font-medium text-white">${drive}</td>`;
+            categories.forEach(cat => {
+                const count = latestCrewData.filter(crew => {
+                    if (selectedPendingDriveHQ !== 'ALL' && crew.hq !== selectedPendingDriveHQ) {
+                        return false;
+                    }
+                    const completed = historyMap.has(`${String(crew.empCode).trim()}|${drive}`);
+                    return (!completed && String(crew.crewType).trim().toUpperCase() === cat);
+                }).length;
+                row += `<td class="text-center">${count}</td>`;
+            });
+            row += '</tr>';
+            bodyHtml += row;
+        });
+        document.getElementById('pendingDriveBody').innerHTML = bodyHtml;
 
-        const obj =
-        cliSummaryMap[cli]
-        .drives[drive];
+        const cliSummaryMap = {};
+        latestCrewData.forEach(crew => {
+            const cli = String(crew.cliName || 'UNKNOWN').trim();
+            const emp = String(crew.empCode || '').trim();
 
-        cliSummaryHtml += `
-        <tr>
+            if (!cliSummaryMap[cli]) {
+                cliSummaryMap[cli] = { totalCrewSet: new Set(), drives: {} };
+            }
+            cliSummaryMap[cli].totalCrewSet.add(emp);
 
-            <td class="font-medium text-cyan-300">
-                ${cli}
-            </td>
+            DRIVE_LIST.forEach(drive => {
+                if (!cliSummaryMap[cli].drives[drive]) {
+                    cliSummaryMap[cli].drives[drive] = { done: 0, pending: 0 };
+                }
+                const completed = historyMap.has(`${emp}|${drive}`);
+                if (completed) {
+                    cliSummaryMap[cli].drives[drive].done++;
+                } else {
+                    cliSummaryMap[cli].drives[drive].pending++;
+                }
+            });
+        });
 
-            <td class="text-center">
-                ${totalCrew}
-            </td>
-
-            <td class="text-slate-200">
-                ${drive}
-            </td>
-
-            <td class="text-center">
-                <span class="text-emerald-400 font-semibold">
-                    ${obj.done}
-                </span>
-            </td>
-
-            <td class="text-center">
-                <span class="text-amber-400 font-semibold">
-                    ${obj.pending}
-                </span>
-            </td>
-
-        </tr>
+        document.getElementById('cliSummaryHead').innerHTML = `
+            <tr>
+                <th>CLI</th>
+                <th>Total Crew</th>
+                <th>Drive</th>
+                <th>Done</th>
+                <th>Pending</th>
+            </tr>
         `;
-    });
-});
 
-document.getElementById(
-'cliSummaryBody'
-).innerHTML = cliSummaryHtml;
+        let cliSummaryHtml = '';
+        Object.keys(cliSummaryMap).sort().forEach(cli => {
+            const totalCrew = cliSummaryMap[cli].totalCrewSet.size;
+            DRIVE_LIST.filter(drive => selectedSummaryDrive === 'ALL' || drive === selectedSummaryDrive).forEach(drive => {
+                const obj = cliSummaryMap[cli].drives[drive];
+                cliSummaryHtml += `
+                    <tr>
+                        <td class="font-medium text-cyan-300">${cli}</td>
+                        <td class="text-center">${totalCrew}</td>
+                        <td class="text-slate-200">${drive}</td>
+                        <td class="text-center"><span class="text-emerald-400 font-semibold">${obj.done}</span></td>
+                        <td class="text-center"><span class="text-amber-400 font-semibold">${obj.pending}</span></td>
+                    </tr>
+                `;
+            });
+        });
+        document.getElementById('cliSummaryBody').innerHTML = cliSummaryHtml;
+
+        lucide.createIcons();
     }
 
     function renderCLIMatrix(data) {
@@ -1473,7 +1481,7 @@ document.getElementById(
 
         const matrix = {};
         data.forEach(r => {
-            if(!matrix[r.cliName]) matrix[r.cliName] = {};
+            if (!matrix[r.cliName]) matrix[r.cliName] = {};
             matrix[r.cliName][r.drive] = (matrix[r.cliName][r.drive] || 0) + 1;
         });
 
@@ -1481,7 +1489,7 @@ document.getElementById(
             html += `<tr><td class="sticky-col font-medium text-white">${cli}</td>`;
             DRIVE_LIST.forEach(d => {
                 const count = matrix[cli][d] || 0;
-                if(count > 0) {
+                if (count > 0) {
                     html += `<td class="text-center"><span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-md text-xs font-bold">${count}</span></td>`;
                 } else {
                     html += `<td class="text-center text-slate-600">-</td>`;
@@ -1492,87 +1500,18 @@ document.getElementById(
         html += `</tbody>`;
         document.getElementById('cliMatrixTable').innerHTML = html;
     }
-    function normalizeDate(dateStr) {
 
-    if (!dateStr) return '';
-
-    dateStr =
-    String(dateStr).trim();
-
-    // ISO Date Handling
-    if (dateStr.includes('T')) {
-
-        const date = new Date(dateStr);
-
-        const day =
-        String(date.getDate()).padStart(2, '0');
-
-        const month =
-        String(date.getMonth() + 1).padStart(2, '0');
-
-        const year =
-        date.getFullYear();
-
-        return `${day}/${month}/${year}`;
+    /* Boot Sequence */
+    async function bootApp() {
+        await initDrives();
+        await Promise.all([
+            loadHistory(),
+            loadLatestCrewData()
+        ]);
+        loadDashboard(true);
     }
 
-    const parts =
-    dateStr.split('/');
-
-    if (parts.length !== 3)
-        return dateStr;
-
-    const day =
-    String(parts[0]).trim()
-    .padStart(2,'0');
-
-    const month =
-    String(parts[1]).trim()
-    .padStart(2,'0');
-
-    let year =
-    String(parts[2]).trim();
-
-    if (year.length === 2) {
-        year = '20' + year;
-    }
-
-    return `${day}/${month}/${year}`;
-}
-function formatDisplayDate(dateStr) {
-
-    if (!dateStr) return '';
-
-    // ISO Date Handling
-    if (dateStr.includes('T')) {
-
-        const isoPart =
-dateStr.split('T')[0];
-
-const [year, month, day] =
-isoPart.split('-');
-
-return `${day}/${month}/${year}`;
-    }
-
-    // Already Normal Format
-    return normalizeDate(dateStr);
-}
-    /* Boot */
-async function bootApp() {
-
-    await initDrives();
-
-    await Promise.all([
-        loadHistory(),
-        loadLatestCrewData()
-    ]);
-
-    loadDashboard(true);
-}
-
-bootApp();
-
+    bootApp();
 </script>
 </body>
 </html>
