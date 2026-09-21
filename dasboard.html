@@ -839,6 +839,15 @@
                 <i class="fas fa-chart-pie"></i>
                 <h3>SHOW SUMMARY</h3>
             </div>
+            <!-- Naye 2 Cards -->
+            <div class="option-card" onclick="showCrewSPMInterface()">
+                <i class="fas fa-id-card"></i>
+                <h3>SEARCH CREW/CLI WISE SPM DETAIL</h3>
+            </div>
+<div class="option-card" onclick="showCrewCVVRSInterface()">
+    <i class="fas fa-video"></i>
+    <h3>SEARCH CREW/CLI WISE CVVRS DETAIL</h3>
+</div>
         </div>
 
         <div id="spm-inputs" class="hidden" style="text-align: center; margin-bottom: 30px;">
@@ -866,6 +875,19 @@
             </div>
         </div>
 
+        <!-- Naya Input Section Crew/CLI Search ke liye -->
+        <div id="crew-spm-inputs" class="hidden" style="text-align: center; margin-bottom: 30px;">
+            <div class="input-group">
+                <input type="text" id="crew-spm-id-input" placeholder="Enter Crew ID or CLI ID..." style="min-width: 250px; text-transform: uppercase;">
+                <button class="action-btn" onclick="searchCrewWiseSPM()">
+                    <i class="fas fa-search"></i> SEARCH SPM
+                </button>
+            </div>
+            <div id="crew-spm-loader" class="hidden" style="color: var(--neon-blue); margin-top: 15px; font-weight: 600;">
+                <i class="fas fa-spinner fa-spin"></i> Checking all worksheets... Please wait...
+            </div>
+        </div>
+
         <div id="spm-results" class="results-container hidden">
             <div class="chart-box">
                 <canvas id="spmChart"></canvas>
@@ -884,6 +906,34 @@
                     <i class="fas fa-table"></i> FULL CLI WISE SPM/CVVRS BREAKDOWN
                 </h3>
                 <div id="spm-bottom-data"></div>
+            </div>
+        </div>
+
+        <!-- Naya Results Section Crew/CLI Detail Table ke liye -->
+        <div id="crew-spm-results" class="hidden" style="margin-top: 20px;">
+            <div class="bottom-panel" style="margin-top:0;">
+                <div id="crew-spm-summary" style="margin-bottom: 15px;"></div>
+                <div id="crew-spm-table-container" style="overflow-x: auto;"></div>
+            </div>
+        </div>
+        <!-- CVVRS Input Section -->
+        <div id="crew-cvvrs-inputs" class="hidden" style="text-align: center; margin-bottom: 30px;">
+            <div class="input-group">
+                <input type="text" id="crew-cvvrs-id-input" placeholder="Enter Crew ID or CLI ID..." style="min-width: 250px; text-transform: uppercase;">
+                <button class="action-btn" onclick="searchCrewWiseCVVRS()">
+                    <i class="fas fa-search"></i> SEARCH CVVRS
+                </button>
+            </div>
+            <div id="crew-cvvrs-loader" class="hidden" style="color: var(--neon-blue); margin-top: 15px; font-weight: 600;">
+                <i class="fas fa-spinner fa-spin"></i> Checking CVVRS records... Please wait...
+            </div>
+        </div>
+
+        <!-- CVVRS Results Section -->
+        <div id="crew-cvvrs-results" class="hidden" style="margin-top: 20px;">
+            <div class="bottom-panel" style="margin-top:0;">
+                <div id="crew-cvvrs-summary" style="margin-bottom: 15px;"></div>
+                <div id="crew-cvvrs-table-container" style="overflow-x: auto;"></div>
             </div>
         </div>
     </div>
@@ -1190,6 +1240,9 @@
         const SANKET_ID = '1XcmhgkXH0fQlUQG3oLmEUrVnUVk3p_gyYqBMPyXfGv0';
         const MANUAL_ID = '1GbWplsBRpKY0OqNGImdS_OBTWsVdVBMIIqCCfqpYT-g';
         const CVVRS_ID = '1BEVUi7CPmrbGYdoom30vr94tGHkSsGeWGLfYLZJX76Q';
+        const SANKET_MULTI_SHEET_ID = '1qYmIAKzt4rAVP0BPTTipzdOgIrwus6P-oGNf5HVekJM';
+        const MANUAL_SPM_SHEET_ID = '1GbWplsBRpKY0OqNGImdS_OBTWsVdVBMIIqCCfqpYT-g';
+        let cliMicroMap = {}; // Maps CLI ID to CLI NAME
 
         const OTHER_DUTY_ID = '1mtFaqe5gLIRYeC7wv6sj7DOv42mQvgDYd9EmV33P5yI';
         const OTHER_DUTY_NAME = 'OTHER DUTY';
@@ -1289,6 +1342,19 @@
                     });
                 }).catch(e => console.warn("CLIALP.csv missing or failed to load.", e));
 
+                 fetch('CLIMICRO.csv').then(res => res.text()).then(csvText => {
+                    const rows = csvText.split('\n');
+                    rows.forEach((row, index) => {
+                        if (index > 0 && row.trim()) {
+                            const cols = row.split(',');
+                            const cliId = cols[0]?.trim().toUpperCase();
+                            const cliName = cols[1]?.trim().toUpperCase();
+                            if (cliId && cliName) {
+                                cliMicroMap[cliId] = cliName;
+                            }
+                        }
+                    });
+                }).catch(e => console.warn("CLIMICRO.csv missing or failed to load.", e));
                 await Promise.all([
                     fetchData(),         
                     fetchOtherDutyData(), 
@@ -1307,7 +1373,7 @@
         }
 
         const COLS = { NAME: 0, LOBBY: 1, DATE: 2, WEE: 3, NO_WEE: 5, GRP_LP: 32, GRP_ALP: 33, COACHING: 52, MEMU: 55, GOODS: 58, ANY_FP_TLC: 62 };
-        const COLS_OA = { AUTO: 8, IB: 20, LC_AMBUSH: 10, CD_ZONES: 12, BA_AMBUSH: 14, SPEED_AUTO: 16, SPEED_YELLOW: 45, BPT_BFT: 37, BPC: 40, FSD_ROUTE: 43, SHUNTING: 47, MOBILE: 49 };
+        const COLS_OA = { AUTO: 8, IB: 20, LC_AMBUSH: 10, CD_ZONES: 12, BA_AMBUSH: 14, SPEED_AUTO: 16, SPEED_YELLOW: 45, BPT_BFT: 37, BPC: 40, FSD_ROUTE: 43, SHUNTING: 47, MOBILE: 49, A9_SA9: 85 };
         const COLS_INSP = { FAMILY: 26, RUNNING: 27, LOBBY: 29, SAFETY: 51, COACHING: 68, NIGHT_STABLING: 71, STABLE_LOAD: 74, SAND: 77 };
         const catNames = {
             wee: "WEE HOURS", noWee: "EXCL WEE HOURS", grpLP: "GROUP LP", 
@@ -1463,7 +1529,7 @@
         }
 
         async function fetchData() {
-            const urlMain = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A2:CB?key=${API_KEY}`;
+            const urlMain = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A2:CZ?key=${API_KEY}`;
             const urlE2E = `https://sheets.googleapis.com/v4/spreadsheets/${E2E_SHEET_ID}/values/${E2E_SHEET_NAME}!A2:Z?key=${API_KEY}`; 
 
             try {
@@ -1691,7 +1757,7 @@
         }
 
         async function fetchOtherAmbushData() {
-            const urlMain = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A2:BK?key=${API_KEY}`;
+            const urlMain = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A2:CZ?key=${API_KEY}`;
             const urlMobile = `https://sheets.googleapis.com/v4/spreadsheets/${MOBILE_SHEET_ID}/values/${MOBILE_SHEET_NAME}!A2:P?key=${API_KEY}`;
             try {
                 const [resMain, resMobile] = await Promise.all([ fetch(urlMain), fetch(urlMobile) ]);
@@ -1742,7 +1808,8 @@
                 lobby: lobby||'-', 
                 auto:0, aCt:0, ib:0, ibCt:0, lc:0, lCt:0, cd:0, cCt:0, ba:0, bCt:0, 
                 speedOn:0, sOnCt:0, speedYellow:0, sYelCt:0, mobile:0, mCt:0,
-                bpt:0, bptCt:0, bpc:0, bpcCt:0, fsd:0, fsdCt:0, shunt:0, shuntCt:0 
+                bpt:0, bptCt:0, bpc:0, bpcCt:0, fsd:0, fsdCt:0, shunt:0, shuntCt:0,
+                a9:0, a9Ct:0
             });
 
             allData.forEach(row => {
@@ -1762,6 +1829,7 @@
                     const fsdVal = safeInt(row[COLS_OA.FSD_ROUTE]); if(fsdVal > 0) { cliStats[rowName].fsd += fsdVal; cliStats[rowName].fsdCt++; }
                     const shuntVal = safeInt(row[COLS_OA.SHUNTING]); if(shuntVal > 0) { cliStats[rowName].shunt += shuntVal; cliStats[rowName].shuntCt++; }
                     const mobVal = safeInt(row[COLS_OA.MOBILE]); if(mobVal > 0) { cliStats[rowName].mobile += mobVal; cliStats[rowName].mCt++; }
+                    const a9Val = safeInt(row[COLS_OA.A9_SA9]); if(a9Val > 0) { cliStats[rowName].a9 += a9Val; cliStats[rowName].a9Ct++; }
                 }
             });
 
@@ -1796,18 +1864,26 @@
                     grand.bpc += s.bpc; grand.bpcCt += s.bpcCt;
                     grand.fsd += s.fsd; grand.fsdCt += s.fsdCt;
                     grand.shunt += s.shunt; grand.shuntCt += s.shuntCt;
+                    grand.a9 += s.a9; grand.a9Ct += s.a9Ct;
                 });
                 renderOAChartAndTable(grand, `Division Ambush Summary - ${month}/${year}`);
                 renderOADetailedTable(cliStats);
             }
         }
 
-        function resetSPMInterface() {
+          function resetSPMInterface() {
             document.getElementById('spm-selection').classList.remove('hidden');
             document.getElementById('spm-inputs').classList.add('hidden');
             document.getElementById('spm-results').classList.add('hidden');
             document.getElementById('spm-cli-name-input').value = '';
             document.getElementById('spm-bottom-box').classList.add('hidden');
+            // Reset crew search elements
+            document.getElementById('crew-spm-inputs').classList.add('hidden');
+            document.getElementById('crew-spm-results').classList.add('hidden');
+            document.getElementById('crew-spm-id-input').value = '';
+            document.getElementById('crew-cvvrs-inputs').classList.add('hidden');
+            document.getElementById('crew-cvvrs-results').classList.add('hidden');
+            document.getElementById('crew-cvvrs-id-input').value = '';
         }
 
         function showSPMSearchInterface(mode) {
@@ -1817,38 +1893,65 @@
             document.getElementById('spm-cli-name-wrapper').style.display = (mode === 'summary') ? 'none' : 'block';
         }
 
-        async function fetchSPMData() {
-            const u1 = `https://sheets.googleapis.com/v4/spreadsheets/${SANKET_ID}/values/Sheet1!A2:AZ?key=${API_KEY}`;
-            const u2 = `https://sheets.googleapis.com/v4/spreadsheets/${MANUAL_ID}/values/Sheet1!A2:Z?key=${API_KEY}`;
-            const u3 = `https://sheets.googleapis.com/v4/spreadsheets/${CVVRS_ID}/values/Sheet1!A2:Z?key=${API_KEY}`;
-
+          async function fetchSPMData() {
             try {
-                const [r1, r2, r3] = await Promise.all([fetch(u1), fetch(u2), fetch(u3)]);
-                const d1 = await r1.json();
-                const d2 = await r2.json();
-                const d3 = await r3.json();
+                // 1. Fetch SANKET Multi-sheets metadata
+                const metaUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SANKET_MULTI_SHEET_ID}?key=${API_KEY}`;
+                const metaRes = await fetch(metaUrl);
+                const metaData = await metaRes.json();
+                const sheetNames = metaData.sheets ? metaData.sheets.map(s => s.properties.title) : [];
 
-                if(d1.values) spmSanketData = d1.values;
-                if(d2.values) spmManualData = d2.values;
-                if(d3.values) spmCvvrsData = d3.values;
+                // 2. Range badha kar A2:AZ kiya taaki Column AO (index 40) pakka load ho
+                const sanketPromises = sheetNames.map(sheetName => {
+                    const sheetUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SANKET_MULTI_SHEET_ID}/values/'${encodeURIComponent(sheetName)}'!A2:AZ?key=${API_KEY}`;
+                    return fetch(sheetUrl)
+                        .then(r => r.json())
+                        .then(d => ({ sheetName, rows: d.values || [] }))
+                        .catch(() => ({ sheetName, rows: [] }));
+                });
+
+                // 3. Fetch MANUAL & CVVRS (Range A2:AZ)
+                const uManual = `https://sheets.googleapis.com/v4/spreadsheets/${MANUAL_SPM_SHEET_ID}/values/Sheet1!A2:AZ?key=${API_KEY}`;
+                const uCVVRS = `https://sheets.googleapis.com/v4/spreadsheets/${CVVRS_ID}/values/Sheet1!A2:AZ?key=${API_KEY}`;
+
+                const [sanketResults, resManual, resCVVRS] = await Promise.all([
+                    Promise.all(sanketPromises),
+                    fetch(uManual).then(r => r.json()).catch(() => ({ values: [] })),
+                    fetch(uCVVRS).then(r => r.json()).catch(() => ({ values: [] }))
+                ]);
+
+                spmSanketData = [];
+                sanketResults.forEach(({ rows }) => {
+                    rows.forEach(r => {
+                        // Timestamp check Col A (Index 0)
+                        if (r[0] && r[0].toString().trim()) {
+                            spmSanketData.push(r);
+                        }
+                    });
+                });
+
+                spmManualData = resManual.values || [];
+                spmCvvrsData = resCVVRS.values || [];
 
                 populateSPMCLIDropdown();
                 populateSPMYearDropdown();
-            } catch(e) { console.error(e); alert("Error fetching SPM data"); }
+            } catch(e) { 
+                console.error("SPM Data Fetch Error:", e); 
+                alert("Error fetching SPM/CVVRS data"); 
+            }
         }
-
         function cleanDate(str) {
             if(!str) return "";
             return str.replace(',', '').trim().split(' ')[0];
         }
 
-        function populateSPMCLIDropdown() {
+function populateSPMCLIDropdown() {
             const list = document.getElementById('spm-cli-names-list');
             list.innerHTML = '';
             let names = new Set();
-            spmSanketData.forEach(r => { if(r[19]) names.add(r[19].trim()); });
-            spmManualData.forEach(r => { if(r[3]) names.add(r[3].trim()); });
-            spmCvvrsData.forEach(r => { if(r[3]) names.add(r[3].trim()); });
+            spmSanketData.forEach(r => { if(r[19]) names.add(r[19].trim().toUpperCase()); });
+            spmManualData.forEach(r => { if(r[3]) names.add(r[3].trim().toUpperCase()); });
+            spmCvvrsData.forEach(r => { if(r[3]) names.add(r[3].trim().toUpperCase()); });
 
             Array.from(names).sort().forEach(n => {
                 let opt = document.createElement('option'); opt.value = n; list.appendChild(opt);
@@ -1860,100 +1963,222 @@
             s.innerHTML = '<option value="">Select Year</option>';
             let years = new Set();
             
-            const getYear = (str, type) => {
-                let d = cleanDate(str);
-                if(!d) return;
-                let parts = d.split('/');
+            const extractYear = (val) => {
+                let d = cleanDate(val);
+                if (!d) return;
+                let parts = d.split(/[-/]/);
                 if(parts.length === 3) {
-                    if(parts[2].length === 4) years.add(parts[2]);
+                    let y = parts[2].length === 4 ? parts[2] : (parts[0].length === 4 ? parts[0] : null);
+                    if (y) years.add(y);
                 }
             };
 
-            spmSanketData.forEach(r => getYear(r[0], 'MDY'));
-            spmManualData.forEach(r => getYear(r[0], 'DMY'));
-            spmCvvrsData.forEach(r => getYear(r[0], 'DMY'));
+            spmSanketData.forEach(r => extractYear(r[1]));
+            spmManualData.forEach(r => extractYear(r[1]));
+            spmCvvrsData.forEach(r => extractYear(r[1]));
 
             Array.from(years).sort().reverse().forEach(y => {
                 let opt = document.createElement('option'); opt.value = y; opt.innerText = y; s.appendChild(opt);
             });
         }
 
+        window.spmDrilldownMap = {}; // Global store for click details
+        function isDateMatchSanketTimestamp(timestampStr, targetYear, targetMonth) {
+            if (!timestampStr) return false;
+            // Format: "7/1/2026 0:04:31" -> "7/1/2026"
+            let datePart = timestampStr.toString().trim().split(' ')[0].replace(',', '');
+            let p = datePart.split(/[-/]/);
+            if (p.length !== 3) return false;
+
+            // Strict format MM/DD/YYYY: p[0]=Month, p[1]=Day, p[2]=Year
+            let rowMonth = parseInt(p[0], 10);
+            let rowYear = p[2];
+
+            return (rowYear == targetYear && rowMonth == parseInt(targetMonth, 10));
+        }
+
+      function isDateMatchSPM(rawDate, targetYear, targetMonth) {
+            if (!rawDate) return false;
+            let d = rawDate.toString().replace(',', '').trim().split(' ')[0];
+            let p = d.split(/[-/]/);
+            if (p.length !== 3) return false;
+
+            let rowYear, rowMonth;
+            if (p[0].length === 4) { 
+                rowYear = p[0];
+                rowMonth = parseInt(p[1], 10);
+            } else if (p[2].length === 4) { 
+                rowYear = p[2];
+                // Agar p[0] > 12 hai to definitely p[1] month hai (DD/MM/YYYY)
+                // Agar p[1] > 12 hai to p[0] month hai (MM/DD/YYYY)
+                if (parseInt(p[0], 10) > 12) {
+                    rowMonth = parseInt(p[1], 10);
+                } else if (parseInt(p[1], 10) > 12) {
+                    rowMonth = parseInt(p[0], 10);
+                } else {
+                    rowMonth = parseInt(p[1], 10); // Standard railway DD/MM/YYYY
+                }
+            } else {
+                return false;
+            }
+            return (rowYear == targetYear && rowMonth == parseInt(targetMonth, 10));
+        }
+
         function generateSPMReport() {
             const year = document.getElementById('spm-year-select').value;
             const month = document.getElementById('spm-month-select').value;
-            const name = document.getElementById('spm-cli-name-input').value;
+            const nameInput = document.getElementById('spm-cli-name-input').value.trim().toUpperCase();
 
-            if(!year || !month) { alert("Select Year and Month"); return; }
-            if(currentSPMMode === 'search' && !name) { alert("Enter CLI Name"); return; }
+            if (!year || !month) { alert("Select Year and Month"); return; }
+            if (currentSPMMode === 'search' && !nameInput) { alert("Enter CLI Name"); return; }
 
             document.getElementById('spm-results').classList.remove('hidden');
+            window.spmDrilldownMap = {};
 
-            let report = {
-                sanket: { count: 0, abn: 0 },
-                manual: { count: 0, abn: 0 },
-                cvvrs: { count: 0, abn: 0 }
-            };
+            const initCLI = () => ({
+                sC: 0, sA: 0, mC: 0, mA: 0, cC: 0, cA: 0,
+                sanketList: [], sanketAbnList: [],
+                manualList: [], manualAbnList: [],
+                cvvrsList: [], cvvrsAbnList: []
+            });
 
             let cliMap = {};
+            let grand = initCLI();
 
-            const checkDate = (dateStr, type) => {
-                let d = cleanDate(dateStr);
-                if(!d) return false;
-                let p = d.split('/');
-                if(p.length !== 3) return false;
-                let m, y;
-                if(type === 'MDY') { m = parseInt(p[0]); y = p[2]; } 
-                else { m = parseInt(p[1]); y = p[2]; }
-                return (y === year && m === parseInt(month));
+            const getCLI = (cliName) => {
+                let n = cliName ? cliName.trim().toUpperCase() : "UNKNOWN";
+                if (!cliMap[n]) cliMap[n] = initCLI();
+                return cliMap[n];
             };
 
-            const updateCliMap = (cName, key, countVal, abnVal) => {
-                if(!cliMap[cName]) cliMap[cName] = { sC:0, sA:0, mC:0, mA:0, cC:0, cA:0 };
-                if(key === 'sanket') { cliMap[cName].sC += 1; cliMap[cName].sA += countVal; }
-                if(key === 'manual') { cliMap[cName].mC += 1; cliMap[cName].mA += countVal; }
-                if(key === 'cvvrs')  { cliMap[cName].cC += 1; cliMap[cName].cA += countVal; }
-            };
+            const norm = (str) => str ? str.toString().trim().toUpperCase() : "";
+// 1. SANKET PROCESSING (Timestamp Col A = Index 0 se date filter)
+            spmSanketData.forEach(r => {
+                const timestampColA = r[0]; // Timestamp in Col A (MM/DD/YYYY)
+                if (isDateMatchSanketTimestamp(timestampColA, year, month)) {
+                    const cli = norm(r[19]); // Col T
+                    const isTarget = (currentSPMMode === 'summary') ? true : (cli === nameInput);
 
-            spmSanketData.forEach(row => {
-                let rName = row[19] ? row[19].trim() : "";
-                if (checkDate(row[0], 'MDY')) {
-                    const abn = safeInt(row[40]);
-                    if(rName) updateCliMap(rName, 'sanket', abn, 0);
+                    if (isTarget && cli) {
+                        // Display ke liye date Column A se hi le rahe hain
+                        const dateOnly = timestampColA.toString().trim().split(' ')[0].replace(',', '');
+                        const crewId = norm(r[5]) || norm(r[9]) || "-";
+                        const crewName = r[5] ? (r[6] || "-") : (r[10] || "-");
+                        const obs = r[38] ? r[38].toString().trim() : "-"; // Col AM
+                        const abnDetail = r[39] ? r[39].toString().trim() : "-"; // Col AN
+                        const abnCount = safeInt(r[40]); // Col AO > 0 check
 
-                    if (currentSPMMode === 'summary' || rName === name) {
-                        report.sanket.count++;
-                        report.sanket.abn += abn;
+                        const record = {
+                            date: dateOnly,
+                            cliName: cli,
+                            crewId: crewId,
+                            crewName: crewName,
+                            observation: obs,
+                            abnormality: abnDetail !== "-" ? abnDetail : (abnCount > 0 ? `Abnormalities: ${abnCount}` : "Nil"),
+                            platform: "SANKET"
+                        };
+
+                        const cObj = getCLI(cli);
+                        cObj.sC++;
+                        cObj.sanketList.push(record);
+                        grand.sC++;
+                        grand.sanketList.push(record);
+
+                        // Abnormality count > 0 check
+                        if (abnCount > 0) {
+                            cObj.sA += abnCount;
+                            cObj.sanketAbnList.push(record);
+                            grand.sA += abnCount;
+                            grand.sanketAbnList.push(record);
+                        }
                     }
                 }
             });
 
-            spmManualData.forEach(row => {
-                let rName = row[3] ? row[3].trim() : "";
-                if (checkDate(row[0], 'DMY')) {
-                    const abn = safeInt(row[19]);
-                    if(rName) updateCliMap(rName, 'manual', abn, 0);
+            // 2. MANUAL PROCESSING (Col T = Index 19)
+            spmManualData.forEach(r => {
+                const rawDate = r[1];
+                if (isDateMatchSPM(rawDate, year, month)) {
+                    const cli = norm(r[3]); // Col D
+                    const isTarget = (currentSPMMode === 'summary') ? true : (cli === nameInput);
 
-                    if (currentSPMMode === 'summary' || rName === name) {
-                        report.manual.count++;
-                        report.manual.abn += abn;
+                    if (isTarget && cli) {
+                        const dateOnly = cleanDate(rawDate);
+                        const crewId = norm(r[12]) || norm(r[16]) || "-";
+                        const crewName = r[12] ? (r[13] || "-") : (r[17] || "-");
+                        const abnDetail = r[18] ? r[18].toString().trim() : "-"; // Col S
+                        const abnCount = safeInt(r[19]); // Col T > 0 check
+
+                        const record = {
+                            date: dateOnly,
+                            cliName: cli,
+                            crewId: crewId,
+                            crewName: crewName,
+                            observation: "**",
+                            abnormality: abnDetail !== "-" ? abnDetail : (abnCount > 0 ? `Abnormalities: ${abnCount}` : "Nil"),
+                            platform: "MANUAL"
+                        };
+
+                        const cObj = getCLI(cli);
+                        cObj.mC++;
+                        cObj.manualList.push(record);
+                        grand.mC++;
+                        grand.manualList.push(record);
+
+                        if (abnCount > 0) {
+                            cObj.mA += abnCount;
+                            cObj.manualAbnList.push(record);
+                            grand.mA += abnCount;
+                            grand.manualAbnList.push(record);
+                        }
                     }
                 }
             });
 
-            spmCvvrsData.forEach(row => {
-                let rName = row[3] ? row[3].trim() : "";
-                if (checkDate(row[0], 'DMY')) {
-                    const abn = safeInt(row[19]);
-                    if(rName) updateCliMap(rName, 'cvvrs', abn, 0);
+            // 3. CVVRS PROCESSING (Col T = Index 19)
+            spmCvvrsData.forEach(r => {
+                const rawDate = r[1];
+                if (isDateMatchSPM(rawDate, year, month)) {
+                    const cli = norm(r[3]); // Col D
+                    const isTarget = (currentSPMMode === 'summary') ? true : (cli === nameInput);
 
-                    if (currentSPMMode === 'summary' || rName === name) {
-                        report.cvvrs.count++;
-                        report.cvvrs.abn += abn;
+                    if (isTarget && cli) {
+                        const dateOnly = cleanDate(rawDate);
+                        const crewId = norm(r[12]) || norm(r[16]) || "-";
+                        const crewName = r[12] ? (r[13] || "-") : (r[17] || "-");
+                        const abnDetail = r[18] ? r[18].toString().trim() : "-";
+                        const abnCount = safeInt(r[19]); // Col T > 0 check
+
+                        const record = {
+                            date: dateOnly,
+                            cliName: cli,
+                            crewId: crewId,
+                            crewName: crewName,
+                            observation: "**",
+                            abnormality: abnDetail !== "-" ? abnDetail : (abnCount > 0 ? `Abnormalities: ${abnCount}` : "Nil"),
+                            platform: "CVVRS"
+                        };
+
+                        const cObj = getCLI(cli);
+                        cObj.cC++;
+                        cObj.cvvrsList.push(record);
+                        grand.cC++;
+                        grand.cvvrsList.push(record);
+
+                        if (abnCount > 0) {
+                            cObj.cA += abnCount;
+                            cObj.cvvrsAbnList.push(record);
+                            grand.cA += abnCount;
+                            grand.cvvrsAbnList.push(record);
+                        }
                     }
                 }
             });
 
-            renderSPMOutput(report, currentSPMMode === 'search' ? `${name} - ${month}/${year}` : `Division Summary - ${month}/${year}`);
+            const currentData = (currentSPMMode === 'search') ? (cliMap[nameInput] || initCLI()) : grand;
+            const chartTitle = (currentSPMMode === 'search') ? `${nameInput} - ${month}/${year}` : `Division Summary - ${month}/${year}`;
+
+            renderSPMOutput(currentData, chartTitle);
 
             if (currentSPMMode === 'summary') {
                 document.getElementById('spm-bottom-box').classList.remove('hidden');
@@ -1963,7 +2188,7 @@
             }
         }
 
-        function renderSPMOutput(data, title) {
+       function renderSPMOutput(data, title) {
             const ctx = document.getElementById('spmChart').getContext('2d');
             if (spmChartInstance) spmChartInstance.destroy();
 
@@ -1974,13 +2199,13 @@
                     datasets: [
                         {
                             label: 'Total Rows (Count)',
-                            data: [data.sanket.count, data.manual.count, data.cvvrs.count],
+                            data: [data.sC, data.mC, data.cC],
                             backgroundColor: 'rgba(0, 242, 255, 0.7)',
                             borderColor: '#fff', borderWidth: 1
                         },
                         {
                             label: 'Abnormality Count',
-                            data: [data.sanket.abn, data.manual.abn, data.cvvrs.abn],
+                            data: [data.sA, data.mA, data.cA],
                             backgroundColor: 'rgba(255, 0, 128, 0.7)',
                             borderColor: '#fff', borderWidth: 1
                         }
@@ -1992,21 +2217,57 @@
                         legend: { labels:{color:'#fff'} }, 
                         title: { display: true, text: title, color: '#fff', font: { size: 18 } } 
                     },
-                    scales: { y: { beginAtZero: true, ticks: { color: '#a0aab8' }, grid: { color: 'rgba(255,255,255,0.1)' } }, x: { ticks: { color: '#a0aab8' } } }
+                    scales: { 
+                        y: { beginAtZero: true, ticks: { color: '#a0aab8' }, grid: { color: 'rgba(255,255,255,0.1)' } }, 
+                        x: { ticks: { color: '#a0aab8' } } 
+                    }
                 }
             });
 
+            // Drilldown storage keys
+            window.spmDrilldownMap['side_sanket_all'] = data.sanketList;
+            window.spmDrilldownMap['side_sanket_abn'] = data.sanketAbnList;
+            window.spmDrilldownMap['side_manual_all'] = data.manualList;
+            window.spmDrilldownMap['side_manual_abn'] = data.manualAbnList;
+            window.spmDrilldownMap['side_cvvrs_all'] = data.cvvrsList;
+            window.spmDrilldownMap['side_cvvrs_abn'] = data.cvvrsAbnList;
+
+            const totalAll = [].concat(data.sanketList, data.manualList, data.cvvrsList);
+            const totalAbnAll = [].concat(data.sanketAbnList, data.manualAbnList, data.cvvrsAbnList);
+            window.spmDrilldownMap['side_total_all'] = totalAll;
+            window.spmDrilldownMap['side_total_abn'] = totalAbnAll;
+
+            const linkStyle = "cursor:pointer; text-decoration:underline; font-weight:bold;";
+
             const html = `
                 <table class="summary-card-table">
-                    <thead><tr><th>ANALYSIS NAME</th><th>COUNT</th><th>ABNORMALITY COUNT</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>ANALYSIS NAME</th>
+                            <th style="text-align:center;">COUNT</th>
+                            <th style="text-align:center;">ABNORMALITY</th>
+                        </tr>
+                    </thead>
                     <tbody>
-                        <tr><td>SANKET SPM ANALYSIS</td><td>${data.sanket.count}</td><td>${data.sanket.abn}</td></tr>
-                        <tr><td>MANUAL SPM ANALYSIS</td><td>${data.manual.count}</td><td>${data.manual.abn}</td></tr>
-                        <tr><td>CVVRS ANALYSIS</td><td>${data.cvvrs.count}</td><td>${data.cvvrs.abn}</td></tr>
-                        <tr style="font-weight:bold; color:var(--neon-blue)">
-                            <td>TOTAL</td>
-                            <td>${data.sanket.count + data.manual.count + data.cvvrs.count}</td>
-                            <td>${data.sanket.abn + data.manual.abn + data.cvvrs.abn}</td>
+                        <tr>
+                            <td>SANKET SPM ANALYSIS</td>
+                            <td style="text-align:center;"><span style="${linkStyle} color:var(--neon-blue);" onclick="openSPMDrilldownModal('side_sanket_all', 'SANKET SPM - ALL CREW')">${data.sC}</span></td>
+                            <td style="text-align:center;"><span style="${linkStyle} color:#ff5252;" onclick="openSPMDrilldownModal('side_sanket_abn', 'SANKET SPM - ABNORMALITY DETAILS')">${data.sA}</span></td>
+                        </tr>
+                        <tr>
+                            <td>MANUAL SPM ANALYSIS</td>
+                            <td style="text-align:center;"><span style="${linkStyle} color:var(--neon-blue);" onclick="openSPMDrilldownModal('side_manual_all', 'MANUAL SPM - ALL CREW')">${data.mC}</span></td>
+                            <td style="text-align:center;"><span style="${linkStyle} color:#ff5252;" onclick="openSPMDrilldownModal('side_manual_abn', 'MANUAL SPM - ABNORMALITY DETAILS')">${data.mA}</span></td>
+                        </tr>
+                        <tr>
+                            <td>CVVRS ANALYSIS</td>
+                            <td style="text-align:center;"><span style="${linkStyle} color:var(--neon-blue);" onclick="openSPMDrilldownModal('side_cvvrs_all', 'CVVRS - ALL CREW')">${data.cC}</span></td>
+                            <td style="text-align:center;"><span style="${linkStyle} color:#ff5252;" onclick="openSPMDrilldownModal('side_cvvrs_abn', 'CVVRS - ABNORMALITY DETAILS')">${data.cA}</span></td>
+                        </tr>
+                        <tr style="font-weight:bold; border-top:2px solid #555;">
+                            <td style="color:var(--neon-blue)">TOTAL</td>
+                            <td style="text-align:center;"><span style="${linkStyle} color:var(--neon-blue);" onclick="openSPMDrilldownModal('side_total_all', 'TOTAL SPM/CVVRS - ALL CREW')">${data.sC + data.mC + data.cC}</span></td>
+                            <td style="text-align:center;"><span style="${linkStyle} color:#ff5252;" onclick="openSPMDrilldownModal('side_total_abn', 'TOTAL - ALL ABNORMALITIES')">${data.sA + data.mA + data.cA}</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -2016,32 +2277,124 @@
 
         function renderSPMDetailedTable(cliMap) {
             let rows = '';
+            const linkStyle = "cursor:pointer; text-decoration:underline; font-weight:bold;";
+
             Object.entries(cliMap).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([name, d]) => {
+                const totalCount = d.sC + d.mC + d.cC;
                 const totalAbn = d.sA + d.mA + d.cA;
+
+                const kSC = `cli_${name}_sc`.replace(/\s+/g, '_');
+                const kSA = `cli_${name}_sa`.replace(/\s+/g, '_');
+                const kMC = `cli_${name}_mc`.replace(/\s+/g, '_');
+                const kMA = `cli_${name}_ma`.replace(/\s+/g, '_');
+                const kCC = `cli_${name}_cc`.replace(/\s+/g, '_');
+                const kCA = `cli_${name}_ca`.replace(/\s+/g, '_');
+                const kTotC = `cli_${name}_totc`.replace(/\s+/g, '_');
+                const kTotA = `cli_${name}_tota`.replace(/\s+/g, '_');
+
+                window.spmDrilldownMap[kSC] = d.sanketList;
+                window.spmDrilldownMap[kSA] = d.sanketAbnList;
+                window.spmDrilldownMap[kMC] = d.manualList;
+                window.spmDrilldownMap[kMA] = d.manualAbnList;
+                window.spmDrilldownMap[kCC] = d.cvvrsList;
+                window.spmDrilldownMap[kCA] = d.cvvrsAbnList;
+                window.spmDrilldownMap[kTotC] = [].concat(d.sanketList, d.manualList, d.cvvrsList);
+                window.spmDrilldownMap[kTotA] = [].concat(d.sanketAbnList, d.manualAbnList, d.cvvrsAbnList);
+
                 rows += `
                 <tr>
-                    <td>${name}</td>
-                    <td>${d.sC} / ${d.sA}</td>
-                    <td>${d.mC} / ${d.mA}</td>
-                    <td>${d.cC} / ${d.cA}</td>
-                    <td style="font-weight:bold; color:var(--neon-blue)">${totalAbn}</td>
+                    <td style="font-weight:600; color:var(--neon-blue);">${name}</td>
+                    <td style="text-align:center;"><span style="${linkStyle}" onclick="openSPMDrilldownModal('${kSC}', '${name} - SANKET CREW')">${d.sC}</span></td>
+                    <td style="text-align:center; color:#ff5252;"><span style="${linkStyle}" onclick="openSPMDrilldownModal('${kSA}', '${name} - SANKET ABNORMALITIES')">${d.sA}</span></td>
+                    <td style="text-align:center;"><span style="${linkStyle}" onclick="openSPMDrilldownModal('${kMC}', '${name} - MANUAL CREW')">${d.mC}</span></td>
+                    <td style="text-align:center; color:#ff5252;"><span style="${linkStyle}" onclick="openSPMDrilldownModal('${kMA}', '${name} - MANUAL ABNORMALITIES')">${d.mA}</span></td>
+                    <td style="text-align:center;"><span style="${linkStyle}" onclick="openSPMDrilldownModal('${kCC}', '${name} - CVVRS CREW')">${d.cC}</span></td>
+                    <td style="text-align:center; color:#ff5252;"><span style="${linkStyle}" onclick="openSPMDrilldownModal('${kCA}', '${name} - CVVRS ABNORMALITIES')">${d.cA}</span></td>
+                    <td style="text-align:center; font-weight:bold; color:var(--neon-blue);"><span style="${linkStyle}" onclick="openSPMDrilldownModal('${kTotC}', '${name} - TOTAL CREW')">${totalCount}</span></td>
+                    <td style="text-align:center; font-weight:bold; color:#ff5252;"><span style="${linkStyle}" onclick="openSPMDrilldownModal('${kTotA}', '${name} - TOTAL ABNORMALITIES')">${totalAbn}</span></td>
                 </tr>`;
             });
 
-            const tableHtml = `
-            <table class="summary-card-table">
+               const tableHtml = `
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+                <button class="action-btn" style="padding: 8px 15px; font-size: 0.8rem; background: linear-gradient(45deg, #00b894, #00ff88); color: #000; border-radius: 20px;" onclick="downloadSPMSummaryExcel()">
+                    <i class="fas fa-file-csv"></i> DOWNLOAD EXCEL
+                </button>
+            </div>
+            <table class="summary-card-table" id="spm-summary-export-table" style="font-size:0.85rem;">
                 <thead>
                     <tr>
-                        <th>CLI NAME</th>
-                        <th>SANKET (Ct/Abn)</th>
-                        <th>MANUAL (Ct/Abn)</th>
-                        <th>CVVRS (Ct/Abn)</th>
-                        <th>TOTAL ABN</th>
+                        <th rowspan="2" style="vertical-align:middle;">CLI NAME</th>
+                        <th colspan="2" style="text-align:center; border-bottom:1px solid #555;">SANKET SPM</th>
+                        <th colspan="2" style="text-align:center; border-bottom:1px solid #555;">MANUAL SPM</th>
+                        <th colspan="2" style="text-align:center; border-bottom:1px solid #555;">CVVRS</th>
+                        <th colspan="2" style="text-align:center; border-bottom:1px solid #555;">TOTAL</th>
+                    </tr>
+                    <tr>
+                        <th style="text-align:center;">COUNT</th>
+                        <th style="text-align:center; color:#ff5252;">ABN</th>
+                        <th style="text-align:center;">COUNT</th>
+                        <th style="text-align:center; color:#ff5252;">ABN</th>
+                        <th style="text-align:center;">COUNT</th>
+                        <th style="text-align:center; color:#ff5252;">ABN</th>
+                        <th style="text-align:center; color:var(--neon-blue);">COUNT</th>
+                        <th style="text-align:center; color:#ff5252;">ABN</th>
                     </tr>
                 </thead>
                 <tbody>${rows}</tbody>
             </table>`;
             document.getElementById('spm-bottom-data').innerHTML = tableHtml;
+        }
+
+        function openSPMDrilldownModal(key, title) {
+            const list = window.spmDrilldownMap[key] || [];
+            document.getElementById('date-modal-title').innerHTML = `<i class="fas fa-list"></i> ${title} (${list.length})`;
+
+            if (list.length === 0) {
+                document.getElementById('date-modal-list').innerHTML = `<div style="text-align:center; color:#888; padding:20px;">No entries found.</div>`;
+                document.getElementById('date-details-modal').style.display = 'flex';
+                return;
+            }
+
+            let tableHTML = `
+                <table class="summary-card-table" style="width:100%; font-size:0.8rem; border-collapse:collapse;">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Crew ID</th>
+                            <th>Crew Name</th>
+                            <th>CLI Name</th>
+                            <th>Observation</th>
+                            <th>Abnormality</th>
+                            <th>Platform</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            list.forEach((r, idx) => {
+                tableHTML += `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td>${r.date}</td>
+                        <td style="font-weight:bold; color:var(--neon-blue);">${r.crewId}</td>
+                        <td>${r.crewName}</td>
+                        <td>${r.cliName}</td>
+                        <td>${r.observation || "-"}</td>
+                        <td style="color:${r.abnormality !== 'Nil' ? '#ff5252' : '#fff'}; font-weight:${r.abnormality !== 'Nil' ? 'bold' : 'normal'};">${r.abnormality}</td>
+                        <td><span class="badge ${r.platform === 'SANKET' ? 'status-fp' : 'status-trg'}">${r.platform}</span></td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `</tbody></table>`;
+
+            document.getElementById('date-modal-list').innerHTML = tableHTML;
+            const contentBox = document.querySelector('.date-modal-content');
+            contentBox.style.width = '850px';
+            contentBox.style.maxWidth = '95vw';
+            document.getElementById('date-details-modal').style.display = 'flex';
         }
 
         function safeInt(val) { if (!val) return 0; const parsed = parseInt(val); return isNaN(parsed) ? 0 : parsed; }
@@ -2117,18 +2470,18 @@
             const ctx = document.getElementById('oaChart').getContext('2d');
             if (oaChartInstance) oaChartInstance.destroy();
             
-            const values = [data.auto, data.ib, data.lc, data.cd, data.ba, data.speedOn, data.speedYellow, data.mobile, data.bpt, data.bpc, data.fsd, data.shunt];
+          const values = [data.auto, data.ib, data.lc, data.cd, data.ba, data.speedOn, data.speedYellow, data.mobile, data.bpt, data.bpc, data.fsd, data.shunt, data.a9];
             const totalSum = values.reduce((a,b) => a+b, 0);
-            const totalCount = data.aCt + data.ibCt + data.lCt + data.cCt + data.bCt + data.sOnCt + data.sYelCt + data.mCt + data.bptCt + data.bpcCt + data.fsdCt + data.shuntCt;
+            const totalCount = data.aCt + data.ibCt + data.lCt + data.cCt + data.bCt + data.sOnCt + data.sYelCt + data.mCt + data.bptCt + data.bpcCt + data.fsdCt + data.shuntCt + data.a9Ct;
 
             oaChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Auto', 'IB', 'L-Crossing', 'CD Zones', 'BA Ambush', 'Speed(ON)', 'Speed(Yel)', 'Mobile', 'BPT/BFT', 'BPC', 'FSD', 'Shunting'],
-                    datasets: [{ 
-                        label: 'Sum (Total)', 
-                        data: values, 
-                        backgroundColor: ['#00f2ff', '#bc13fe', '#ff0080', '#e0ff00', '#00ff88', '#ff8800', '#fff', '#00f2ff', '#bc13fe', '#ff0080', '#e0ff00', '#00ff88'], 
+                    labels: ['Auto', 'IB', 'L-Crossing', 'CD Zones', 'BA Ambush', 'Speed(ON)', 'Speed(Yel)', 'Mobile', 'BPT/BFT', 'BPC', 'FSD', 'Shunting', 'A9/SA9'],
+datasets: [{ 
+    label: 'Sum (Total)', 
+    data: values, 
+    backgroundColor: ['#00f2ff', '#bc13fe', '#ff0080', '#e0ff00', '#00ff88', '#ff8800', '#fff', '#00f2ff', '#bc13fe', '#ff0080', '#e0ff00', '#00ff88', '#ff7675'],
                         borderColor: '#fff', 
                         borderWidth: 1, 
                         borderRadius: 5 
@@ -2164,6 +2517,7 @@
                     <tr><td>BPC AMBUSH</td><td>${data.bpcCt}</td><td>${data.bpc}</td></tr>
                     <tr><td>FSD ROUTE SETTING</td><td>${data.fsdCt}</td><td>${data.fsd}</td></tr>
                     <tr><td>SHUNTING AMBUSH</td><td>${data.shuntCt}</td><td>${data.shunt}</td></tr>
+                    <tr><td>A-9/SA-9 AMBUSH</td><td>${data.a9Ct}</td><td>${data.a9}</td></tr>
                     <tr style="font-weight:bold; color:var(--neon-blue); border-top:2px solid #555">
                         <td>TOTAL</td><td>${totalCount}</td><td>${totalSum}</td>
                     </tr>
@@ -2184,8 +2538,8 @@
             let rows = '';
             
             Object.entries(cliStats).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([name, d]) => {
-                const totalSum = d.auto + d.ib + d.lc + d.cd + d.ba + d.speedOn + d.speedYellow + d.mobile + d.bpt + d.bpc + d.fsd + d.shunt;
-                const totalTimes = d.aCt + d.ibCt + d.lCt + d.cCt + d.bCt + d.sOnCt + d.sYelCt + d.mCt + d.bptCt + d.bpcCt + d.fsdCt + d.shuntCt;
+const totalSum = d.auto + d.ib + d.lc + d.cd + d.ba + d.speedOn + d.speedYellow + d.mobile + d.bpt + d.bpc + d.fsd + d.shunt + d.a9;
+const totalTimes = d.aCt + d.ibCt + d.lCt + d.cCt + d.bCt + d.sOnCt + d.sYelCt + d.mCt + d.bptCt + d.bpcCt + d.fsdCt + d.shuntCt + d.a9Ct;
                 
                 const getVal = (times, sum) => oaTableDisplayMode === 'times' ? times : sum;
 
@@ -2203,6 +2557,7 @@
                     <td>${getVal(d.bpcCt, d.bpc)}</td>
                     <td>${getVal(d.fsdCt, d.fsd)}</td>
                     <td>${getVal(d.shuntCt, d.shunt)}</td>
+                    <td>${getVal(d.a9Ct, d.a9)}</td>
                     <td style="font-weight:bold; color:var(--neon-blue)">${getVal(totalTimes, totalSum)}</td>
                 </tr>`;
             });
@@ -2245,6 +2600,7 @@
                         <th>BPC<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
                         <th>FSD<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
                         <th>SHUNT<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
+                        <th>A9/SA9<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
                         <th>TOTAL<br><span style="font-size:0.7em; color:#a0aab8">${headingSuffix}</span></th>
                     </tr>
                 </thead>
@@ -4269,6 +4625,517 @@
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
+        }
+        function showCrewSPMInterface() {
+            document.getElementById('spm-selection').classList.add('hidden');
+            document.getElementById('spm-inputs').classList.add('hidden');
+            document.getElementById('spm-results').classList.add('hidden');
+            document.getElementById('crew-spm-inputs').classList.remove('hidden');
+            document.getElementById('crew-spm-results').classList.add('hidden');
+        }
+
+        async function searchCrewWiseSPM() {
+            const rawInput = document.getElementById('crew-spm-id-input').value.trim();
+            if (!rawInput) {
+                alert("Please enter Crew ID or CLI ID");
+                return;
+            }
+
+            const searchKey = rawInput.toUpperCase();
+            const loader = document.getElementById('crew-spm-loader');
+            loader.classList.remove('hidden');
+            document.getElementById('crew-spm-results').classList.add('hidden');
+
+            // Check if input is a CLI ID from CLIMICRO.csv
+            const matchedCliName = cliMicroMap[searchKey] || null;
+            const isCliSearch = Boolean(matchedCliName);
+
+            let allRowsFound = [];
+
+            try {
+                // 1. Fetch metadata of SANKET Google Sheet to get all worksheet names
+                const metaUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SANKET_MULTI_SHEET_ID}?key=${API_KEY}`;
+                const metaRes = await fetch(metaUrl);
+                const metaData = await metaRes.json();
+                const sheetNames = metaData.sheets ? metaData.sheets.map(s => s.properties.title) : [];
+
+                // 2. Fetch each sheet of SANKET
+                const fetchSheetPromises = sheetNames.map(sheetName => {
+                   const sheetUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SANKET_MULTI_SHEET_ID}/values/'${encodeURIComponent(sheetName)}'!A2:AZ?key=${API_KEY}`;
+                    return fetch(sheetUrl)
+                        .then(r => r.json())
+                        .then(d => ({ sheetName, rows: d.values || [] }))
+                        .catch(err => ({ sheetName, rows: [] }));
+                });
+
+                // 3. Fetch MANUAL Google Sheet (Sheet1)
+                const manualUrl = `https://sheets.googleapis.com/v4/spreadsheets/${MANUAL_SPM_SHEET_ID}/values/Sheet1!A2:AZ?key=${API_KEY}`;
+                const manualPromise = fetch(manualUrl)
+                    .then(r => r.json())
+                    .then(d => d.values || [])
+                    .catch(err => []);
+
+                const [sanketResults, manualRows] = await Promise.all([
+                    Promise.all(fetchSheetPromises),
+                    manualPromise
+                ]);
+
+                // 4. Process SANKET sheets
+                sanketResults.forEach(({ sheetName, rows }) => {
+                    rows.forEach(r => {
+                        const timestamp = r[0] ? r[0].toString().trim() : "";
+                        if (!timestamp) return; // Sirf timestamp wali rows check karni hai
+
+                        const rawDate = r[1] ? r[1].toString().trim().replace(',', '') : "";
+                        const dateOnly = rawDate.split(' ')[0] || "-";
+
+                        const colF = r[5] ? r[5].toString().trim().toUpperCase() : "";
+                        const colG = r[6] ? r[6].toString().trim() : "";
+                        const colJ = r[9] ? r[9].toString().trim().toUpperCase() : "";
+                        const colK = r[10] ? r[10].toString().trim() : "";
+
+                        const cliName = r[19] ? r[19].toString().trim() : "";
+                        const cliObs = r[38] ? r[38].toString().trim() : "-";
+                        const abnDetail = r[39] ? r[39].toString().trim() : "-";
+
+                        if (isCliSearch) {
+                            if (cliName.toUpperCase() === matchedCliName) {
+                                allRowsFound.push({
+                                    cliName: cliName,
+                                    crewId: colF || colJ || "-",
+                                    crewName: colF ? colG : colK,
+                                    coCrewId: colF ? (colJ || "-") : (colF || "-"),
+                                    coCrewName: colF ? (colK || "-") : (colG || "-"),
+                                    date: dateOnly,
+                                    observation: cliObs,
+                                    abnormality: abnDetail,
+                                    platform: 'SANKET'
+                                });
+                            }
+                        } else {
+                            if (colF === searchKey) {
+                                allRowsFound.push({
+                                    crewId: colF,
+                                    crewName: colG,
+                                    coCrewId: colJ || "-",
+                                    coCrewName: colK || "-",
+                                    date: dateOnly,
+                                    cliName: cliName,
+                                    observation: cliObs,
+                                    abnormality: abnDetail,
+                                    platform: 'SANKET'
+                                });
+                            } else if (colJ === searchKey) {
+                                allRowsFound.push({
+                                    crewId: colJ,
+                                    crewName: colK,
+                                    coCrewId: colF || "-",
+                                    coCrewName: colG || "-",
+                                    date: dateOnly,
+                                    cliName: cliName,
+                                    observation: cliObs,
+                                    abnormality: abnDetail,
+                                    platform: 'SANKET'
+                                });
+                            }
+                        }
+                    });
+                });
+
+                // 5. Process MANUAL Sheet
+                manualRows.forEach(r => {
+                    const rawDate = r[1] ? r[1].toString().trim().replace(',', '') : "";
+                    const dateOnly = rawDate.split(' ')[0] || "-";
+
+                    const colM = r[12] ? r[12].toString().trim().toUpperCase() : "";
+                    const colN = r[13] ? r[13].toString().trim() : "";
+                    const colQ = r[16] ? r[16].toString().trim().toUpperCase() : "";
+                    const colR = r[17] ? r[17].toString().trim() : "";
+
+                    const cliName = r[3] ? r[3].toString().trim() : "";
+                    const cliObs = "**";
+                    const abnDetail = r[18] ? r[18].toString().trim() : "-";
+
+                    if (isCliSearch) {
+                        if (cliName.toUpperCase() === matchedCliName) {
+                            allRowsFound.push({
+                                cliName: cliName,
+                                crewId: colM || colQ || "-",
+                                crewName: colM ? colN : colR,
+                                coCrewId: colM ? (colQ || "-") : (colM || "-"),
+                                coCrewName: colM ? (colR || "-") : (colN || "-"),
+                                date: dateOnly,
+                                observation: cliObs,
+                                abnormality: abnDetail,
+                                platform: 'MANUAL'
+                            });
+                        }
+                    } else {
+                        if (colM === searchKey) {
+                            allRowsFound.push({
+                                crewId: colM,
+                                crewName: colN,
+                                coCrewId: colQ || "-",
+                                coCrewName: colR || "-",
+                                date: dateOnly,
+                                cliName: cliName,
+                                observation: cliObs,
+                                abnormality: abnDetail,
+                                platform: 'MANUAL'
+                            });
+                        } else if (colQ === searchKey) {
+                            allRowsFound.push({
+                                crewId: colQ,
+                                crewName: colR,
+                                coCrewId: colM || "-",
+                                coCrewName: colN || "-",
+                                date: dateOnly,
+                                cliName: cliName,
+                                observation: cliObs,
+                                abnormality: abnDetail,
+                                platform: 'MANUAL'
+                            });
+                        }
+                    }
+                });
+
+                loader.classList.add('hidden');
+                renderCrewSPMTable(allRowsFound, isCliSearch, searchKey, matchedCliName);
+
+            } catch (err) {
+                console.error("Error fetching SPM Detail:", err);
+                loader.classList.add('hidden');
+                alert("Error reading sheets. Please check console for details.");
+            }
+        }
+
+        function renderCrewSPMTable(records, isCliSearch, searchKey, matchedCliName) {
+            const resultsDiv = document.getElementById('crew-spm-results');
+            const summaryDiv = document.getElementById('crew-spm-summary');
+            const container = document.getElementById('crew-spm-table-container');
+
+            resultsDiv.classList.remove('hidden');
+
+            const title = isCliSearch 
+                ? `CLI SEARCH RESULT: ${matchedCliName} (${searchKey})`
+                : `CREW SEARCH RESULT: ${searchKey}`;
+
+summaryDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h3 style="margin: 0; color: var(--neon-blue);">${title}</h3>
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">Total SPM Entries Found: <strong style="color: #fff;">${records.length}</strong></span>
+                    </div>
+                    <button class="action-btn" style="padding: 8px 15px; font-size: 0.8rem; background: linear-gradient(45deg, #00b894, #00ff88); color: #000; border-radius: 20px;" onclick="downloadCrewSPMExcel()">
+                        <i class="fas fa-file-csv"></i> DOWNLOAD EXCEL
+                    </button>
+                </div>
+            `;
+
+            if (records.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding: 25px; color: #ff5252;">No records found for ${searchKey}</div>`;
+                return;
+            }
+
+            let thead = '';
+            let tbody = '';
+
+            if (isCliSearch) {
+                thead = `
+                    <tr>
+                        <th>Sr.No</th>
+                        <th>CLI Name</th>
+                        <th>Crew ID</th>
+                        <th>Crew Name</th>
+                        <th>Co Crew ID</th>
+                        <th>Co Crew Name</th>
+                        <th>Date of Analysis</th>
+                        <th>CLI Observation</th>
+                        <th>Abnormality Detail</th>
+                        <th>SPM PLATFORM</th>
+                    </tr>
+                `;
+
+                records.forEach((row, idx) => {
+                    tbody += `
+                        <tr>
+                            <td>${idx + 1}</td>
+                            <td style="color: var(--neon-blue); font-weight: 600;">${row.cliName}</td>
+                            <td style="font-weight: bold;">${row.crewId}</td>
+                            <td>${row.crewName}</td>
+                            <td>${row.coCrewId}</td>
+                            <td>${row.coCrewName}</td>
+                            <td>${row.date}</td>
+                            <td>${row.observation}</td>
+                            <td style="color: ${row.abnormality !== '-' ? '#ff5252' : '#fff'}; font-weight: ${row.abnormality !== '-' ? 'bold' : 'normal'};">${row.abnormality}</td>
+                            <td><span class="badge ${row.platform === 'SANKET' ? 'status-fp' : 'status-trg'}">${row.platform}</span></td>
+                        </tr>
+                    `;
+                });
+            } else {
+                thead = `
+                    <tr>
+                        <th>Sr.No</th>
+                        <th>Crew ID</th>
+                        <th>Crew Name</th>
+                        <th>Co Crew ID</th>
+                        <th>Co Crew Name</th>
+                        <th>Date of Analysis</th>
+                        <th>CLI Name</th>
+                        <th>CLI Observation</th>
+                        <th>Abnormality Detail</th>
+                        <th>SPM PLATFORM</th>
+                    </tr>
+                `;
+
+                records.forEach((row, idx) => {
+                    tbody += `
+                        <tr>
+                            <td>${idx + 1}</td>
+                            <td style="color: var(--neon-blue); font-weight: bold;">${row.crewId}</td>
+                            <td>${row.crewName}</td>
+                            <td>${row.coCrewId}</td>
+                            <td>${row.coCrewName}</td>
+                            <td>${row.date}</td>
+                            <td style="font-weight: 600;">${row.cliName}</td>
+                            <td>${row.observation}</td>
+                            <td style="color: ${row.abnormality !== '-' ? '#ff5252' : '#fff'}; font-weight: ${row.abnormality !== '-' ? 'bold' : 'normal'};">${row.abnormality}</td>
+                            <td><span class="badge ${row.platform === 'SANKET' ? 'status-fp' : 'status-trg'}">${row.platform}</span></td>
+                        </tr>
+                    `;
+                });
+            }
+
+             container.innerHTML = `
+                <table class="summary-card-table" id="crew-spm-export-table">
+                    <thead>${thead}</thead>
+                    <tbody>${tbody}</tbody>
+                </table>
+            `;
+        }
+        function showCrewCVVRSInterface() {
+            document.getElementById('spm-selection').classList.add('hidden');
+            document.getElementById('spm-inputs').classList.add('hidden');
+            document.getElementById('spm-results').classList.add('hidden');
+            document.getElementById('crew-spm-inputs').classList.add('hidden');
+            document.getElementById('crew-spm-results').classList.add('hidden');
+            document.getElementById('crew-cvvrs-inputs').classList.remove('hidden');
+            document.getElementById('crew-cvvrs-results').classList.add('hidden');
+        }
+
+        async function searchCrewWiseCVVRS() {
+            const rawInput = document.getElementById('crew-cvvrs-id-input').value.trim();
+            if (!rawInput) {
+                alert("Please enter Crew ID or CLI ID");
+                return;
+            }
+
+            const searchKey = rawInput.toUpperCase();
+            const loader = document.getElementById('crew-cvvrs-loader');
+            loader.classList.remove('hidden');
+            document.getElementById('crew-cvvrs-results').classList.add('hidden');
+
+            const matchedCliName = cliMicroMap[searchKey] || null;
+            const isCliSearch = Boolean(matchedCliName);
+
+            let allRowsFound = [];
+
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CVVRS_ID}/values/Sheet1!A2:T?key=${API_KEY}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                const rows = data.values || [];
+
+                rows.forEach(r => {
+                    const rawDate = r[1] ? r[1].toString().trim().replace(',', '') : "";
+                    const dateOnly = rawDate.split(' ')[0] || "-";
+
+                    const cliName = r[3] ? r[3].toString().trim() : "";
+                    const colM = r[12] ? r[12].toString().trim().toUpperCase() : "";
+                    const colN = r[13] ? r[13].toString().trim() : "";
+                    const colQ = r[16] ? r[16].toString().trim().toUpperCase() : "";
+                    const colR = r[17] ? r[17].toString().trim() : "";
+                    const abnDetail = r[18] ? r[18].toString().trim() : "-";
+
+                    if (isCliSearch) {
+                        if (cliName.toUpperCase() === matchedCliName) {
+                            allRowsFound.push({
+                                cliName: cliName,
+                                crewId: colM || colQ || "-",
+                                crewName: colM ? colN : colR,
+                                coCrewId: colM ? (colQ || "-") : (colM || "-"),
+                                coCrewName: colM ? (colR || "-") : (colN || "-"),
+                                date: dateOnly,
+                                abnormality: abnDetail
+                            });
+                        }
+                    } else {
+                        if (colM === searchKey) {
+                            allRowsFound.push({
+                                crewId: colM,
+                                crewName: colN,
+                                coCrewId: colQ || "-",
+                                coCrewName: colR || "-",
+                                date: dateOnly,
+                                cliName: cliName,
+                                abnormality: abnDetail
+                            });
+                        } else if (colQ === searchKey) {
+                            allRowsFound.push({
+                                crewId: colQ,
+                                crewName: colR,
+                                coCrewId: colM || "-",
+                                coCrewName: colN || "-",
+                                date: dateOnly,
+                                cliName: cliName,
+                                abnormality: abnDetail
+                            });
+                        }
+                    }
+                });
+
+                loader.classList.add('hidden');
+                renderCrewCVVRSTable(allRowsFound, isCliSearch, searchKey, matchedCliName);
+
+            } catch (err) {
+                console.error("Error fetching CVVRS Detail:", err);
+                loader.classList.add('hidden');
+                alert("Error reading CVVRS sheet. Please check console for details.");
+            }
+        }
+
+        function renderCrewCVVRSTable(records, isCliSearch, searchKey, matchedCliName) {
+            const resultsDiv = document.getElementById('crew-cvvrs-results');
+            const summaryDiv = document.getElementById('crew-cvvrs-summary');
+            const container = document.getElementById('crew-cvvrs-table-container');
+
+            resultsDiv.classList.remove('hidden');
+
+            const title = isCliSearch 
+                ? `CLI SEARCH RESULT: ${matchedCliName} (${searchKey})`
+                : `CREW SEARCH RESULT: ${searchKey}`;
+
+summaryDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h3 style="margin: 0; color: var(--neon-blue);">${title}</h3>
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">Total SPM Entries Found: <strong style="color: #fff;">${records.length}</strong></span>
+                    </div>
+                    <button class="action-btn" style="padding: 8px 15px; font-size: 0.8rem; background: linear-gradient(45deg, #00b894, #00ff88); color: #000; border-radius: 20px;" onclick="downloadCrewSPMExcel()">
+                        <i class="fas fa-file-csv"></i> DOWNLOAD EXCEL
+                    </button>
+                </div>
+            `;
+
+            if (records.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding: 25px; color: #ff5252;">No records found for ${searchKey}</div>`;
+                return;
+            }
+
+            let thead = '';
+            let tbody = '';
+
+            if (isCliSearch) {
+                thead = `
+                    <tr>
+                        <th>Sr.No</th>
+                        <th>CLI Name</th>
+                        <th>Crew ID</th>
+                        <th>Crew Name</th>
+                        <th>Co Crew ID</th>
+                        <th>Co Crew Name</th>
+                        <th>Date of Analysis</th>
+                        <th>Abnormality Detail</th>
+                    </tr>
+                `;
+
+                records.forEach((row, idx) => {
+                    tbody += `
+                        <tr>
+                            <td>${idx + 1}</td>
+                            <td style="color: var(--neon-blue); font-weight: 600;">${row.cliName}</td>
+                            <td style="font-weight: bold;">${row.crewId}</td>
+                            <td>${row.crewName}</td>
+                            <td>${row.coCrewId}</td>
+                            <td>${row.coCrewName}</td>
+                            <td>${row.date}</td>
+                            <td style="color: ${row.abnormality !== '-' ? '#ff5252' : '#fff'}; font-weight: ${row.abnormality !== '-' ? 'bold' : 'normal'};">${row.abnormality}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                thead = `
+                    <tr>
+                        <th>Sr.No</th>
+                        <th>Crew ID</th>
+                        <th>Crew Name</th>
+                        <th>Co Crew ID</th>
+                        <th>Co Crew Name</th>
+                        <th>Date of Analysis</th>
+                        <th>CLI Name</th>
+                        <th>Abnormality Detail</th>
+                    </tr>
+                `;
+
+                records.forEach((row, idx) => {
+                    tbody += `
+                        <tr>
+                            <td>${idx + 1}</td>
+                            <td style="color: var(--neon-blue); font-weight: bold;">${row.crewId}</td>
+                            <td>${row.crewName}</td>
+                            <td>${row.coCrewId}</td>
+                            <td>${row.coCrewName}</td>
+                            <td>${row.date}</td>
+                            <td style="font-weight: 600;">${row.cliName}</td>
+                            <td style="color: ${row.abnormality !== '-' ? '#ff5252' : '#fff'}; font-weight: ${row.abnormality !== '-' ? 'bold' : 'normal'};">${row.abnormality}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+                container.innerHTML = `
+                <table class="summary-card-table" id="crew-spm-export-table">
+                    <thead>${thead}</thead>
+                    <tbody>${tbody}</tbody>
+                </table>
+            `;
+        }
+        function downloadTableAsCSV(tableId, filename) {
+            let table = document.getElementById(tableId);
+            if (!table) return;
+            let csv = [];
+            let rows = table.querySelectorAll("tr");
+            for (let i = 0; i < rows.length; i++) {
+                let row = [], cols = rows[i].querySelectorAll("td, th");
+                for (let j = 0; j < cols.length; j++) {
+                    let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                    data = data.replace(/"/g, '""');
+                    row.push('"' + data + '"');
+                }
+                csv.push(row.join(","));
+            }
+            let csvFile = new Blob([csv.join("\n")], { type: "text/csv;charset=utf-8;" });
+            let downloadLink = document.createElement("a");
+            downloadLink.download = filename;
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = "none";
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+
+        function downloadSPMSummaryExcel() {
+            downloadTableAsCSV("spm-summary-export-table", "SPM_CVVRS_Summary_Report.csv");
+        }
+
+        function downloadCrewSPMExcel() {
+            const inputVal = document.getElementById('crew-spm-id-input').value.trim() || 'Detail';
+            downloadTableAsCSV("crew-spm-export-table", `SPM_Detail_${inputVal}.csv`);
+        }
+
+        function downloadCrewCVVRSExcel() {
+            const inputVal = document.getElementById('crew-cvvrs-id-input').value.trim() || 'Detail';
+            downloadTableAsCSV("crew-cvvrs-export-table", `CVVRS_Detail_${inputVal}.csv`);
         }
     </script>
 </body>
