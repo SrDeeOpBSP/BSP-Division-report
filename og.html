@@ -1010,7 +1010,7 @@
         }
     }
 
-    // Generate FSD Grid Table
+   // Generate FSD Grid Table with FSD Number
     function generateFsdTableGrid() {
         const countVal = parseInt(document.getElementById('fsdTrainsCount').value) || 0;
         const container = document.getElementById('fsdTableRowsContainer');
@@ -1026,6 +1026,7 @@
                 <thead>
                     <tr class="bg-slate-100 font-bold text-slate-700">
                         <th class="border border-slate-200 p-2 text-center w-10">S.No</th>
+                        <th class="border border-slate-200 p-2">FSD NUMBER</th>
                         <th class="border border-slate-200 p-2">LP ID</th>
                         <th class="border border-slate-200 p-2">ALP ID</th>
                         <th class="border border-slate-200 p-2">Name of Train</th>
@@ -1039,6 +1040,9 @@
             tableMarkup += `
                 <tr class="fsd-data-row">
                     <td class="border border-slate-200 p-2 text-center font-bold text-slate-500">${i}</td>
+                    <td class="border border-slate-200 p-1">
+                        <input type="text" class="modern-input p-1.5 font-mono uppercase font-bold fsd-no" placeholder="e.g. FSD-12" required>
+                    </td>
                     <td class="border border-slate-200 p-1">
                         <input type="text" class="modern-input p-1.5 font-mono uppercase font-bold fsd-lp-id" placeholder="e.g. BSP1234" required oninput="sanitizeAlphanumericNoSpace(this)">
                     </td>
@@ -1058,24 +1062,24 @@
         tableMarkup += `</tbody></table>`;
         container.innerHTML = tableMarkup;
     }
-
     function sanitizeAlphanumericNoSpace(input) {
         input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     }
 
-    function getFsdTableDetailString() {
+function getFsdTableDetailString() {
         const rows = document.querySelectorAll('.fsd-data-row');
         if (!rows || rows.length === 0) return "NIL";
 
         let parsedStatements = [];
         rows.forEach((row, index) => {
+            const fsdNo = row.querySelector('.fsd-no').value.trim();
             const lpId = row.querySelector('.fsd-lp-id').value.trim();
             const alpId = row.querySelector('.fsd-alp-id').value.trim();
             const trainName = row.querySelector('.fsd-train-name').value.trim();
             const abnDetail = row.querySelector('.fsd-abn-detail').value.trim();
 
-            if (lpId || alpId || trainName || abnDetail) {
-                parsedStatements.push(`${index + 1}. LP ID: ${lpId}, ALP ID: ${alpId}, Train: ${trainName}, Abnormality: ${abnDetail}`);
+            if (fsdNo || lpId || alpId || trainName || abnDetail) {
+                parsedStatements.push(`${index + 1}. FSD No: ${fsdNo}, LP ID: ${lpId}, ALP ID: ${alpId}, Train: ${trainName}, Abnormality: ${abnDetail}`);
             }
         });
 
