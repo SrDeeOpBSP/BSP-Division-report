@@ -492,7 +492,19 @@
                     <div id="crewMobileTableRowsContainer" class="min-w-full bg-white rounded-lg border border-slate-200 p-2">
                         <input type="text" class="modern-input" value="NIL" readonly>
                     </div>
-                </div>                
+                </div> 
+                    <!-- NIGHT ALERTNESS AMBUSH SECTION -->
+<div>
+    <label class="modern-label font-extrabold text-indigo-600">NIGHT ALERTNESS AMBUSH (23:00 - 06:00) (NO OF CREW SET)</label>
+    <input type="number" id="nightAlertnessCount" data-name="Night Alertness Ambush(23:00 -06:00)" value="0" min="0" class="modern-input req-ab border-indigo-400 focus:border-indigo-600 bg-indigo-50/30 font-bold" oninput="generateNightAlertnessTableGrid()">
+</div>
+
+<div class="lg:col-span-3 overflow-x-auto mt-2">
+    <label class="modern-label font-bold text-slate-700">DETAILS ON NIGHT ALERTNESS AMBUSH</label>
+    <div id="nightAlertnessTableRowsContainer" class="min-w-full bg-white rounded-lg border border-slate-200 p-2">
+        <input type="text" class="modern-input" value="NIL" readonly>
+    </div>
+</div>           
                    <div class="lg:col-span-3 mt-6">
                     <h3 class="font-bold text-xl text-green-700 border-b-2 border-green-300 pb-2">
                         COUNSELLING ENTRIES
@@ -916,6 +928,7 @@
         "ABNORMALITIES ON RUNNING ROOM INSPECTION": "runningRoomRowsContainer",
         "ABNORMALITIES ON LOBBY INSPECTION": "lobbyRowsContainer",
         "Abnormalities found on Securing & Releasing of Vehicles/Train/Loco Ambush Drive": "securingDriveRowsContainer",
+        "Night Alertness Ambush (23:00 - 06:00)": "nightAlertnessTableRowsContainer"
     };
 
     const ABN_MAP_COUNT_TO_DETAIL_HEADER = {
@@ -1013,7 +1026,7 @@
         }
     }
 
-   // Generate FSD Grid Table with FSD Number
+// Generate FSD Grid Table with FSD Number & Name of Station
     function generateFsdTableGrid() {
         const countVal = parseInt(document.getElementById('fsdTrainsCount').value) || 0;
         const container = document.getElementById('fsdTableRowsContainer');
@@ -1033,6 +1046,7 @@
                         <th class="border border-slate-200 p-2">LP ID</th>
                         <th class="border border-slate-200 p-2">ALP ID</th>
                         <th class="border border-slate-200 p-2">Name of Train</th>
+                        <th class="border border-slate-200 p-2">Name of Station</th>
                         <th class="border border-slate-200 p-2">Abnormality Detail</th>
                     </tr>
                 </thead>
@@ -1056,6 +1070,9 @@
                         <input type="text" class="modern-input p-1.5 font-semibold fsd-train-name" placeholder="Train Name/No." required>
                     </td>
                     <td class="border border-slate-200 p-1">
+                        <input type="text" class="modern-input p-1.5 font-semibold fsd-station-name" placeholder="Station Name" required>
+                    </td>
+                    <td class="border border-slate-200 p-1">
                         <input type="text" class="modern-input p-1.5 fsd-abn-detail" placeholder="Describe issue" required>
                     </td>
                 </tr>
@@ -1065,11 +1082,12 @@
         tableMarkup += `</tbody></table>`;
         container.innerHTML = tableMarkup;
     }
+
     function sanitizeAlphanumericNoSpace(input) {
         input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     }
 
-function getFsdTableDetailString() {
+    function getFsdTableDetailString() {
         const rows = document.querySelectorAll('.fsd-data-row');
         if (!rows || rows.length === 0) return "NIL";
 
@@ -1079,17 +1097,18 @@ function getFsdTableDetailString() {
             const lpId = row.querySelector('.fsd-lp-id').value.trim();
             const alpId = row.querySelector('.fsd-alp-id').value.trim();
             const trainName = row.querySelector('.fsd-train-name').value.trim();
+            const stationName = row.querySelector('.fsd-station-name').value.trim();
             const abnDetail = row.querySelector('.fsd-abn-detail').value.trim();
 
-            if (fsdNo || lpId || alpId || trainName || abnDetail) {
-                parsedStatements.push(`${index + 1}. FSD No: ${fsdNo}, LP ID: ${lpId}, ALP ID: ${alpId}, Train: ${trainName}, Abnormality: ${abnDetail}`);
+            if (fsdNo || lpId || alpId || trainName || stationName || abnDetail) {
+                parsedStatements.push(`${index + 1}. FSD No: ${fsdNo}, LP ID: ${lpId}, ALP ID: ${alpId}, Train: ${trainName}, Station: ${stationName}, Abnormality: ${abnDetail}`);
             }
         });
 
         return parsedStatements.length > 0 ? parsedStatements.join('\n') : "NIL";
     }
 
-    // Generate Mobile Ambush Grid Table with Single Crew ID
+    // Generate Mobile Ambush Grid Table with Separate Name of Train and Name of Station
     function generateMobileAmbushTableGrid() {
         const countVal = parseInt(document.getElementById('crewMobileCount').value) || 0;
         const container = document.getElementById('crewMobileTableRowsContainer');
@@ -1106,7 +1125,8 @@ function getFsdTableDetailString() {
                     <tr class="bg-slate-100 font-bold text-slate-700">
                         <th class="border border-slate-200 p-2 text-center w-10">S.No</th>
                         <th class="border border-slate-200 p-2">CREW ID</th>
-                        <th class="border border-slate-200 p-2">Name of Train/Place</th>
+                        <th class="border border-slate-200 p-2">Name of Train</th>
+                        <th class="border border-slate-200 p-2">Name of Station</th>
                         <th class="border border-slate-200 p-2">Abnormality Detail</th>
                     </tr>
                 </thead>
@@ -1121,7 +1141,10 @@ function getFsdTableDetailString() {
                         <input type="text" class="modern-input p-1.5 font-mono uppercase font-bold mobile-crew-id" placeholder="e.g. BSP1234" required oninput="sanitizeAlphanumericNoSpace(this)">
                     </td>
                     <td class="border border-slate-200 p-1">
-                        <input type="text" class="modern-input p-1.5 font-semibold mobile-train-place" placeholder="Train Name/No./Place" required>
+                        <input type="text" class="modern-input p-1.5 font-semibold mobile-train-name" placeholder="Train Name/No." required>
+                    </td>
+                    <td class="border border-slate-200 p-1">
+                        <input type="text" class="modern-input p-1.5 font-semibold mobile-station-name" placeholder="Station Name" required>
                     </td>
                     <td class="border border-slate-200 p-1">
                         <input type="text" class="modern-input p-1.5 mobile-abn-detail" placeholder="Describe issue" required>
@@ -1142,15 +1165,17 @@ function getFsdTableDetailString() {
         let parsedStatements = [];
         rows.forEach((row, index) => {
             const crewIdInput = row.querySelector('.mobile-crew-id');
-            const trainPlaceInput = row.querySelector('.mobile-train-place');
+            const trainNameInput = row.querySelector('.mobile-train-name');
+            const stationNameInput = row.querySelector('.mobile-station-name');
             const abnDetailInput = row.querySelector('.mobile-abn-detail');
 
             const crewId = crewIdInput ? crewIdInput.value.trim() : "";
-            const trainPlace = trainPlaceInput ? trainPlaceInput.value.trim() : "";
+            const trainName = trainNameInput ? trainNameInput.value.trim() : "";
+            const stationName = stationNameInput ? stationNameInput.value.trim() : "";
             const abnDetail = abnDetailInput ? abnDetailInput.value.trim() : "";
 
-            if (crewId || trainPlace || abnDetail) {
-                parsedStatements.push(`${index + 1}. CREW ID: ${crewId}, Train/Place: ${trainPlace}, Abnormality: ${abnDetail}`);
+            if (crewId || trainName || stationName || abnDetail) {
+                parsedStatements.push(`${index + 1}. CREW ID: ${crewId}, Train: ${trainName}, Station: ${stationName}, Abnormality: ${abnDetail}`);
             }
         });
 
@@ -1650,7 +1675,7 @@ function autoFillAlpDetails(alpId) {
     // =========================================================
     // MASTER SINGLE UNIFIED SUBMIT FUNCTION
     // =========================================================
-    async function processUnifiedSubmit() {
+async function processUnifiedSubmit() {
         const form = document.getElementById('masterForm');
         if(!form.checkValidity()) { form.reportValidity(); return; }
 
@@ -1730,6 +1755,9 @@ function autoFillAlpDetails(alpId) {
             const combinedMobileString = getMobileAmbushTableDetailString();
             fd.append("ABNORMALITIES DETAIL ON CREW MOBILE AMBUSH", combinedMobileString);
 
+            const combinedNightAlertnessString = getNightAlertnessTableDetailString();
+            fd.append("Details on Night Alertness Ambush", combinedNightAlertnessString);
+
             promises.push(fetch(URL_AB, { method: 'POST', mode: 'no-cors', body: fd }));
         }
         
@@ -1762,7 +1790,7 @@ function autoFillAlpDetails(alpId) {
             promises.push(fetch(URL_LP, { method: 'POST', mode: 'no-cors', body: fd }));
         }
 
-// 3. ALP SECTION
+        // 3. ALP SECTION
         if (checks[2]) {
             let fd = new FormData(); 
             fd.append("CLI ID", c_cli_id); 
@@ -1882,6 +1910,79 @@ function autoFillAlpDetails(alpId) {
             }, 4000);
         }
     }
+   // Generate Night Alertness Ambush Grid Table
+function generateNightAlertnessTableGrid() {
+    const countVal = parseInt(document.getElementById('nightAlertnessCount').value) || 0;
+    const container = document.getElementById('nightAlertnessTableRowsContainer');
+    container.innerHTML = '';
+
+    if (countVal <= 0) {
+        container.innerHTML = `<input type="text" class="modern-input" value="NIL" readonly>`;
+        return;
+    }
+
+    let tableMarkup = `
+        <table class="w-full text-left border-collapse border border-slate-200 mt-2 text-xs">
+            <thead>
+                <tr class="bg-slate-100 font-bold text-slate-700">
+                    <th class="border border-slate-200 p-2 text-center w-10">S.No</th>
+                    <th class="border border-slate-200 p-2">CREW ID</th>
+                    <th class="border border-slate-200 p-2">Name of Train</th>
+                    <th class="border border-slate-200 p-2">Name of Station</th>
+                    <th class="border border-slate-200 p-2">Abnormality Detail</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    for (let i = 1; i <= countVal; i++) {
+        tableMarkup += `
+            <tr class="night-alertness-data-row">
+                <td class="border border-slate-200 p-2 text-center font-bold text-slate-500">${i}</td>
+                <td class="border border-slate-200 p-1">
+                    <input type="text" class="modern-input p-1.5 font-mono uppercase font-bold night-crew-id" placeholder="e.g. BSP1234" required oninput="sanitizeAlphanumericNoSpace(this)">
+                </td>
+                <td class="border border-slate-200 p-1">
+                    <input type="text" class="modern-input p-1.5 font-semibold night-train-name" placeholder="Train Name/No." required>
+                </td>
+                <td class="border border-slate-200 p-1">
+                    <input type="text" class="modern-input p-1.5 font-semibold night-station-name" placeholder="Station Name" required>
+                </td>
+                <td class="border border-slate-200 p-1">
+                    <input type="text" class="modern-input p-1.5 night-abn-detail" placeholder="Describe issue" required>
+                </td>
+            </tr>
+        `;
+    }
+
+    tableMarkup += `</tbody></table>`;
+    container.innerHTML = tableMarkup;
+}
+
+// Parse Night Alertness Grid Data into String Format
+function getNightAlertnessTableDetailString() {
+    const rows = document.querySelectorAll('.night-alertness-data-row');
+    if (!rows || rows.length === 0) return "NIL";
+
+    let parsedStatements = [];
+    rows.forEach((row, index) => {
+        const crewIdInput = row.querySelector('.night-crew-id');
+        const trainNameInput = row.querySelector('.night-train-name');
+        const stationNameInput = row.querySelector('.night-station-name');
+        const abnDetailInput = row.querySelector('.night-abn-detail');
+
+        const crewId = crewIdInput ? crewIdInput.value.trim() : "";
+        const trainName = trainNameInput ? trainNameInput.value.trim() : "";
+        const stationName = stationNameInput ? stationNameInput.value.trim() : "";
+        const abnDetail = abnDetailInput ? abnDetailInput.value.trim() : "";
+
+        if (crewId || trainName || stationName || abnDetail) {
+            parsedStatements.push(`${index + 1}. CREW ID: ${crewId}, Train: ${trainName}, Station: ${stationName}, Abnormality: ${abnDetail}`);
+        }
+    });
+
+    return parsedStatements.length > 0 ? parsedStatements.join('\n') : "NIL";
+} 
 </script>
 </body>
 </html>
