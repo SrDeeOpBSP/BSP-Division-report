@@ -279,7 +279,7 @@
                     </div>
                 </div>
                 
-                  <div class="lg:col-span-3 mt-2">
+                 <div class="lg:col-span-3 mt-2">
     <h4 class="font-black text-sm text-white bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 px-4 py-2.5 rounded-lg shadow-lg tracking-wide uppercase border border-pink-400">
         🚨 CRITICAL DRIVE: SECURING AND RELEASING OF VEHICLES/TRAINS/LOCO AS PER RB JPO DT:24.01.2025.
     </h4>
@@ -505,7 +505,7 @@
         <input type="text" class="modern-input" value="NIL" readonly>
     </div>
 </div>           
-                   <div class="lg:col-span-3 mt-6">
+               <div class="lg:col-span-3 mt-6">
                     <h3 class="font-bold text-xl text-green-700 border-b-2 border-green-300 pb-2">
                         COUNSELLING ENTRIES
                     </h3>
@@ -529,7 +529,7 @@
                 <div>
                     <label class="modern-label">LONG HOURS DUTY OF CREW</label>
                     <input type="number" data-name="LONG HOURS DUTY OF CREW" value="0" min="0" class="modern-input req-ab">
-                </div>             
+                </div>              
                 <div class="lg:col-span-3 mt-6">
                     <h3 class="font-bold text-xl text-purple-700 border-b-2 border-purple-300 pb-2">
                         INSPECTION & SEMINAR ENTRIES
@@ -662,6 +662,21 @@
                 <div><label class="modern-label">HQ</label><input type="text" id="lp_hq" class="modern-input" readonly></div>
                 <div><label class="modern-label">EMP CODE</label><input type="text" id="lp_empcode" class="modern-input font-mono" readonly></div>
                 
+                <!-- NEW FIELDS ADDED -->
+                <div>
+                    <label class="modern-label">COMPLETED WITHIN 90 DAYS</label>
+                    <select id="lp_completed_90" class="modern-input req-lp" onchange="handle90DaysSelection(this, 'lp', 'lp_reason_90_container', 'lp_reason_90')">
+                        <option value="" disabled selected>Select</option>
+                        <option value="YES">YES</option>
+                        <option value="NO">NO</option>
+                    </select>
+                </div>
+                <div id="lp_reason_90_container" class="hidden">
+                    <label class="modern-label">REASON (IF NO)</label>
+                    <input type="text" id="lp_reason_90" class="modern-input" placeholder="Enter reason">
+                </div>
+                
+                
                 <div class="md:col-span-2"><label class="modern-label">MAJOR BEAT</label><select id="lp_major_beat" class="modern-input req-lp"><option value="">Select MAJOR BEAT</option></select></div>
                 <div class="md:col-span-2"><label class="modern-label">BEAT</label>
                     <select id="lp_beat" class="modern-input req-lp" onchange="toggleOtherBeat(this, 'lp_other_beat')">
@@ -677,7 +692,7 @@
             </div>
         </div>
 
-      <!-- 3. QUARTERLY FP WITH GROUP ALP (HIGH PRIORITY) -->
+      <!-- 3. FOOTPLATE MONITORING WITHIN 90 DAYS (GROUP ALP) -->
         <div class="clean-card overflow-hidden border-2 border-amber-400/80 shadow-md ring-1 ring-amber-400/30">
             <label class="section-header bg-gradient-to-r from-amber-50 via-orange-50/50 to-white hover:from-amber-100/80 hover:via-orange-100/60 hover:to-amber-50/40 border-b border-amber-200 cursor-pointer p-4 md:p-5 flex items-center gap-3">
                 <input type="checkbox" id="chk_alp" class="checkbox-custom accent-amber-600 w-5 h-5 cursor-pointer mt-0.5" onchange="toggleSection('sec_alp', this.checked)">
@@ -685,7 +700,7 @@
                 <div class="flex flex-col gap-1 w-full">
                     <div class="flex flex-wrap items-center gap-2">
                         <span class="font-extrabold text-amber-950 text-lg md:text-xl tracking-tight">
-                            3. QUARTERLY FOOTPLATE MONITORING (GROUP ALP)
+                            3. FOOTPLATE MONITORING WITHIN 90 DAYS (GROUP ALP)
                         </span>
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase bg-amber-600 text-white shadow-xs">
                             CRITICAL MANDATORY
@@ -703,6 +718,20 @@
                 <div><label class="modern-label">DESG</label><input type="text" id="alp_desg" class="modern-input" readonly></div>
                 <div><label class="modern-label">HQ</label><input type="text" id="alp_hq" class="modern-input" readonly></div>
                 <div><label class="modern-label">EMP CODE</label><input type="text" id="alp_empcode" class="modern-input font-mono" readonly></div>
+
+                <!-- NEW FIELDS ADDED -->
+<div>
+    <label class="modern-label">COMPLETED WITHIN 90 DAYS</label>
+    <select id="alp_completed_90" class="modern-input req-alp" onchange="handle90DaysSelection(this, 'alp', 'alp_reason_90_container', 'alp_reason_90')">
+        <option value="" disabled selected>Select</option>
+        <option value="YES">YES</option>
+        <option value="NO">NO</option>
+    </select>
+</div>
+<div id="alp_reason_90_container" class="hidden">
+    <label class="modern-label">REASON (IF NO)</label>
+    <input type="text" id="alp_reason_90" class="modern-input" placeholder="Enter reason">
+</div>
                 
                 <div>
                     <label class="modern-label">TYPE OF FOOTPLATE</label>
@@ -842,7 +871,7 @@
                         </div>
                     </div>
 
-                                           <div class="link-card shadow-sm">
+                                            <div class="link-card shadow-sm">
                         <span class="text-sm font-semibold text-slate-700">CLI OWNING STATION DETAILS</span>
                         <div class="flex gap-2">
                             <a href="https://docs.google.com/spreadsheets/d/13usxSocRWAT18AeapyUJUrhWjLtTI9j6/edit?usp=sharing&ouid=117943961944786894024&rtpof=true&sd=true" target="_blank" class="btn-link btn-drive w-full">Google Sheet</a>
@@ -1364,31 +1393,45 @@
 
     function autoFillLpDetails(lpId) {
         const data = latestCrewData.find(i => i.crewId === lpId);
-        document.getElementById('lp_name').value = data ? data.crewName : "";
-        document.getElementById('lp_desg').value = data ? data.crewType : "";
+        const nameEl = document.getElementById('lp_name');
+        const desgEl = document.getElementById('lp_desg');
+        const hqEl = document.getElementById('lp_hq');
+        const empCodeEl = document.getElementById('lp_empcode');
+
+        if (nameEl) nameEl.value = data ? data.crewName : "";
+        if (desgEl) desgEl.value = data ? data.crewType : "";
         const hq = data ? data.hq : "";
-        document.getElementById('lp_hq').value = hq;
-        document.getElementById('lp_empcode').value = data ? data.empCode : "";
+        if (hqEl) hqEl.value = hq;
+        if (empCodeEl) empCodeEl.value = data ? data.empCode : "";
 
         const mb = document.getElementById('lp_major_beat');
-        mb.innerHTML = '<option value="">Select MAJOR BEAT</option>';
-        if (hq) {
-            majorBeatData.filter(i => i['HQ'] === hq).forEach(i => mb.appendChild(new Option(i['BEAT'], i['BEAT'])));
+        if (mb) {
+            mb.innerHTML = '<option value="">Select MAJOR BEAT</option>';
+            if (hq) {
+                majorBeatData.filter(i => i['HQ'] === hq).forEach(i => mb.appendChild(new Option(i['BEAT'], i['BEAT'])));
+            }
         }
     }
 
 function autoFillAlpDetails(alpId) {
         const data = latestCrewData.find(i => i.crewId === alpId);
-        document.getElementById('alp_name').value = data ? data.crewName : "";
-        document.getElementById('alp_desg').value = data ? data.crewType : "";
+        const nameEl = document.getElementById('alp_name');
+        const desgEl = document.getElementById('alp_desg');
+        const hqEl = document.getElementById('alp_hq');
+        const empCodeEl = document.getElementById('alp_empcode');
+
+        if (nameEl) nameEl.value = data ? data.crewName : "";
+        if (desgEl) desgEl.value = data ? data.crewType : "";
         const hq = data ? data.hq : "";
-        document.getElementById('alp_hq').value = hq;
-        document.getElementById('alp_empcode').value = data ? data.empCode : "";
+        if (hqEl) hqEl.value = hq;
+        if (empCodeEl) empCodeEl.value = data ? data.empCode : "";
 
         const mb = document.getElementById('alp_major_beat');
-        mb.innerHTML = '<option value="">Select MAJOR BEAT</option>';
-        if (hq) {
-            majorBeatData.filter(i => i['HQ'] === hq).forEach(i => mb.appendChild(new Option(i['BEAT'], i['BEAT'])));
+        if (mb) {
+            mb.innerHTML = '<option value="">Select MAJOR BEAT</option>';
+            if (hq) {
+                majorBeatData.filter(i => i['HQ'] === hq).forEach(i => mb.appendChild(new Option(i['BEAT'], i['BEAT'])));
+            }
         }
     }
     function toggleOtherBeat(select, targetId) { const input = document.getElementById(targetId); if(select.value === 'OTHER') { input.classList.remove('hidden'); input.required = true; } else { input.classList.add('hidden'); input.required = false; input.value = ''; } }
@@ -1435,7 +1478,7 @@ function autoFillAlpDetails(alpId) {
         const totalDrives = DRIVE_LIST.length;
         
         let html = `<thead class="sticky top-0 z-30"><tr>
-                       <th class="sticky-id min-w-[75px] max-w-[75px] text-[10px]">Crew ID</th>
+                    <th class="sticky-id min-w-[75px] max-w-[75px] text-[10px]">Crew ID</th>
                         <th class="min-w-[180px] max-w-[180px] text-[11px]">Name</th>`;
         for(let d=1; d<=days; d++) html += `<th class="text-center min-w-[70px] text-[10px] px-1 bg-[#e2e8f0]">${String(d).padStart(2,'0')}/${String(month).padStart(2,'0')}</th>`;
         html += `</tr></thead><tbody>`;
@@ -1771,21 +1814,23 @@ async function processUnifiedSubmit() {
             fd.append("DESG", document.getElementById('lp_desg').value); 
             fd.append("HQ", document.getElementById('lp_hq').value); 
             fd.append("EMP CODE", document.getElementById('lp_empcode').value); 
-            fd.append("MAJOR BEAT", document.getElementById('lp_major_beat').value);
+            fd.append("Completed Within 90 days (Yes/No)", document.getElementById('lp_completed_90').value);
+            fd.append("Reason", document.getElementById('lp_reason_90').value || "");
+            fd.append("MAJOR BEAT", document.getElementById('lp_major_beat').value || "");
             
             const bv = document.getElementById('lp_beat').value; 
             if(bv==='OTHER'){ 
                 fd.append("BEAT_OTHER","OTHER"); 
-                fd.append("BEAT",document.getElementById('lp_other_beat').value); 
+                fd.append("BEAT",document.getElementById('lp_other_beat').value || ""); 
             } else { 
-                fd.append("BEAT",bv); 
+                fd.append("BEAT",bv || ""); 
             }
             
-            fd.append("LOCO NUMBER", document.getElementById('lp_loco').value); 
-            fd.append("TRAIN NUMBER", document.getElementById('lp_train').value); 
+            fd.append("LOCO NUMBER", document.getElementById('lp_loco').value || ""); 
+            fd.append("TRAIN NUMBER", document.getElementById('lp_train').value || ""); 
             fd.append("DATE", c_date); 
-            fd.append("FROM TIME", document.getElementById('lp_from').value); 
-            fd.append("TO TIME", document.getElementById('lp_to').value);
+            fd.append("FROM TIME", document.getElementById('lp_from').value || ""); 
+            fd.append("TO TIME", document.getElementById('lp_to').value || "");
             
             promises.push(fetch(URL_LP, { method: 'POST', mode: 'no-cors', body: fd }));
         }
@@ -1800,22 +1845,24 @@ async function processUnifiedSubmit() {
             fd.append("DESG", document.getElementById('alp_desg').value); 
             fd.append("HQ", document.getElementById('alp_hq').value);
             fd.append("EMP CODE", document.getElementById('alp_empcode').value);
-            fd.append("TYPE OF FOOTPLATE", document.getElementById('alp_type_fp').value);
-            fd.append("MAJOR BEAT", document.getElementById('alp_major_beat').value);
+            fd.append("Completed Within 90 days (Yes/No)", document.getElementById('alp_completed_90').value);
+            fd.append("Reason", document.getElementById('alp_reason_90').value || "");
+            fd.append("TYPE OF FOOTPLATE", document.getElementById('alp_type_fp').value || "");
+            fd.append("MAJOR BEAT", document.getElementById('alp_major_beat').value || "");
             
             const bv = document.getElementById('alp_beat').value; 
             if(bv === 'OTHER'){ 
                 fd.append("BEAT_OTHER", "OTHER"); 
-                fd.append("BEAT", document.getElementById('alp_other_beat').value); 
+                fd.append("BEAT", document.getElementById('alp_other_beat').value || ""); 
             } else { 
-                fd.append("BEAT", bv); 
+                fd.append("BEAT", bv || ""); 
             }
             
-            fd.append("LOCO NUMBER", document.getElementById('alp_loco').value);
-            fd.append("TRAIN NUMBER", document.getElementById('alp_train').value);
+            fd.append("LOCO NUMBER", document.getElementById('alp_loco').value || "");
+            fd.append("TRAIN NUMBER", document.getElementById('alp_train').value || "");
             fd.append("DATE", c_date);
-            fd.append("FROM TIME", document.getElementById('alp_from').value);
-            fd.append("TO TIME", document.getElementById('alp_to').value);
+            fd.append("FROM TIME", document.getElementById('alp_from').value || "");
+            fd.append("TO TIME", document.getElementById('alp_to').value || "");
             
             promises.push(fetch(URL_ALP, { method: 'POST', mode: 'no-cors', body: fd }));
         }
@@ -1983,6 +2030,35 @@ function getNightAlertnessTableDetailString() {
 
     return parsedStatements.length > 0 ? parsedStatements.join('\n') : "NIL";
 } 
+
+function handle90DaysSelection(selectEl, sectionPrefix, containerId, inputId) {
+    const container = document.getElementById(containerId);
+    const reasonInput = document.getElementById(inputId);
+    
+    const sectionElement = selectEl.closest('.section-body');
+    const subsequentInputs = sectionElement.querySelectorAll('.' + 'req-' + sectionPrefix);
+
+    if (selectEl.value === 'NO') {
+        container.classList.remove('hidden');
+        reasonInput.required = true; 
+
+        subsequentInputs.forEach(input => {
+            if (input !== selectEl && input !== reasonInput) {
+                input.required = false;
+            }
+        });
+    } else {
+        container.classList.add('hidden');
+        reasonInput.required = false;
+        reasonInput.value = '';
+
+        subsequentInputs.forEach(input => {
+            if (input !== selectEl) {
+                input.required = true;
+            }
+        });
+    }
+}
 </script>
 </body>
 </html>
